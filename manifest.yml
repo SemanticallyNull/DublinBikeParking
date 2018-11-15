@@ -1,0 +1,9 @@
+---
+applications:
+- name: dublinbike
+  memory: 64M
+  instances: 2
+  routes:
+  - route: dublinbike.cfapps.io
+  - route: dublinbikeparking.com
+  - route: www.dublinbikeparking.com

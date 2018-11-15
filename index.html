@@ -1,0 +1,118 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Dublin Bike Parking</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.4/dist/leaflet.css"
+      integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
+      crossorigin="">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css"
+      integrity="sha384-lPzjPsFQL6te2x+VxmV6q1DpRxpRk0tmnl2cpwAO5y04ESyc752tnEWPKDfl1olr"
+      crossorigin="">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css"
+      integrity="sha384-5kMSQJ6S4Qj5i09mtMNrWpSi8iXw230pKU76xTmrpezGnNJQzj0NzXjQLLg+jE7k"
+      crossorigin="">
+    <style type="text/css">
+      html, body {padding:0;margin:0;height:100%;}
+
+      #map {
+        width:100%;
+        height:100%;
+      }
+      .info { padding: 6px 8px; font: 14px/16px Arial, Helvetica, sans-serif; background: white; background: rgba(255,255,255,0.8); box-shadow: 0 0 15px rgba(0,0,0,0.2); border-radius: 5px; } .info h4 { margin: 0 0 5px; color: #777; }
+      .legend { text-align: left; line-height: 18px; color: #555; }
+    </style>
+    <script src="https://unpkg.com/leaflet@1.3.4/dist/leaflet.js"
+      integrity="sha512-nMMmRyTVoLYqjP9hrbed9S+FzjZHW5gY1TWCHA5ckwXZBadntCNs8kEqAWdrb9O7rxbCaA4lKTIWjDXZxflOcA=="
+      crossorigin=""></script>
+    <script src="https://unpkg.com/leaflet-ajax@2.1.0/dist/leaflet.ajax.min.js"
+      integrity="sha384-sKs8ZrrxyJoElcPVznZwGpUTTXvkMYfHYxdIFzO8Hd0TA6emONMj8BwnsFf+6cZ/"
+      crossorigin=""></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"
+      integrity="sha384-RLIyj5q1b5XJTn0tqUhucRZe40nFTocRP91R/NkRJHwAe4XxnTV77FXy/vGLiec2"
+      crossorigin=""></script>
+    <script type="text/javascript">
+      window.addEventListener('load', function() {
+        var map = L.map('map').setView([53.34587706183283, -6.267379465984959], 15);
+
+        var markers = new L.MarkerClusterGroup({maxClusterRadius:100});
+
+        var StandIcon = L.Icon.extend({
+          options: {
+            iconSize: [22,22]
+          }
+        })
+        var sheffieldStand = new StandIcon({iconUrl: 'stand_icon_sheffield.png'})
+        var curvedStand = new StandIcon({iconUrl: 'stand_icon_ssc.png'})
+        var hoopStand = new StandIcon({iconUrl: 'stand_icon_hoop.png'})
+        var dublinBikesStand = new StandIcon({iconUrl: 'station_icon_db.png'})
+
+        L.tileLayer('https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        var legend = L.control({position: 'bottomright'});
+        legend.onAdd = function (map) {
+            var div = L.DomUtil.create('div', 'info legend')
+
+            div.innerHTML = '<table><tr><td><img src="stand_icon_sheffield.png"></td><td>Sheffield Stand</td></tr><tr><td><img src="stand_icon_hoop.png"></td><td>Hoop (on signpost)</td></tr><tr><td><img src="stand_icon_ssc.png"></td><td>Stainless Steel Curved Stand</td></tr><tr><td><img src="station_icon_db.png"></td><td>DublinBikes Station</td></tr></table>';
+
+            return div;
+        };
+        legend.addTo(map);
+
+        var geojsonLayer = new L.GeoJSON.AJAX("BikeParkingIDs.geojson",{onEachFeature:popUp});
+        geojsonLayer.getAttribution = function() { return 'Bike Parking: <a href="https://data.smartdublin.ie/dataset/dcc_public_cycle_parking_stands">Dublin City Council CC-BY 4.0</a>'; };
+
+        var dublinBikesLayer = new L.GeoJSON.AJAX("DublinBikes.geojson",{onEachFeature:dbPopUp});
+        dublinBikesLayer.getAttribution = function() { return 'DublinBikes: <a href="https://developer.jcdecaux.com/#/opendata/vls?page=getstarted&contract=Dublin">JCDecaux</a>'; };
+
+        geojsonLayer.on('data:loaded', function () {
+          markers.addLayer(geojsonLayer);
+          map.addLayer(markers);
+        });
+        dublinBikesLayer.on('data:loaded', function () {
+          markers.addLayer(dublinBikesLayer);
+        });
+
+        function dbPopUp(f,l){
+          l.setIcon(dublinBikesStand).bindPopup("<table>" +
+            "<tr><td><b>Type of Stands</b></td><td>DublinBikes</td></tr>" +
+            "<tr><td><b>Location</b></td><td>" + f.properties["Address"] + "</td></tr>" +
+            "</table>");
+        }
+
+        function popUp(f,l){
+          var icon;
+
+          switch(f.properties["type_stands"]) {
+              case "Sheffield Stand":
+                icon = sheffieldStand;
+                break;
+              case "Stainless Steel Curved":
+                icon = curvedStand;
+                break;
+              case "Hoops":
+                icon = hoopStand;
+                break;
+              case "Railing":
+                icon = sheffieldStand;
+                break;
+              default:
+                icon = sheffieldStand;
+          }
+
+          l.setIcon(icon).bindPopup("<table>" +
+            "<tr><td><b>Type of Stands</b></td><td>" + f.properties["type_stands"] + "</td></tr>" +
+            "<tr><td><b>Number of Stands</b></td><td>" + f.properties["no_stands"] + "</td></tr>" +
+            "<tr><td><b>Location</b></td><td>" + f.properties["location_stand"] + "</td></tr>" +
+            "</table>");
+        }
+      });
+    </script>
+  </head>
+  <body>
+    <div id="map">
+    </div>
+  </body>
+</html>
