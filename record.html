@@ -25,6 +25,7 @@
     <script src="https://unpkg.com/leaflet-ajax@2.1.0/dist/leaflet.ajax.min.js"
       integrity="sha384-sKs8ZrrxyJoElcPVznZwGpUTTXvkMYfHYxdIFzO8Hd0TA6emONMj8BwnsFf+6cZ/"
       crossorigin=""></script>
+    <script src="https://unpkg.com/nosleep.js@0.7.0/dist/NoSleep.min.js" integrity="sha384-cR9Tx9898BigGUVSuwWg4H4lAs65FxW5vlKAos37rTe76eT+uki9wMw3N+DnhUTn" crossorigin="anonymous"></script>
     <script type="text/javascript">
       window.addEventListener('load', function() {
         var map = L.map('map').setView([53.34587706183283, -6.267379465984959], 12);
@@ -108,6 +109,19 @@
 
           //document.location = "/record.html"
         });
+
+        var noSleep = new NoSleep();
+
+        function enableNoSleep() {
+          noSleep.enable();
+          document.removeEventListener('click', enableNoSleep, false);
+          document.getElementById('wl').classList.add('btn-success')
+          document.getElementById('wl').classList.remove('btn-primary')
+        }
+
+        // Enable wake lock.
+        // (must be wrapped in a user input event handler e.g. a mouse or touch handler)
+        document.getElementById('wl').addEventListener('click', enableNoSleep, false);
       });
     </script>
   </head>
@@ -156,6 +170,11 @@
       <div class="row">
         <div class="col-12 text-center">
           <button class="btn btn-lg btn-primary btn-add" id="add">Add stand</button>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12">
+          <button class="btn btn-primary" id="wl">wakelock</button>
         </div>
       </div>
     </div>
