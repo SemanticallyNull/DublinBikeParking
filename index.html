@@ -47,28 +47,24 @@
         var hoopStand = new StandIcon({iconUrl: 'stand_icon_hoop.png'})
         var dublinBikesStand = new StandIcon({iconUrl: 'station_icon_db.png'})
 
-        L.tileLayer('https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        var osm = L.tileLayer('https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, DublinBikes: <a href="https://developer.jcdecaux.com/#/opendata/vls?page=getstarted&contract=Dublin">JCDecaux</a>'
         }).addTo(map);
 
-        var legend = L.control({position: 'bottomright'});
-        legend.onAdd = function (map) {
-            var div = L.DomUtil.create('div', 'info legend')
+        // var legend = L.control({position: 'bottomright'});
+        // legend.onAdd = function (map) {
+        //     var div = L.DomUtil.create('div', 'info legend')
+        // 
+        //     div.innerHTML = '<table><tr><td><img src="stand_icon_sheffield.png"></td><td>Sheffield Stand</td></tr><tr><td><img src="stand_icon_hoop.png"></td><td>Hoop (on signpost)</td></tr><tr><td><img src="stand_icon_ssc.png"></td><td>Stainless Steel Curved Stand</td></tr><tr><td><img src="station_icon_db.png"></td><td>DublinBikes Station</td></tr></table>';
+        //
+        //     return div;
+        // };
+        // legend.addTo(map);
 
-            div.innerHTML = '<table><tr><td><img src="stand_icon_sheffield.png"></td><td>Sheffield Stand</td></tr><tr><td><img src="stand_icon_hoop.png"></td><td>Hoop (on signpost)</td></tr><tr><td><img src="stand_icon_ssc.png"></td><td>Stainless Steel Curved Stand</td></tr><tr><td><img src="station_icon_db.png"></td><td>DublinBikes Station</td></tr></table>';
-
-            return div;
-        };
-        legend.addTo(map);
-
-        var geojsonLayer = new L.GeoJSON.AJAX("BikeParkingIDs.geojson",{onEachFeature:popUp});
-        geojsonLayer.getAttribution = function() { return 'Bike Parking: <a href="https://data.smartdublin.ie/dataset/dcc_public_cycle_parking_stands">Dublin City Council CC-BY 4.0</a>'; };
-
+        var osmBikesLayer = new L.GeoJSON.AJAX("OSM_StandData.geojson",{onEachFeature:osmPopUp});
         var dublinBikesLayer = new L.GeoJSON.AJAX("DublinBikes.geojson",{onEachFeature:dbPopUp});
-        dublinBikesLayer.getAttribution = function() { return 'DublinBikes: <a href="https://developer.jcdecaux.com/#/opendata/vls?page=getstarted&contract=Dublin">JCDecaux</a>'; };
-
-        geojsonLayer.on('data:loaded', function () {
-          markers.addLayer(geojsonLayer);
+        osmBikesLayer.on('data:loaded', function () {
+          markers.addLayer(osmBikesLayer);
           map.addLayer(markers);
         });
         dublinBikesLayer.on('data:loaded', function () {
@@ -82,31 +78,13 @@
             "</table>");
         }
 
-        function popUp(f,l){
-          var icon;
-
-          switch(f.properties["type_stands"]) {
-              case "Sheffield Stand":
-                icon = sheffieldStand;
-                break;
-              case "Stainless Steel Curved":
-                icon = curvedStand;
-                break;
-              case "Hoops":
-                icon = hoopStand;
-                break;
-              case "Railing":
-                icon = sheffieldStand;
-                break;
-              default:
-                icon = sheffieldStand;
-          }
-
-          l.setIcon(icon).bindPopup("<table>" +
-            "<tr><td><b>Type of Stands</b></td><td>" + f.properties["type_stands"] + "</td></tr>" +
-            "<tr><td><b>Number of Stands</b></td><td>" + f.properties["no_stands"] + "</td></tr>" +
-            "<tr><td><b>Location</b></td><td>" + f.properties["location_stand"] + "</td></tr>" +
+        function osmPopUp(f,l){
+          l.setIcon(sheffieldStand)
+          if("bicycle_parking" in f.properties) {
+            l.bindPopup("<table>" +
+            "<tr><td><b>Type of Stands</b></td><td>" + f.properties["bicycle_parking"] + "</td></tr>" +
             "</table>");
+          }
         }
       });
     </script>
