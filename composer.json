@@ -1,0 +1,12 @@
+{
+    "name": "ben/dbp",
+    "authors": [
+        {
+            "name": "Ben Chapman",
+            "email": "bchapman@pivotal.io"
+        }
+    ],
+    "require": {
+        "phpmailer/phpmailer": "^6.0"
+    }
+}
