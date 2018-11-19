@@ -91,6 +91,7 @@
                 var currentLocation = L.latLng(position.coords.latitude,position.coords.longitude)
                 var distance = stand.getLatLng().distanceTo(currentLocation)
                 L.circle(currentLocation, position.coords.accuracy/2).addTo(map);
+                L.marker(currentLocation).addTo(map);
                 map.fitBounds(L.latLngBounds([stand.getLatLng(), currentLocation]));
                 setTimeout(function() { stand.bindPopup("You are " + Math.round(distance) + " metres away").openPopup(); }, 750);
               } else {
