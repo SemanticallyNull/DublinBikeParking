@@ -43,29 +43,17 @@
           }
         })
         var sheffieldStand = new StandIcon({iconUrl: 'stand_icon_sheffield.png'})
-        var curvedStand = new StandIcon({iconUrl: 'stand_icon_ssc.png'})
-        var hoopStand = new StandIcon({iconUrl: 'stand_icon_hoop.png'})
         var dublinBikesStand = new StandIcon({iconUrl: 'station_icon_db.png'})
 
         var osm = L.tileLayer('https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, DublinBikes: <a href="https://developer.jcdecaux.com/#/opendata/vls?page=getstarted&contract=Dublin">JCDecaux</a>',
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Stand Data: <a href="https://bleeperbike.com/">Bleeper Bikes</a>, DublinBikes: <a href="https://developer.jcdecaux.com/#/opendata/vls?page=getstarted&contract=Dublin">JCDecaux</a>',
             maxZoom: 19
         }).addTo(map);
 
-        // var legend = L.control({position: 'bottomright'});
-        // legend.onAdd = function (map) {
-        //     var div = L.DomUtil.create('div', 'info legend')
-        // 
-        //     div.innerHTML = '<table><tr><td><img src="stand_icon_sheffield.png"></td><td>Sheffield Stand</td></tr><tr><td><img src="stand_icon_hoop.png"></td><td>Hoop (on signpost)</td></tr><tr><td><img src="stand_icon_ssc.png"></td><td>Stainless Steel Curved Stand</td></tr><tr><td><img src="station_icon_db.png"></td><td>DublinBikes Station</td></tr></table>';
-        //
-        //     return div;
-        // };
-        // legend.addTo(map);
-
-        var osmBikesLayer = new L.GeoJSON.AJAX("OSM_StandData.geojson",{onEachFeature:osmPopUp});
+        var bleeperLayer = new L.GeoJSON.AJAX("BleeperData.geojson",{onEachFeature:bleeperIcon});
         var dublinBikesLayer = new L.GeoJSON.AJAX("DublinBikes.geojson",{onEachFeature:dbPopUp});
-        osmBikesLayer.on('data:loaded', function () {
-          markers.addLayer(osmBikesLayer);
+        bleeperLayer.on('data:loaded', function () {
+          markers.addLayer(bleeperLayer);
           map.addLayer(markers);
         });
         dublinBikesLayer.on('data:loaded', function () {
@@ -79,13 +67,8 @@
             "</table>");
         }
 
-        function osmPopUp(f,l){
-          l.setIcon(sheffieldStand)
-          if("bicycle_parking" in f.properties) {
-            l.bindPopup("<table>" +
-            "<tr><td><b>Type of Stands</b></td><td>" + f.properties["bicycle_parking"] + "</td></tr>" +
-            "</table>");
-          }
+        function bleeperIcon(f,l){
+          l.setIcon(sheffieldStand);
         }
       });
     </script>
