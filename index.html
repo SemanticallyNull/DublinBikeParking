@@ -5,13 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.4/dist/leaflet.css"
       integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
-      crossorigin="">
+      crossorigin="anonymous">
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css"
       integrity="sha384-lPzjPsFQL6te2x+VxmV6q1DpRxpRk0tmnl2cpwAO5y04ESyc752tnEWPKDfl1olr"
-      crossorigin="">
+      crossorigin="anonymous">
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css"
       integrity="sha384-5kMSQJ6S4Qj5i09mtMNrWpSi8iXw230pKU76xTmrpezGnNJQzj0NzXjQLLg+jE7k"
-      crossorigin="">
+      crossorigin="anonymous">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-easybutton@2.3.0/src/easy-button.css"
+      integrity="sha384-iNk4bdiUuP4VWx8c4KVwk07wshEQVvAe/8xwpcNR/5anLhH9SFPHkjLSXAwGwXKC"
+      crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css"
+      integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU"
+      crossorigin="anonymous">
     <style type="text/css">
       html, body {padding:0;margin:0;height:100%;}
 
@@ -24,19 +30,24 @@
     </style>
     <script src="https://unpkg.com/leaflet@1.3.4/dist/leaflet.js"
       integrity="sha512-nMMmRyTVoLYqjP9hrbed9S+FzjZHW5gY1TWCHA5ckwXZBadntCNs8kEqAWdrb9O7rxbCaA4lKTIWjDXZxflOcA=="
-      crossorigin=""></script>
+      crossorigin="anonymous"></script>
     <script src="https://unpkg.com/leaflet-ajax@2.1.0/dist/leaflet.ajax.min.js"
       integrity="sha384-sKs8ZrrxyJoElcPVznZwGpUTTXvkMYfHYxdIFzO8Hd0TA6emONMj8BwnsFf+6cZ/"
-      crossorigin=""></script>
+      crossorigin="anonymous"></script>
     <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"
       integrity="sha384-RLIyj5q1b5XJTn0tqUhucRZe40nFTocRP91R/NkRJHwAe4XxnTV77FXy/vGLiec2"
-      crossorigin=""></script>
+      crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/leaflet-knn@0.1.0/leaflet-knn.min.js"
+      integrity="sha384-goDoVSh/ha1q7BF3AM8ZbCVDSRPQskogAUTfPxfs13/TJIYguhSGEg4afRJq1hmQ"
+      crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/leaflet-easybutton@2.3.0/src/easy-button.js"
+      integrity="sha384-GHKGgc0qNzZZpBzGWvVZWSRFNB+LYy8aJCBtgI0IpWul99UCBQcSP85Z9RLAorB/"
+      crossorigin="anonymous"></script>
     <script type="text/javascript">
       window.addEventListener('load', function() {
         var map = L.map('map').setView([53.34587706183283, -6.267379465984959], 15);
 
         var markers = new L.MarkerClusterGroup({maxClusterRadius:100});
-
         var StandIcon = L.Icon.extend({
           options: {
             iconSize: [22,22]
@@ -70,6 +81,32 @@
         function bleeperIcon(f,l){
           l.setIcon(sheffieldStand);
         }
+
+        function nearMe() {
+          if('geolocation' in navigator) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+              var nearestStands = leafletKnn(bleeperLayer).nearest(L.latLng(position.coords.latitude, position.coords.longitude), 1, 2000);
+              if(nearestStands.length > 0) {
+                var distance = nearestStands[0].layer.getLatLng().distanceTo(L.latLng(position.coords.latitude,position.coords.longitude))
+                highlightStand(nearestStands[0].layer, "You are " + Math.round(distance) + " metres away");
+              } else {
+                alert("cannot find any stands within 2km of you, sorry");
+              }
+            });
+          } else {
+            alert('geolocation is not available in your browser, sorry!');
+          }
+        }
+        dNearMe = nearMe;
+
+        function highlightStand(stand, popupContent) {
+          map.fitBounds(L.latLngBounds([stand.getLatLng()]));
+          setTimeout(function() { stand.bindPopup(popupContent).openPopup(); }, 750);
+        }
+
+        L.easyButton('fas fa-location-arrow', function() {
+          nearMe();
+        }).addTo(map);
       });
     </script>
   </head>
