@@ -87,8 +87,12 @@
             navigator.geolocation.getCurrentPosition(function(position) {
               var nearestStands = leafletKnn(bleeperLayer).nearest(L.latLng(position.coords.latitude, position.coords.longitude), 1, 2000);
               if(nearestStands.length > 0) {
-                var distance = nearestStands[0].layer.getLatLng().distanceTo(L.latLng(position.coords.latitude,position.coords.longitude))
-                highlightStand(nearestStands[0].layer, "You are " + Math.round(distance) + " metres away");
+                var stand = nearestStands[0].layer;
+                var currentLocation = L.latLng(position.coords.latitude,position.coords.longitude)
+                var distance = stand.getLatLng().distanceTo(currentLocation)
+                L.circle(currentLocation, position.coords.accuracy/2).addTo(map);
+                map.fitBounds(L.latLngBounds([stand.getLatLng(), currentLocation]));
+                setTimeout(function() { stand.bindPopup("You are " + Math.round(distance) + " metres away").openPopup(); }, 750);
               } else {
                 alert("cannot find any stands within 2km of you, sorry");
               }
@@ -96,12 +100,6 @@
           } else {
             alert('geolocation is not available in your browser, sorry!');
           }
-        }
-        dNearMe = nearMe;
-
-        function highlightStand(stand, popupContent) {
-          map.fitBounds(L.latLngBounds([stand.getLatLng()]));
-          setTimeout(function() { stand.bindPopup(popupContent).openPopup(); }, 750);
         }
 
         L.easyButton('fas fa-location-arrow', function() {
