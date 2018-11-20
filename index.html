@@ -83,7 +83,7 @@
           l.setIcon(sheffieldStand);
         }
 
-        function nearMe() {
+        function nearMe(control) {
           if('geolocation' in navigator) {
             navigator.geolocation.getCurrentPosition(function(position) {
               var nearestStands = leafletKnn(bleeperLayer).nearest(L.latLng(position.coords.latitude, position.coords.longitude), 1, 2000);
@@ -102,6 +102,7 @@
                   stand.bindPopup("You are " + Math.round(distance) + " metres away<br>" +
                       "<a href='" + navigationUrl(currentLocation, stand.getLatLng(), travelMode) + "'><span class='fas fa-location-arrow'></span> Navigate</a>")
                     .openPopup();
+                  control.state('locate-stand');
                 }, 750);
               } else {
                 alert("cannot find any stands within 2km of you, sorry");
@@ -112,9 +113,24 @@
           }
         }
 
-        L.easyButton('fas fa-location-arrow', function() {
-          nearMe();
-        }).addTo(map);
+        L.easyButton({states: [
+          {
+            stateName: 'locate-stand',
+            icon: 'fas fa-location-arrow',
+            title: 'Find my nearest stand',
+            onClick: function(control) {
+              control.state('loading');
+              nearMe(control);
+            }
+          }, {
+            stateName: 'loading',
+            icon: 'fas fa-sync fa-spin',
+            title: 'Finding nearest stand...',
+            onClick: function() {
+              return false;
+            }
+          }
+        ]}).addTo(map);
       });
 
       function navigationUrl(fromLatLng, toLatLng, travelMode) {
