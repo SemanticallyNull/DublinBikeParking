@@ -51,13 +51,15 @@
         var sheffieldStand = new StandIcon({iconUrl: 'stand_icon_sheffield.png'})
 
         var osm = L.tileLayer('https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png', {
-          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Stand Data: <a href="https://bleeperbike.com/">Bleeper Bikes</a>, DublinBikes: <a href="https://developer.jcdecaux.com/#/opendata/vls?page=getstarted&contract=Dublin">JCDecaux</a>',
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Stand Data: collected by volunteers for Dublin Cycling Campaign and I Bike Dublin',
             maxZoom: 19
         }).addTo(map);
 
         var bleeperHeat = L.heatLayer([],{radius:20,blur:20,gradient:{0:'darkgreen',1:'darkgreen'},minOpacity: 0.4});
-        var bleeperHeatLayer = new L.GeoJSON.AJAX("BleeperData.geojson",{onEachFeature: function(f,l) {
-          bleeperHeat.addLatLng(L.latLng(f.geometry.coordinates[1],f.geometry.coordinates[0]));
+        var bleeperHeatLayer = new L.GeoJSON.AJAX("VolunteerStand.geojson",{onEachFeature: function(f,l) {
+          if(f.properties.validated != "0") {
+            bleeperHeat.addLatLng(L.latLng(f.geometry.coordinates[1],f.geometry.coordinates[0]));
+          }
         }});
         bleeperHeat.addTo(map);
 
