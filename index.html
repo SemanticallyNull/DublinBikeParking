@@ -94,9 +94,13 @@
                 L.circle(currentLocation, position.coords.accuracy/2).addTo(map);
                 L.marker(currentLocation).addTo(map);
                 map.fitBounds(L.latLngBounds([stand.getLatLng(), currentLocation]));
+                var travelMode = "walking";
+                if(distance > 200) {
+                  travelMode = "bicycling";
+                }
                 setTimeout(function() {
                   stand.bindPopup("You are " + Math.round(distance) + " metres away<br>" +
-                      "<a href='" + navigationUrl(currentLocation, stand.getLatLng()) + "'><span class='fas fa-location-arrow'></span> Navigate</a>")
+                      "<a href='" + navigationUrl(currentLocation, stand.getLatLng(), travelMode) + "'><span class='fas fa-location-arrow'></span> Navigate</a>")
                     .openPopup();
                 }, 750);
               } else {
@@ -113,17 +117,12 @@
         }).addTo(map);
       });
 
-      function navigationUrl(fromLatLng, toLatLng) {
+      function navigationUrl(fromLatLng, toLatLng, travelMode) {
         var toLatLngString = [toLatLng.lat,toLatLng.lng].join(',');
         var fromLatLngString = [fromLatLng.lat,fromLatLng.lng].join(',');
 
-        if ((navigator.platform.indexOf("iPhone") != -1) ||
-          (navigator.platform.indexOf("iPad") != -1) ||
-          (navigator.platform.indexOf("iPod") != -1)) {
-          return "maps://maps.google.com/maps?saddr=" + fromLatLngString + "&daddr" + toLatLngString + "&ll=";
-        } else {
-          return "https://maps.google.com/maps?saddr=" + fromLatLngString + "&daddr=" + toLatLngString + "&ll=";
-        }
+        return "https://www.google.com/maps/dir/?api=1&origin=" + fromLatLngString +
+          "&destination=" + toLatLngString + "&travelmode=" + travelMode + "&dir_action=navigate";
       }
     </script>
   </head>
