@@ -27,6 +27,7 @@
       }
       .info { padding: 6px 8px; font: 14px/16px Arial, Helvetica, sans-serif; background: white; background: rgba(255,255,255,0.8); box-shadow: 0 0 15px rgba(0,0,0,0.2); border-radius: 5px; } .info h4 { margin: 0 0 5px; color: #777; }
       .legend { text-align: left; line-height: 18px; color: #555; }
+      .leaflet-popup-content { text-align: center; }
     </style>
     <script src="https://unpkg.com/leaflet@1.3.4/dist/leaflet.js"
       integrity="sha512-nMMmRyTVoLYqjP9hrbed9S+FzjZHW5gY1TWCHA5ckwXZBadntCNs8kEqAWdrb9O7rxbCaA4lKTIWjDXZxflOcA=="
@@ -93,7 +94,11 @@
                 L.circle(currentLocation, position.coords.accuracy/2).addTo(map);
                 L.marker(currentLocation).addTo(map);
                 map.fitBounds(L.latLngBounds([stand.getLatLng(), currentLocation]));
-                setTimeout(function() { stand.bindPopup("You are " + Math.round(distance) + " metres away").openPopup(); }, 750);
+                setTimeout(function() {
+                  stand.bindPopup("You are " + Math.round(distance) + " metres away<br>" +
+                      "<a href='" + navigationUrl(currentLocation, stand.getLatLng()) + "'><span class='fas fa-location-arrow'></span> Navigate</a>")
+                    .openPopup();
+                }, 750);
               } else {
                 alert("cannot find any stands within 2km of you, sorry");
               }
@@ -107,6 +112,19 @@
           nearMe();
         }).addTo(map);
       });
+
+      function navigationUrl(fromLatLng, toLatLng) {
+        var toLatLngString = [toLatLng.lat,toLatLng.lng].join(',');
+        var fromLatLngString = [fromLatLng.lat,fromLatLng.lng].join(',');
+
+        if ((navigator.platform.indexOf("iPhone") != -1) ||
+          (navigator.platform.indexOf("iPad") != -1) ||
+          (navigator.platform.indexOf("iPod") != -1)) {
+          return "maps://maps.google.com/maps?saddr=" + fromLatLngString + "&daddr" + toLatLngString + "&ll=";
+        } else {
+          return "https://maps.google.com/maps?saddr=" + fromLatLngString + "&daddr=" + toLatLngString + "&ll=";
+        }
+      }
     </script>
   </head>
   <body>
