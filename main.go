@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	fs := http.FileServer(packr.NewBox("static"))
+	fs := http.FileServer(packr.NewBox("./static"))
 	http.Handle("/", fs)
 
 	port := getPort()

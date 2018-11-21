@@ -1,11 +1,7 @@
 ---
 applications:
-- name: dublinbike
-  memory: 64M
+- name: dublinbike-stg
+  memory: 128M
   instances: 2
   buildpack: binary_buildpack
   command: './dbp'
-  routes:
-  - route: dublinbike.cfapps.io
-  - route: dublinbikeparking.com
-  - route: www.dublinbikeparking.com
