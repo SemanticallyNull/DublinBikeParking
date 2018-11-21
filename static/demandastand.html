@@ -56,7 +56,7 @@
         }).addTo(map);
 
         var bleeperHeat = L.heatLayer([],{radius:20,blur:20,gradient:{0:'darkgreen',1:'darkgreen'},minOpacity: 0.4});
-        var bleeperHeatLayer = new L.GeoJSON.AJAX("VolunteerStand.geojson",{onEachFeature: function(f,l) {
+        var bleeperHeatLayer = new L.GeoJSON.AJAX("VolunteerStand.json",{onEachFeature: function(f,l) {
           if(f.properties.validated != "0") {
             bleeperHeat.addLatLng(L.latLng(f.geometry.coordinates[1],f.geometry.coordinates[0]));
           }
@@ -64,7 +64,7 @@
         bleeperHeat.addTo(map);
 
         var demandAStandHeat = L.heatLayer([],{radius:20,blur:20,gradient:{0:'red',1:'red'},minOpacity:0.4});
-        var demandAStandLayer = new L.GeoJSON.AJAX("DemandAStand.geojson",{onEachFeature: function(f,l) {
+        var demandAStandLayer = new L.GeoJSON.AJAX("DemandAStand.json",{onEachFeature: function(f,l) {
           demandAStandHeat.addLatLng(L.latLng(f.geometry.coordinates[1],f.geometry.coordinates[0]));
         }});
         demandAStandHeat.addTo(map);

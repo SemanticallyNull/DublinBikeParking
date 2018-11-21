@@ -62,8 +62,8 @@
             maxZoom: 19
         }).addTo(map);
 
-        var bleeperLayer = new L.GeoJSON.AJAX("BleeperData.geojson",{onEachFeature:bleeperIcon});
-        var dublinBikesLayer = new L.GeoJSON.AJAX("DublinBikes.geojson",{onEachFeature:dbPopUp});
+        var bleeperLayer = new L.GeoJSON.AJAX("BleeperData.json",{onEachFeature:bleeperIcon});
+        var dublinBikesLayer = new L.GeoJSON.AJAX("DublinBikes.json",{onEachFeature:dbPopUp});
         bleeperLayer.on('data:loaded', function () {
           markers.addLayer(bleeperLayer);
           map.addLayer(markers);
