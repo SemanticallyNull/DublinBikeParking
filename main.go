@@ -1,13 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"os"
 
 	"code.benchapman.ie/dublinbikeparking/apiv0"
-	cfenv "github.com/cloudfoundry-community/go-cfenv"
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
@@ -18,27 +16,8 @@ func main() {
 	var dialect = "sqlite3"
 	var connectionString = "./demo.db"
 
-	if cfenv.IsRunningOnCF() {
-		cfapp, err := cfenv.Current()
-		if err != nil {
-			panic(err)
-		}
-
-		service, err := cfapp.Services.WithName("dublinbikeparking-db")
-		if err != nil {
-			log.Fatalf("%s", err)
-		}
-
-		dialect = "mysql"
-		hostname, _ := service.CredentialString("hostname")
-		username, _ := service.CredentialString("username")
-		password, _ := service.CredentialString("password")
-		dbname, _ := service.CredentialString("name")
-		connectionString = fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?charset=utf8", username, password, hostname, dbname)
-	}
-
 	if dbDialect := os.Getenv("DBP_DB_DIALECT"); dbDialect != "" {
-		connectionString = dbDialect
+		dialect = dbDialect
 	}
 	if dbConnectionString := os.Getenv("DBP_DB_CONNECTION_STRING"); dbConnectionString != "" {
 		connectionString = dbConnectionString
