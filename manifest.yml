@@ -9,7 +9,7 @@ applications:
     GOPACKAGENAME: code.benchapman.ie/dublinbikeparking
     DBP_DB_DIALECT: mysql
     DBP_DB_CONNECTION_STRING: ((db_connection_string))
- routes:
- - route: dublinbike.cfapps.io
- - route: dublinbikeparking.com
- - route: www.dublinbikeparking.com
+  routes:
+  - route: dublinbike.cfapps.io
+  - route: dublinbikeparking.com
+  - route: www.dublinbikeparking.com
