@@ -26,10 +26,6 @@
 
 
 [[constraint]]
-  name = "github.com/gobuffalo/packr"
-  version = "1.21.3"
-
-[[constraint]]
   name = "github.com/onsi/ginkgo"
   version = "1.6.0"
 

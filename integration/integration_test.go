@@ -2,6 +2,7 @@ package integration_test
 
 import (
 	"fmt"
+	"io/ioutil"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -26,5 +27,12 @@ var _ = Describe("DublinBikeParking", func() {
 		resp, err := http.Get(fmt.Sprintf("http://localhost:%s/BleeperData.json", serverPort))
 		Expect(err).ToNot(HaveOccurred())
 		Expect(resp.StatusCode).To(Equal(http.StatusOK))
+	})
+
+	It("returns a 200 for the healthz endpoint", func() {
+		resp, err := http.Get(fmt.Sprintf("http://localhost:%s/healthz", serverPort))
+		Expect(err).ToNot(HaveOccurred())
+		Expect(resp.StatusCode).To(Equal(http.StatusOK))
+		Expect(ioutil.ReadAll(resp.Body)).To(Equal([]byte("ok")))
 	})
 })

@@ -2,36 +2,20 @@
 
 
 [[projects]]
-  digest = "1:ba4a13c1846fc9df263e43e61854e2ce530eadfdc10a7ea394cc3b76b42ddaed"
-  name = "github.com/gobuffalo/envy"
+  digest = "1:c79fb010be38a59d657c48c6ba1d003a8aa651fa56b579d959d74573b7dff8e1"
+  name = "github.com/gorilla/context"
   packages = ["."]
   pruneopts = "UT"
-  revision = "b29bf6b8134f3398b9333ba1893c58620152edb0"
-  version = "v1.6.9"
+  revision = "08b5f424b9271eedf6f9f0ce86cb9396ed337a42"
+  version = "v1.1.1"
 
 [[projects]]
-  branch = "master"
-  digest = "1:7c6a1822e4a22049b62beab49776703f626fd848fa1ac438401653e438eccf6d"
-  name = "github.com/gobuffalo/packd"
+  digest = "1:e73f5b0152105f18bc131fba127d9949305c8693f8a762588a82a48f61756f5f"
+  name = "github.com/gorilla/mux"
   packages = ["."]
   pruneopts = "UT"
-  revision = "a1fb7d1c9873c1dae25b15ece2fceaaf445a24eb"
-
-[[projects]]
-  digest = "1:6f92eb0109fc0b899e1b3ee5b27cfe77b3a09e096e83fa5551f52abd26ba628d"
-  name = "github.com/gobuffalo/packr"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "7c2dcc2885cf30cb864d25bb1a5f50e0f5c99acd"
-  version = "v1.21.3"
-
-[[projects]]
-  branch = "master"
-  digest = "1:da425896866b704cec05178819d7f31c7d5dad4d705403607b971b326bc7fea3"
-  name = "github.com/gobuffalo/syncx"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "558ac7de985fc4f4057bff27c7bdf99e92fe0750"
+  revision = "e3702bed27f0d39777b0b37b664b6280e8ef8fbf"
+  version = "v1.6.2"
 
 [[projects]]
   branch = "master"
@@ -46,22 +30,6 @@
   ]
   pruneopts = "UT"
   revision = "a1dbeea552b7c8df4b542c66073e393de198a800"
-
-[[projects]]
-  digest = "1:ecd9aa82687cf31d1585d4ac61d0ba180e42e8a6182b85bd785fcca8dfeefc1b"
-  name = "github.com/joho/godotenv"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "23d116af351c84513e1946b527c88823e476be13"
-  version = "v1.3.0"
-
-[[projects]]
-  branch = "master"
-  digest = "1:598aa4555d1ea05a7b949e31e7db0e7b2df21f8772c53cc42f6543dc6bf9a35a"
-  name = "github.com/markbates/oncer"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "05fccaae8fc423476d98fd4c3e4699ba0fbbde48"
 
 [[projects]]
   digest = "1:42e29deef12327a69123b9cb2cb45fee4af5c12c2a23c6e477338279a052703f"
@@ -112,14 +80,6 @@
   pruneopts = "UT"
   revision = "7615b9433f86a8bdf29709bf288bc4fd0636a369"
   version = "v1.4.2"
-
-[[projects]]
-  digest = "1:40e195917a951a8bf867cd05de2a46aaf1806c50cf92eebf4c16f78cd196f747"
-  name = "github.com/pkg/errors"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
-  version = "v0.8.0"
 
 [[projects]]
   branch = "master"
@@ -194,7 +154,7 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "github.com/gobuffalo/packr",
+    "github.com/gorilla/mux",
     "github.com/onsi/ginkgo",
     "github.com/onsi/gomega",
     "github.com/onsi/gomega/gexec",
