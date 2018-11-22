@@ -9,7 +9,7 @@ import (
 )
 
 type Stand struct {
-	gorm.Model     `json:"-"`
+	gorm.Model
 	Lat            float64
 	Lng            float64
 	Source         string
@@ -32,6 +32,7 @@ func (a *api) getStands(w http.ResponseWriter, r *http.Request) {
 				Point: []float64{stand.Lng, stand.Lat},
 			},
 			Properties: map[string]interface{}{
+				"id":             stand.ID,
 				"name":           stand.Name,
 				"type":           stand.Type,
 				"numberOfStands": stand.NumberOfStands,

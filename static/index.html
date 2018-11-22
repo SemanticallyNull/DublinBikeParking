@@ -62,31 +62,31 @@
             maxZoom: 19
         }).addTo(map);
 
-        var bleeperLayer = new L.GeoJSON.AJAX("/api/v0/stand",{onEachFeature:bleeperIcon});
-        var dublinBikesLayer = new L.GeoJSON.AJAX("DublinBikes.json",{onEachFeature:dbPopUp});
-        bleeperLayer.on('data:loaded', function () {
-          markers.addLayer(bleeperLayer);
+        var standsLayer = new L.GeoJSON.AJAX("/api/v0/stand",{onEachFeature:standIcon});
+        standsLayer.on('data:loaded', function () {
+          markers.addLayer(standsLayer);
           map.addLayer(markers);
         });
-        dublinBikesLayer.on('data:loaded', function () {
-          markers.addLayer(dublinBikesLayer);
-        });
 
-        function dbPopUp(f,l){
-          l.setIcon(dublinBikesStand).bindPopup("<table>" +
-            "<tr><td><b>Type of Stands</b></td><td>DublinBikes</td></tr>" +
-            "<tr><td><b>Location</b></td><td>" + f.properties["Address"] + "</td></tr>" +
-            "</table>");
-        }
-
-        function bleeperIcon(f,l){
-          l.setIcon(sheffieldStand);
+        function standIcon(f,l){
+          switch(f.properties.type) {
+            case "DublinBikes":
+              l.setIcon(dublinBikesStand).bindPopup("<table>" +
+                "<tr><td><b>Type of Stands</b></td><td>" + f.properties["type"] + "</td></tr>" +
+                "<tr><td><b>Location</b></td><td>" + f.properties["name"] + "</td></tr>" +
+                "</table>");
+              break;
+            default:
+              l.setIcon(sheffieldStand).bindPopup("<table>" +
+                "<tr><td><b>Type of Stands</b></td><td>" + f.properties["type"] + "</td></tr>" +
+                "</table>");
+          }
         }
 
         function nearMe(control) {
           if('geolocation' in navigator) {
             navigator.geolocation.getCurrentPosition(function(position) {
-              var nearestStands = leafletKnn(bleeperLayer).nearest(L.latLng(position.coords.latitude, position.coords.longitude), 1, 2000);
+              var nearestStands = leafletKnn(standsLayer).nearest(L.latLng(position.coords.latitude, position.coords.longitude), 1, 2000);
               if(nearestStands.length > 0) {
                 var stand = nearestStands[0].layer;
                 var currentLocation = L.latLng(position.coords.latitude,position.coords.longitude)
