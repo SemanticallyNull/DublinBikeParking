@@ -3,9 +3,13 @@ applications:
 - name: dublinbike
   memory: 128M
   instances: 2
+  health-check-type: http
+  health-check-http-endpoint: /healthz
   env:
     GOPACKAGENAME: code.benchapman.ie/dublinbikeparking
-  routes:
-  - route: dublinbike.cfapps.io
-  - route: dublinbikeparking.com
-  - route: www.dublinbikeparking.com
+  # routes:
+  # - route: dublinbike.cfapps.io
+  # - route: dublinbikeparking.com
+  # - route: www.dublinbikeparking.com
+  services:
+  - dublinbikeparking-db
