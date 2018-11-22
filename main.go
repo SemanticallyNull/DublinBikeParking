@@ -4,12 +4,10 @@ import (
 	"log"
 	"net/http"
 	"os"
-
-	"github.com/gobuffalo/packr"
 )
 
 func main() {
-	fs := http.FileServer(packr.NewBox("./static"))
+	fs := http.FileServer(http.Dir("./static"))
 	http.Handle("/", fs)
 
 	port := getPort()

@@ -1,7 +1,11 @@
 ---
 applications:
-- name: dublinbike-stg
+- name: dublinbike
   memory: 128M
   instances: 2
-  buildpack: binary_buildpack
-  command: './dbp'
+  env:
+    GOPACKAGENAME: code.benchapman.ie/dublinbikeparking
+  routes:
+  - route: dublinbike.cfapps.io
+  - route: dublinbikeparking.com
+  - route: www.dublinbikeparking.com
