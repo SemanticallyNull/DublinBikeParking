@@ -18,6 +18,9 @@
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css"
       integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU"
       crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+      integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+      crossorigin="anonymous">
     <style type="text/css">
       html, body {padding:0;margin:0;height:100%;}
 
@@ -28,6 +31,7 @@
       .info { padding: 6px 8px; font: 14px/16px Arial, Helvetica, sans-serif; background: white; background: rgba(255,255,255,0.8); box-shadow: 0 0 15px rgba(0,0,0,0.2); border-radius: 5px; } .info h4 { margin: 0 0 5px; color: #777; }
       .legend { text-align: left; line-height: 18px; color: #555; }
       .leaflet-popup-content { text-align: center; }
+      .leaflet-selector { position: fixed; top: 0; right: 0; margin-top: 10px; margin-right: 10px; z-index: 9999; }
     </style>
     <script src="https://unpkg.com/leaflet@1.3.4/dist/leaflet.js"
       integrity="sha512-nMMmRyTVoLYqjP9hrbed9S+FzjZHW5gY1TWCHA5ckwXZBadntCNs8kEqAWdrb9O7rxbCaA4lKTIWjDXZxflOcA=="
@@ -69,11 +73,13 @@
             maxZoom: 19
         }).addTo(map);
 
-        var standsLayer = new L.GeoJSON.AJAX("/api/v0/stand",{onEachFeature:standIcon});
+        var standsLayer = new L.GeoJSON.AJAX("/api/v0/stand?dublinbikes=off",{onEachFeature:standIcon});
         standsLayer.on('data:loaded', function () {
           markers.addLayer(standsLayer);
           map.addLayer(markers);
         });
+        var hireLayer = new L.GeoJSON.AJAX("/api/v0/stand?dublinbikes=only",{onEachFeature:standIcon});
+        hireLayer.on('data:loaded', function () {});
 
         function standIcon(f,l){
           switch(f.properties.type) {
@@ -157,6 +163,23 @@
             }
           }
         ]}).addTo(map);
+
+        document.getElementById("myBikeSelector").addEventListener("click", function(e) {
+          markers.removeLayer(hireLayer);
+          markers.addLayer(standsLayer);
+          e.target.classList.add("btn-dark")
+          e.target.classList.remove("btn-outline-dark")
+          document.getElementById("hireBikeSelector").classList.remove("btn-dark")
+          document.getElementById("hireBikeSelector").classList.add("btn-outline-dark")
+        });
+        document.getElementById("hireBikeSelector").addEventListener("click", function(e) {
+          markers.removeLayer(standsLayer);
+          markers.addLayer(hireLayer);
+          e.target.classList.add("btn-dark")
+          e.target.classList.remove("btn-outline-dark")
+          document.getElementById("myBikeSelector").classList.remove("btn-dark")
+          document.getElementById("myBikeSelector").classList.add("btn-outline-dark")
+        });
       });
 
       function navigationUrl(fromLatLng, toLatLng, travelMode) {
@@ -170,6 +193,10 @@
   </head>
   <body>
     <div id="map">
+    </div>
+    <div class="btn-group leaflet-selector">
+      <button type="button" class="btn btn-sm btn-dark" id="myBikeSelector">My Bike</button>
+      <button type="button" class="btn btn-sm btn-outline-dark" id="hireBikeSelector">Hire Bike</button>
     </div>
   </body>
 </html>

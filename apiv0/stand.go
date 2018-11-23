@@ -23,8 +23,16 @@ type Stand struct {
 func (a *api) getStands(w http.ResponseWriter, r *http.Request) {
 	fc := geojson.NewFeatureCollection()
 
+	dbc := a.DB
+
+	if db := r.URL.Query().Get("dublinbikes"); db == "off" {
+		dbc = dbc.Where("type != ?", "DublinBikes")
+	} else if db == "only" {
+		dbc = dbc.Where("type = ?", "DublinBikes")
+	}
+
 	stands := []Stand{}
-	a.DB.Find(&stands)
+	dbc.Find(&stands)
 
 	for _, stand := range stands {
 		fc.AddFeature(&geojson.Feature{
