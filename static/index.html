@@ -57,6 +57,7 @@
         var sheffieldStand = new StandIcon({iconUrl: 'stand_icon_sheffield.png'})
         var hoopStand = new StandIcon({iconUrl: 'stand_icon_hoop.png'})
         var sscStand = new StandIcon({iconUrl: 'stand_icon_ssc.png'})
+        var railingStand = new StandIcon({iconUrl: 'stand_icon_railing.png'})
         var dublinBikesStand = new StandIcon({iconUrl: 'station_icon_db.png'})
 
         var osm = L.tileLayer('https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png', {
@@ -73,13 +74,16 @@
         function standIcon(f,l){
           switch(f.properties.type) {
             case "Sheffield Stand":
-              standType(l,f,sheffieldStand)
+              standType(l,f,sheffieldStand);
               break;
             case "Hoop":
-              standType(l,f,hoopStand)
+              standType(l,f,hoopStand);
               break;
             case "Stainless Steel Curved":
-              standType(l,f,sscStand)
+              standType(l,f,sscStand);
+              break;
+            case "Railing":
+              standType(l,f,railingStand);
               break;
             case "DublinBikes":
                 l.setIcon(dublinBikesStand).bindPopup("<table>" +
