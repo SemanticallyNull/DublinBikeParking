@@ -13,6 +13,7 @@ type Stand struct {
 	Lat            float64
 	Lng            float64
 	Source         string
+	SourceID       string
 	Name           string
 	Type           string
 	NumberOfStands int
