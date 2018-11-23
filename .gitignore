@@ -1,2 +1,3 @@
 *.db
 private.yml
+.envrc
