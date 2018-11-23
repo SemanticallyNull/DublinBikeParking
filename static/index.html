@@ -52,7 +52,7 @@
         var map = L.map('map').setView([53.34587706183283, -6.267379465984959], 12);
         var hash = new L.Hash(map);
 
-        var markers = new L.MarkerClusterGroup({maxClusterRadius:100});
+        var markers = new L.MarkerClusterGroup({maxClusterRadius:50});
         var StandIcon = L.Icon.extend({
           options: {
             iconSize: [22,22]
@@ -90,10 +90,7 @@
               standType(l,f,railingStand);
               break;
             case "DublinBikes":
-                l.setIcon(dublinBikesStand).bindPopup("<table>" +
-                  "<tr><td><b>Type of Stands</b></td><td>" + f.properties["type"] + "</td></tr>" +
-                  "<tr><td><b>Location</b></td><td>" + f.properties["name"] + "</td></tr>" +
-                  "</table>");
+              standType(l,f,dublinBikesStand);
                 break;
             default:
               l.setIcon(sheffieldStand).bindPopup("<table>" +
