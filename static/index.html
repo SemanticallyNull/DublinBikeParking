@@ -55,6 +55,8 @@
           }
         })
         var sheffieldStand = new StandIcon({iconUrl: 'stand_icon_sheffield.png'})
+        var hoopStand = new StandIcon({iconUrl: 'stand_icon_hoop.png'})
+        var sscStand = new StandIcon({iconUrl: 'stand_icon_ssc.png'})
         var dublinBikesStand = new StandIcon({iconUrl: 'station_icon_db.png'})
 
         var osm = L.tileLayer('https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png', {
@@ -70,17 +72,36 @@
 
         function standIcon(f,l){
           switch(f.properties.type) {
-            case "DublinBikes":
-              l.setIcon(dublinBikesStand).bindPopup("<table>" +
-                "<tr><td><b>Type of Stands</b></td><td>" + f.properties["type"] + "</td></tr>" +
-                "<tr><td><b>Location</b></td><td>" + f.properties["name"] + "</td></tr>" +
-                "</table>");
+            case "Sheffield Stand":
+              standType(l,f,sheffieldStand)
               break;
+            case "Hoop":
+              standType(l,f,hoopStand)
+              break;
+            case "Stainless Steel Curved":
+              standType(l,f,sscStand)
+              break;
+            case "DublinBikes":
+                l.setIcon(dublinBikesStand).bindPopup("<table>" +
+                  "<tr><td><b>Type of Stands</b></td><td>" + f.properties["type"] + "</td></tr>" +
+                  "<tr><td><b>Location</b></td><td>" + f.properties["name"] + "</td></tr>" +
+                  "</table>");
+                break;
             default:
               l.setIcon(sheffieldStand).bindPopup("<table>" +
                 "<tr><td><b>Type of Stands</b></td><td>" + f.properties["type"] + "</td></tr>" +
                 "</table>");
           }
+        }
+
+        function standType(l, f, icon) {
+          noStands = f.properties["numberOfStands"] > 0 ? f.properties["numberOfStands"] : "Unknown"
+
+          l.setIcon(icon).bindPopup("<table>" +
+            "<tr><td><b>Type of Stands</b></td><td>" + f.properties["type"] + "</td></tr>" +
+            "<tr><td><b>Location</b></td><td>" + f.properties["name"] + "</td></tr>" +
+            "<tr><td><b>Number of Stands</b></td><td>" + noStands + "</td></tr>" +
+            "</table>");
         }
 
         function nearMe(control) {
