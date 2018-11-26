@@ -106,12 +106,18 @@
         }
 
         function standType(l, f, icon) {
-          noStands = f.properties["numberOfStands"] > 0 ? f.properties["numberOfStands"] : "Unknown"
+          var noStands = f.properties["numberOfStands"] > 0 ? f.properties["numberOfStands"] : "Unknown"
+
+          var unverifiedMessage = ""
+          if(!f.properties["verified"]) {
+            unverifiedMessage = "<tr><td colspan=2><small>This is a user submitted stand we have not verified yet.</small></td></tr>"
+          }
 
           l.setIcon(icon).bindPopup("<table>" +
             "<tr><td><b>Type of Stands</b></td><td>" + f.properties["type"] + "</td></tr>" +
             "<tr><td><b>Location</b></td><td>" + f.properties["name"] + "</td></tr>" +
             "<tr><td><b>Number of Stands</b></td><td>" + noStands + "</td></tr>" +
+            unverifiedMessage +
             "</table>");
         }
 
@@ -180,7 +186,64 @@
           document.getElementById("myBikeSelector").classList.remove("btn-dark")
           document.getElementById("myBikeSelector").classList.add("btn-outline-dark")
         });
+
+        var addMarker = L.marker();
+        map.on('contextmenu', function(e) {
+          addMarker.setLatLng(e.latlng).bindPopup("<form id=\"addMarker\"><table>" +
+            "<input type=\"hidden\" id=\"lat\" value=\"" + e.latlng.lat + "\">" +
+            "<input type=\"hidden\" id=\"lng\" value=\"" + e.latlng.lng + "\">" +
+            "<tr><td><b>Type of Stands</b></td><td>"+standTypeMenu()+"</td></tr>" +
+            "<tr><td><b>Location</b></td><td><input id=\"name\" type=\"text\"></td></tr>" +
+            "<tr><td><b>Number of Stands</b></td><td><input id=\"NumberOfStands\" type=\"number\"></td></tr>" +
+            "<tr><td cellwidth=2><input type=\"submit\" class=\"btn btn-primary\"></td></tr>" +
+            "</table></form>").addTo(map).openPopup();
+            document.getElementById('addMarker').addEventListener('submit', function(e) {
+              e.preventDefault();
+              addMarker.setPopupContent("<span class=\"fas fa-sync fa-spin\"></span> Submitting...")
+              addStand(e).then(function(e) {
+                if(e.target.status == 200) {
+                  addMarker.setPopupContent("<span class=\"fas fa-check text-success\"></span> Thank you for your submission. It will be reviewed soon!")
+                } else {
+                  addMarker.setPopupContent("<span class=\"fas fa-times text-danger\"></span> There was an issue with your submission.<br><code>" + e.target.statusText + "</code>" )
+                }
+              }, function(e){
+                addMarker.setPopupContent("<span class=\"fas fa-times text-danger\"></span> There was an issue with your submission.<br><code>" + e.target.statusText + "</code>" )
+              })
+            })
+        })
       });
+
+      function addStand(e) {
+        return new Promise(function(resolve, reject) {
+          standData = {}
+          for (var i = 0; i < e.target.length; i++) {
+            if(e.target[i].id != "") {
+              if(!isNaN(parseFloat(e.target[i].value))) {
+                standData[e.target[i].id] = parseFloat(e.target[i].value)
+              } else {
+                standData[e.target[i].id] = e.target[i].value
+              }
+            }
+          }
+
+          var request = new XMLHttpRequest();
+          request.open('POST', '/api/v0/stand', true);
+          request.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+          request.onload = resolve
+          request.onerror = reject
+          request.send(JSON.stringify(standData));
+        })
+      }
+
+      function standTypeMenu() {
+        var standMenu = "<select id=\"type\">"
+        var types = ["Sheffield Stand", "Hoop", "Stainless Steel Curved", "Railing", "Other"];
+        for (var i = 0; i < types.length; i++) {
+          standMenu += "<option>" + types[i] + "</option>"
+        }
+        standMenu += "</select>"
+        return standMenu
+      }
 
       function navigationUrl(fromLatLng, toLatLng, travelMode) {
         var toLatLngString = [toLatLng.lat,toLatLng.lng].join(',');

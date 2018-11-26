@@ -10,6 +10,14 @@
   version = "v1.4.1"
 
 [[projects]]
+  digest = "1:236d7e1bdb50d8f68559af37dbcf9d142d56b431c9b2176d41e2a009b664cda8"
+  name = "github.com/google/uuid"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "9b3b1e0f5f99ae461456d768e7d301a7acdaa2d8"
+  version = "v1.1.0"
+
+[[projects]]
   digest = "1:c79fb010be38a59d657c48c6ba1d003a8aa651fa56b579d959d74573b7dff8e1"
   name = "github.com/gorilla/context"
   packages = ["."]
@@ -195,6 +203,14 @@
   revision = "c131134a1947e9afd9cecfe11f4c6dff0732ae58"
 
 [[projects]]
+  branch = "v2"
+  digest = "1:b6539350da50de0d3c9b83ae587c06b89be9cb5750443bdd887f1c4077f57776"
+  name = "gopkg.in/validator.v2"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "135c24b11c19e52befcae2ec3fca5d9b78c4e98e"
+
+[[projects]]
   digest = "1:342378ac4dcb378a5448dd723f0784ae519383532f5e70ade24132c4c8693202"
   name = "gopkg.in/yaml.v2"
   packages = ["."]
@@ -206,6 +222,7 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/google/uuid",
     "github.com/gorilla/mux",
     "github.com/jinzhu/gorm",
     "github.com/jinzhu/gorm/dialects/mysql",
@@ -214,6 +231,7 @@
     "github.com/onsi/gomega",
     "github.com/onsi/gomega/gexec",
     "github.com/paulmach/go.geojson",
+    "gopkg.in/validator.v2",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1
