@@ -113,13 +113,20 @@
             unverifiedMessage = "<tr><td colspan=2><small>This is a user submitted stand we have not verified yet.</small></td></tr>"
           }
 
+          var urlParams = new URLSearchParams(window.location.search);
+          var standIDParam = urlParams.get('showIDs');
+          var standID = ""
+          if(standIDParam == "true") {
+            standID = "<tr><td><b>Stand ID</b></td><td>" + f.properties["id"] + "</td></tr>"
+          }
+
           l.setIcon(icon).bindPopup("<table>" +
             "<tr><td><b>Type of Stands</b></td><td>" + f.properties["type"] + "</td></tr>" +
             "<tr><td><b>Location</b></td><td>" +
               f.properties["name"] +
             "</td></tr>" +
             "<tr><td><b>Number of Stands</b></td><td>" + noStands + "</td></tr>" +
-            "<tr><td><b>Stand ID</b></td><td>" + f.properties["id"] + "</td></tr>" +
+            standID +
             unverifiedMessage +
             "</table>");
         }
