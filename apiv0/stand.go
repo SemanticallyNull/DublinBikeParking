@@ -13,6 +13,7 @@ import (
 
 type Stand struct {
 	gorm.Model
+	StandID        string
 	Lat            float64 `validate:"min=-90,max=90"`
 	Lng            float64 `validate:"min=-180,max=180"`
 	Source         string
@@ -47,7 +48,7 @@ func (a *api) getStands(w http.ResponseWriter, r *http.Request) {
 				Point: []float64{stand.Lng, stand.Lat},
 			},
 			Properties: map[string]interface{}{
-				"id":             stand.ID,
+				"id":             stand.StandID,
 				"name":           stand.Name,
 				"type":           stand.Type,
 				"numberOfStands": stand.NumberOfStands,
@@ -85,7 +86,9 @@ func (a *api) createStand(w http.ResponseWriter, r *http.Request) {
 
 	stand.Checked = ""
 	stand.Source = "User Submission"
-	stand.SourceID = uuid.New().String()[:7]
+	id := uuid.New().String()[:6]
+	stand.SourceID = id
+	stand.StandID = id
 
 	a.DB.Create(&stand)
 
