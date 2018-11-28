@@ -57,7 +57,7 @@
         var map = L.map('map').setView([53.34587706183283, -6.267379465984959], 12);
         var hash = new L.Hash(map);
 
-        var markers = new L.MarkerClusterGroup({maxClusterRadius:50});
+        var markers = new L.MarkerClusterGroup({maxClusterRadius:50, disableClusteringAtZoom: 18});
         var StandIcon = L.Icon.extend({
           options: {
             iconSize: [22,22]
