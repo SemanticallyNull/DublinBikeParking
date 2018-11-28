@@ -57,7 +57,7 @@
         var map = L.map('map').setView([53.34587706183283, -6.267379465984959], 12);
         var hash = new L.Hash(map);
 
-        var markers = new L.MarkerClusterGroup({maxClusterRadius:50, disableClusteringAtZoom: 18});
+        var markers = new L.MarkerClusterGroup({maxClusterRadius:50});
         var StandIcon = L.Icon.extend({
           options: {
             iconSize: [22,22]
@@ -75,13 +75,11 @@
             maxZoom: 19
         }).addTo(map);
 
-        var standsLayer = new L.GeoJSON.AJAX("/api/v0/stand?dublinbikes=off",{onEachFeature:standIcon});
+        var standsLayer = new L.GeoJSON.AJAX("/api/v0/stand?dublinbikes=off&review=true",{onEachFeature:standIcon});
         standsLayer.on('data:loaded', function () {
           markers.addLayer(standsLayer);
           map.addLayer(markers);
         });
-        var hireLayer = new L.GeoJSON.AJAX("/api/v0/stand?dublinbikes=only",{onEachFeature:standIcon});
-        hireLayer.on('data:loaded', function () {});
 
         function standIcon(f,l){
           switch(f.properties.type) {
@@ -92,7 +90,6 @@
               standType(l,f,wheelOnlyStand);
               break;
             case "Hoop":
-            case "Hoops":
               standType(l,f,hoopStand);
               break;
             case "Stainless Steel Curved":
@@ -112,124 +109,34 @@
         }
 
         function standType(l, f, icon) {
-          var noStands = f.properties["numberOfStands"] > 0 ? f.properties["numberOfStands"] : "Unknown"
-
-          var unverifiedMessage = ""
-          if(!f.properties["verified"]) {
-            unverifiedMessage = "<tr><td colspan=2><small>This is a user submitted stand we have not verified yet.</small></td></tr>"
-          }
-
-          var urlParams = new URLSearchParams(window.location.search);
-          var standIDParam = urlParams.get('showIDs');
-          var standID = ""
-          if(standIDParam == "true") {
-            standID = "<tr><td><b>Stand ID</b></td><td>" + f.properties["id"] + "</td></tr>"
-          }
-
-          l.setIcon(icon).bindPopup("<table>" +
-            "<tr><td><b>Type of Stands</b></td><td>" + f.properties["type"] + "</td></tr>" +
-            "<tr><td><b>Location</b></td><td>" +
-              f.properties["name"] +
-            "</td></tr>" +
-            "<tr><td><b>Number of Stands</b></td><td>" + noStands + "</td></tr>" +
-            standID +
-            unverifiedMessage +
-            "</table>");
-        }
-
-        function nearMe(control) {
-          if('geolocation' in navigator) {
-            navigator.geolocation.getCurrentPosition(function(position) {
-              var nearestStands = leafletKnn(standsLayer).nearest(L.latLng(position.coords.latitude, position.coords.longitude), 1, 2000);
-              if(nearestStands.length > 0) {
-                var stand = nearestStands[0].layer;
-                var currentLocation = L.latLng(position.coords.latitude,position.coords.longitude)
-                var distance = stand.getLatLng().distanceTo(currentLocation)
-                L.circle(currentLocation, position.coords.accuracy/2).addTo(map);
-                L.marker(currentLocation).addTo(map);
-                map.fitBounds(L.latLngBounds([stand.getLatLng(), currentLocation]));
-                var travelMode = "walking";
-                if(distance > 200) {
-                  travelMode = "bicycling";
-                }
-                setTimeout(function() {
-                  stand.bindPopup("You are " + Math.round(distance) + " metres away<br>" +
-                      "<a href='" + navigationUrl(currentLocation, stand.getLatLng(), travelMode) + "'><span class='fas fa-location-arrow'></span> Navigate</a>")
-                    .openPopup();
-                  control.state('locate-stand');
-                }, 750);
-              } else {
-                alert("cannot find any stands within 2km of you, sorry");
-              }
-            });
-          } else {
-            alert('geolocation is not available in your browser, sorry!');
-          }
-        }
-
-        L.easyButton({states: [
-          {
-            stateName: 'locate-stand',
-            icon: 'fas fa-location-arrow',
-            title: 'Find my nearest stand',
-            onClick: function(control) {
-              control.state('loading');
-              nearMe(control);
-            }
-          }, {
-            stateName: 'loading',
-            icon: 'fas fa-sync fa-spin',
-            title: 'Finding nearest stand...',
-            onClick: function() {
-              return false;
-            }
-          }
-        ]}).addTo(map);
-
-        document.getElementById("myBikeSelector").addEventListener("click", function(e) {
-          markers.removeLayer(hireLayer);
-          markers.addLayer(standsLayer);
-          e.target.classList.add("btn-dark")
-          e.target.classList.remove("btn-outline-dark")
-          document.getElementById("hireBikeSelector").classList.remove("btn-dark")
-          document.getElementById("hireBikeSelector").classList.add("btn-outline-dark")
-        });
-        document.getElementById("hireBikeSelector").addEventListener("click", function(e) {
-          markers.removeLayer(standsLayer);
-          markers.addLayer(hireLayer);
-          e.target.classList.add("btn-dark")
-          e.target.classList.remove("btn-outline-dark")
-          document.getElementById("myBikeSelector").classList.remove("btn-dark")
-          document.getElementById("myBikeSelector").classList.add("btn-outline-dark")
-        });
-
-        var addMarker = L.marker();
-        map.on('contextmenu', function(e) {
-          addMarker.setLatLng(e.latlng).bindPopup("<form id=\"addMarker\"><table>" +
-            "<input type=\"hidden\" id=\"lat\" value=\"" + e.latlng.lat + "\">" +
-            "<input type=\"hidden\" id=\"lng\" value=\"" + e.latlng.lng + "\">" +
+          var form = document.createElement('form')
+          form.innerHTML = "<table>" +
+            "<tr><td cellwidth=2><a class=\"btn btn-primary text-light\" href=\"https://www.google.com/maps/@?api=1&map_action=pano&viewpoint="+l.getLatLng().lat+","+l.getLatLng().lng+"\" target=\"_BLANK\">Street View</a></td></tr>" +
+            "<tr><td><b>ID</b></td><td>"+f.properties["id"]+"</td></tr>" +
             "<tr><td><b>Type of Stands</b></td><td>"+standTypeMenu()+"</td></tr>" +
-            "<tr><td><b>Location</b></td><td><input id=\"name\" type=\"text\"></td></tr>" +
-            "<tr><td><b>Number of Stands</b></td><td><input id=\"NumberOfStands\" type=\"number\"></td></tr>" +
+            "<tr><td><b>Location</b></td><td><input id=\"name\" type=\"text\" value=\""+f.properties["name"]+"\"></td></tr>" +
+            "<tr><td><b>Number of Stands</b></td><td><input id=\"NumberOfStands\" type=\"number\" value=\""+f.properties["numberOfStands"]+"\"></td></tr>" +
             "<tr><td cellwidth=2><input type=\"submit\" class=\"btn btn-primary\"></td></tr>" +
-            "</table></form>").addTo(map).openPopup();
-            document.getElementById('addMarker').addEventListener('submit', function(e) {
-              e.preventDefault();
-              addMarker.setPopupContent("<span class=\"fas fa-sync fa-spin\"></span> Submitting...")
-              addStand(e).then(function(e) {
-                if(e.target.status == 200) {
-                  addMarker.setPopupContent("<span class=\"fas fa-check text-success\"></span> Thank you for your submission. It will be reviewed soon!")
-                } else {
-                  addMarker.setPopupContent("<span class=\"fas fa-times text-danger\"></span> There was an issue with your submission.<br><code>" + e.target.statusText + "</code>" )
-                }
-              }, function(e){
-                addMarker.setPopupContent("<span class=\"fas fa-times text-danger\"></span> There was an issue with your submission.<br><code>" + e.target.statusText + "</code>" )
-              })
+            "</table>";
+          form.addEventListener('submit',function(e) {
+            e.preventDefault();
+            l.setPopupContent("<span class=\"fas fa-sync fa-spin\"></span> Submitting...")
+            updateStand(f.properties["id"], e).then(function(e) {
+              if(e.target.status == 200) {
+                markers.removeLayer(l)
+              } else {
+                l.setPopupContent("<span class=\"fas fa-times text-danger\"></span> There was an issue with your submission.<br><code>" + e.target.statusText + "</code>" )
+              }
+            }, function(e){
+              l.setPopupContent("<span class=\"fas fa-times text-danger\"></span> There was an issue with your submission.<br><code>" + e.target.statusText + "</code>" )
             })
-        })
+          })
+          l.setIcon(icon).bindPopup(form);
+        }
+
       });
 
-      function addStand(e) {
+      function updateStand(id,e) {
         return new Promise(function(resolve, reject) {
           standData = {}
           for (var i = 0; i < e.target.length; i++) {
@@ -243,7 +150,7 @@
           }
 
           var request = new XMLHttpRequest();
-          request.open('POST', '/api/v0/stand', true);
+          request.open('POST', '/api/v0/stand/'+id, true);
           request.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
           request.onload = resolve
           request.onerror = reject

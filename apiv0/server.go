@@ -18,4 +18,5 @@ func NewAPIv0(r *mux.Router, db *gorm.DB) {
 
 	r.HandleFunc("/stand", apiHandler.getStands).Methods("GET")
 	r.HandleFunc("/stand", apiHandler.createStand).Methods("POST")
+	r.HandleFunc("/stand/{id}", apiHandler.updateStand).Methods("POST")
 }

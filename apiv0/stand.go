@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
+	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
 	geojson "github.com/paulmach/go.geojson"
 	validator "gopkg.in/validator.v2"
@@ -36,6 +37,10 @@ func (a *api) getStands(w http.ResponseWriter, r *http.Request) {
 		dbc = dbc.Where("type != ?", "DublinBikes")
 	} else if db == "only" {
 		dbc = dbc.Where("type = ?", "DublinBikes")
+	}
+
+	if r.URL.Query().Get("review") == "true" {
+		dbc = dbc.Where("number_of_stands IS NULL")
 	}
 
 	stands := []Stand{}
@@ -93,4 +98,38 @@ func (a *api) createStand(w http.ResponseWriter, r *http.Request) {
 	a.DB.Create(&stand)
 
 	json.NewEncoder(w).Encode(stand)
+}
+
+func (a *api) updateStand(w http.ResponseWriter, r *http.Request) {
+	var originStand, updatedStand Stand
+
+	vars := mux.Vars(r)
+
+	a.DB.Where("stand_id = ?", vars["id"]).First(&originStand)
+
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(err)
+		return
+	}
+	json.Unmarshal(body, &updatedStand)
+
+	err = validator.Validate(&updatedStand)
+	if err != nil {
+		errs := err.(validator.ErrorMap)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"errors": errs,
+		})
+		return
+	}
+
+	a.DB.Model(&originStand).Update(map[string]interface{}{
+		"name":             updatedStand.Name,
+		"type":             updatedStand.Type,
+		"number_of_stands": updatedStand.NumberOfStands,
+	})
+
+	json.NewEncoder(w).Encode(originStand)
 }
