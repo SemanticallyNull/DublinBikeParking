@@ -136,6 +136,38 @@
           console.log(e)
           window.localStorage.setItem('apiKey', e.target.value)
         })
+
+        function nearMe(control) {
+          if('geolocation' in navigator) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+              var currentLocation = L.latLng(position.coords.latitude,position.coords.longitude)
+              L.circle(currentLocation, position.coords.accuracy/2).addTo(map);
+              L.marker(currentLocation).addTo(map);
+              map.fitBounds(L.latLngBounds([currentLocation]));
+            });
+          } else {
+            alert('geolocation is not available in your browser, sorry!');
+          }
+        }
+
+        L.easyButton({states: [
+          {
+            stateName: 'locate-stand',
+            icon: 'fas fa-location-arrow',
+            title: 'Find meter',
+            onClick: function(control) {
+              control.state('loading');
+              nearMe(control);
+            }
+          }, {
+            stateName: 'loading',
+            icon: 'fas fa-sync fa-spin',
+            title: 'Finding you...',
+            onClick: function() {
+              return false;
+            }
+          }
+        ]}).addTo(map);
       });
 
       function updateStand(id,e) {
