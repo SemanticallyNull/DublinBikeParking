@@ -42,7 +42,10 @@ func main() {
 
 	port := getPort()
 	log.Printf("Listening on port %s...", port)
-	http.ListenAndServe(":"+port, r)
+	err = http.ListenAndServe(":"+port, r)
+	if err != nil {
+		log.Fatalf("%s\n", err)
+	}
 }
 
 func getPort() string {

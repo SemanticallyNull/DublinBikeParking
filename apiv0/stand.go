@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
@@ -101,6 +102,11 @@ func (a *api) createStand(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *api) updateStand(w http.ResponseWriter, r *http.Request) {
+	if strings.ToLower(r.URL.Query().Get("apiKey")) != "irideabike" {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
 	var originStand, updatedStand Stand
 
 	vars := mux.Vars(r)
@@ -125,11 +131,19 @@ func (a *api) updateStand(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	a.DB.Model(&originStand).Update(map[string]interface{}{
-		"name":             updatedStand.Name,
-		"type":             updatedStand.Type,
-		"number_of_stands": updatedStand.NumberOfStands,
-	})
+	if originStand.ID != 0 {
+		a.DB.Model(&originStand).Update(map[string]interface{}{
+			"name":             updatedStand.Name,
+			"type":             updatedStand.Type,
+			"number_of_stands": updatedStand.NumberOfStands,
+		})
+	} else {
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"errors": []string{
+				"stand not found",
+			},
+		})
+	}
 
 	json.NewEncoder(w).Encode(originStand)
 }

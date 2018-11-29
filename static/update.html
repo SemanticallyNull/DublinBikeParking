@@ -75,7 +75,7 @@
             maxZoom: 19
         }).addTo(map);
 
-        var standsLayer = new L.GeoJSON.AJAX("/api/v0/stand?dublinbikes=off&review=true",{onEachFeature:standIcon});
+        var standsLayer = new L.GeoJSON.AJAX("/api/v0/stand?dublinbikes=off",{onEachFeature:standIcon});
         standsLayer.on('data:loaded', function () {
           markers.addLayer(standsLayer);
           map.addLayer(markers);
@@ -83,9 +83,6 @@
 
         function standIcon(f,l){
           switch(f.properties.type) {
-            case "Sheffield Stand":
-              standType(l,f,sheffieldStand);
-              break;
             case "Wheel Only":
               standType(l,f,wheelOnlyStand);
               break;
@@ -100,11 +97,9 @@
               break;
             case "DublinBikes":
               standType(l,f,dublinBikesStand);
-                break;
+              break;
             default:
-              l.setIcon(sheffieldStand).bindPopup("<table>" +
-                "<tr><td><b>Type of Stands</b></td><td>" + f.properties["type"] + "</td></tr>" +
-                "</table>");
+              standType(l,f,sheffieldStand);
           }
         }
 
@@ -123,7 +118,9 @@
             l.setPopupContent("<span class=\"fas fa-sync fa-spin\"></span> Submitting...")
             updateStand(f.properties["id"], e).then(function(e) {
               if(e.target.status == 200) {
-                markers.removeLayer(l)
+                l.setPopupContent("<span class=\"fas fa-check text-success\"></span> Thank you for your submission!")
+              } else if(e.target.status == 401) {
+                l.setPopupContent("<span class=\"fas fa-times text-success\"></span> Please fill in the API key above and try again.")
               } else {
                 l.setPopupContent("<span class=\"fas fa-times text-danger\"></span> There was an issue with your submission.<br><code>" + e.target.statusText + "</code>" )
               }
@@ -181,9 +178,8 @@
   <body>
     <div id="map">
     </div>
-    <div class="btn-group leaflet-selector">
-      <button type="button" class="btn btn-sm btn-dark" id="myBikeSelector">My Bike</button>
-      <button type="button" class="btn btn-sm btn-outline-dark" id="hireBikeSelector">DublinBikes</button>
+    <div class="leaflet-selector">
+      <input type="text" placeholder="apiKey" id="apiKey">
     </div>
   </body>
 </html>
