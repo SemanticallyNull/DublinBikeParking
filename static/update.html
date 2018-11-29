@@ -120,7 +120,7 @@
               if(e.target.status == 200) {
                 l.setPopupContent("<span class=\"fas fa-check text-success\"></span> Thank you for your submission!")
               } else if(e.target.status == 401) {
-                l.setPopupContent("<span class=\"fas fa-times text-success\"></span> Please fill in the API key above and try again.")
+                l.setPopupContent("<span class=\"fas fa-times text-danger\"></span> Please fill in the API key above and try again.")
               } else {
                 l.setPopupContent("<span class=\"fas fa-times text-danger\"></span> There was an issue with your submission.<br><code>" + e.target.statusText + "</code>" )
               }
@@ -131,6 +131,11 @@
           l.setIcon(icon).bindPopup(form);
         }
 
+        document.getElementById('apiKey').value = window.localStorage.getItem('apiKey')
+        document.getElementById('apiKey').addEventListener('blur', function(e) {
+          console.log(e)
+          window.localStorage.setItem('apiKey', e.target.value)
+        })
       });
 
       function updateStand(id,e) {
@@ -147,7 +152,7 @@
           }
 
           var request = new XMLHttpRequest();
-          request.open('POST', '/api/v0/stand/'+id, true);
+          request.open('POST', '/api/v0/stand/'+id+'?apiKey='+document.getElementById('apiKey').value, true);
           request.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
           request.onload = resolve
           request.onerror = reject
