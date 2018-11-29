@@ -132,7 +132,7 @@ func (a *api) updateStand(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if originStand.ID != 0 {
-		a.DB.Model(&originStand).Update(map[string]interface{}{
+		a.DB.Model(&originStand).Limit(1).Update(map[string]interface{}{
 			"name":             updatedStand.Name,
 			"type":             updatedStand.Type,
 			"number_of_stands": updatedStand.NumberOfStands,
