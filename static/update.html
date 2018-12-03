@@ -120,7 +120,19 @@
               if(e.target.status == 200) {
                 l.setPopupContent("<span class=\"fas fa-check text-success\"></span> Thank you for your submission!")
               } else if(e.target.status == 401) {
-                l.setPopupContent("<span class=\"fas fa-times text-danger\"></span> Please fill in the API key above and try again.")
+                var container = document.createElement('div')
+                var content = document.createElement('div')
+                content.innerHTML = "<span class=\"fas fa-times text-danger\"></span> Please check the API key above and try again.<br>"
+                container.appendChild(content)
+                var tryAgainLink = document.createElement('a')
+                tryAgainLink.addEventListener('click', function (e){
+                  e.preventDefault()
+                  l.setPopupContent(form)
+                })
+                tryAgainLink.innerHTML = "<span class=\"fas fa-undo\"></span> Try again"
+                tryAgainLink.setAttribute('href', '#')
+                container.appendChild(tryAgainLink)
+                l.setPopupContent(container)
               } else {
                 l.setPopupContent("<span class=\"fas fa-times text-danger\"></span> There was an issue with your submission.<br><code>" + e.target.statusText + "</code>" )
               }
@@ -133,7 +145,6 @@
 
         document.getElementById('apiKey').value = window.localStorage.getItem('apiKey')
         document.getElementById('apiKey').addEventListener('blur', function(e) {
-          console.log(e)
           window.localStorage.setItem('apiKey', e.target.value)
         })
 
