@@ -15,6 +15,8 @@ func NewAPIv0(r *mux.Router, db *gorm.DB) {
 	}
 
 	db.AutoMigrate(&Stand{})
+	db.AutoMigrate(&APIUser{})
+	db.AutoMigrate(&StandUpdate{})
 
 	r.HandleFunc("/stand", apiHandler.getStands).Methods("GET")
 	r.HandleFunc("/stand", apiHandler.createStand).Methods("POST")

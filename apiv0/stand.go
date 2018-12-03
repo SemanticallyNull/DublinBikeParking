@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
-	"strings"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
@@ -26,6 +25,16 @@ type Stand struct {
 	Notes          string
 	Checked        string `json:"-"`
 	Verified       bool
+	LastUpdateBy   string
+}
+
+type StandUpdate struct {
+	gorm.Model
+	Stand     Stand
+	StandID   uint
+	APIUser   APIUser
+	APIUserID uint
+	Update    string `sql:"type:text"`
 }
 
 func (a *api) getStands(w http.ResponseWriter, r *http.Request) {
@@ -102,7 +111,8 @@ func (a *api) createStand(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *api) updateStand(w http.ResponseWriter, r *http.Request) {
-	if strings.ToLower(r.URL.Query().Get("apiKey")) != "irideabike" {
+	user, err := a.AuthenticateUser(r.URL.Query().Get("apiKey"))
+	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
@@ -132,11 +142,42 @@ func (a *api) updateStand(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if originStand.ID != 0 {
-		a.DB.Model(&originStand).Limit(1).Update(map[string]interface{}{
+		tx := a.DB.Begin()
+		err = tx.Model(&originStand).Limit(1).Update(map[string]interface{}{
+			"name":             updatedStand.Name,
+			"type":             updatedStand.Type,
+			"number_of_stands": updatedStand.NumberOfStands,
+			"last_update_by":   user.Email,
+		}).Error
+		if err != nil {
+			tx.Rollback()
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
+			return
+		}
+		updateJson, err := json.Marshal(map[string]interface{}{
 			"name":             updatedStand.Name,
 			"type":             updatedStand.Type,
 			"number_of_stands": updatedStand.NumberOfStands,
 		})
+		if err != nil {
+			tx.Rollback()
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
+			return
+		}
+		update := StandUpdate{
+			Stand:   originStand,
+			APIUser: user,
+			Update:  string(updateJson),
+		}
+		if err := tx.Create(&update).Error; err != nil {
+			tx.Rollback()
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
+			return
+		}
+		tx.Commit()
 	} else {
 		json.NewEncoder(w).Encode(map[string]interface{}{
 			"errors": []string{
