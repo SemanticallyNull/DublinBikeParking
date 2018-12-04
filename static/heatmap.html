@@ -49,11 +49,37 @@
           heat.addLatLng([f.geometry.coordinates[1],f.geometry.coordinates[0],f.properties["numberOfStands"]/10]);
         }});
         heat.addTo(map);
+
+        var hireHeat = L.heatLayer([],{radius:60,blur:60,minOpacity:0.3});
+        var hireLayer = new L.GeoJSON.AJAX("/api/v0/stand?dublinbikes=only",{onEachFeature: function(f,l) {
+          hireHeat.addLatLng([f.geometry.coordinates[1],f.geometry.coordinates[0],f.properties["numberOfStands"]/40]);
+        }});
+
+        document.getElementById("myBikeSelector").addEventListener("click", function(e) {
+          hireHeat.remove()
+          heat.addTo(map)
+          e.target.classList.add("btn-dark")
+          e.target.classList.remove("btn-outline-dark")
+          document.getElementById("hireBikeSelector").classList.remove("btn-dark")
+          document.getElementById("hireBikeSelector").classList.add("btn-outline-dark")
+        });
+        document.getElementById("hireBikeSelector").addEventListener("click", function(e) {
+          heat.remove()
+          hireHeat.addTo(map)
+          e.target.classList.add("btn-dark")
+          e.target.classList.remove("btn-outline-dark")
+          document.getElementById("myBikeSelector").classList.remove("btn-dark")
+          document.getElementById("myBikeSelector").classList.add("btn-outline-dark")
+        });
       })
     </script>
   </head>
   <body>
     <div id="map">
+    </div>
+    <div class="btn-group leaflet-selector">
+      <button type="button" class="btn btn-sm btn-dark" id="myBikeSelector">My Bike</button>
+      <button type="button" class="btn btn-sm btn-outline-dark" id="hireBikeSelector">DublinBikes</button>
     </div>
   </body>
 </html>
