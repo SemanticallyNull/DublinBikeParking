@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
+	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
 	geojson "github.com/paulmach/go.geojson"
@@ -32,7 +33,7 @@ type StandUpdate struct {
 	gorm.Model
 	Stand     Stand
 	StandID   uint
-	APIUser   APIUser
+	UserEmail string
 	APIUserID uint
 	Update    string `sql:"type:text"`
 }
@@ -111,12 +112,6 @@ func (a *api) createStand(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *api) updateStand(w http.ResponseWriter, r *http.Request) {
-	user, err := a.AuthenticateUser(r.URL.Query().Get("apiKey"))
-	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-
 	var originStand, updatedStand Stand
 
 	vars := mux.Vars(r)
@@ -142,12 +137,14 @@ func (a *api) updateStand(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if originStand.ID != 0 {
+		userEmail := context.Get(r, "userEmail").(string)
+
 		tx := a.DB.Begin()
 		err = tx.Model(&originStand).Limit(1).Update(map[string]interface{}{
 			"name":             updatedStand.Name,
 			"type":             updatedStand.Type,
 			"number_of_stands": updatedStand.NumberOfStands,
-			"last_update_by":   user.Email,
+			"last_update_by":   userEmail,
 		}).Error
 		if err != nil {
 			tx.Rollback()
@@ -167,9 +164,9 @@ func (a *api) updateStand(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		update := StandUpdate{
-			Stand:   originStand,
-			APIUser: user,
-			Update:  string(updateJson),
+			Stand:     originStand,
+			UserEmail: userEmail,
+			Update:    string(updateJson),
 		}
 		if err := tx.Create(&update).Error; err != nil {
 			tx.Rollback()

@@ -34,6 +34,9 @@
       .leaflet-selector { position: fixed; top: 0; right: 0; margin-top: 10px; margin-right: 10px; z-index: 9999; }
       .icon-color { color: #148bbb; }
     </style>
+    <script src="https://cdn.auth0.com/js/auth0/9.8.2/auth0.min.js"
+      integrity="sha384-4n2se6tj8mYQslm93DNAuyqjtQRmFh1NFhDJp3GoI4EeHGIdmPVDQqqnTaRDrDDW"
+      crossorigin="anonymous"></script>
     <script src="https://unpkg.com/leaflet@1.3.4/dist/leaflet.js"
       integrity="sha512-nMMmRyTVoLYqjP9hrbed9S+FzjZHW5gY1TWCHA5ckwXZBadntCNs8kEqAWdrb9O7rxbCaA4lKTIWjDXZxflOcA=="
       crossorigin="anonymous"></script>
@@ -53,9 +56,46 @@
       integrity="sha384-GHKGgc0qNzZZpBzGWvVZWSRFNB+LYy8aJCBtgI0IpWul99UCBQcSP85Z9RLAorB/"
       crossorigin="anonymous"></script>
     <script type="text/javascript">
+      var ac;
+
       window.addEventListener('load', function() {
+        ac = new auth0.WebAuth({
+          domain: "benchapman.eu.auth0.com",
+          clientID: "0Hz3wMPMskh2qVpypXPzjwOykkYV1eZd",
+          responseType: 'id_token'
+        });
+
+        if(!window.localStorage.getItem('apiKey')) {
+          ac.parseHash({ hash: window.location.hash }, function(err, authResult) {
+            if (err) {
+              return console.log(err);
+            }
+
+            console.log(authResult);
+
+            if(authResult == null) {
+              document.getElementById('loginButton').addEventListener('click', function() {
+                ac.authorize({
+                  scope: 'openid profile email',
+                  redirectUri: window.location.toString()
+                });
+              })
+            } else {
+              window.localStorage.setItem('apiKey', authResult.idToken)
+              document.getElementById('apiKey').value = authResult.idToken
+              document.getElementById('loginButton').innerHTML = "Logout"
+            }
+          });
+        } else {
+          document.getElementById('loginButton').innerHTML = "Logout"
+          document.getElementById('loginButton').addEventListener('click', function() {
+            window.localStorage.removeItem('apiKey')
+            location.reload()
+          })
+        }
+
         var map = L.map('map').setView([53.34587706183283, -6.267379465984959], 12);
-        var hash = new L.Hash(map);
+        //var hash = new L.Hash(map);
 
         var markers = new L.MarkerClusterGroup({maxClusterRadius:50, disableClusteringAtZoom: 18});
         var StandIcon = L.Icon.extend({
@@ -71,7 +111,7 @@
         var dublinBikesStand = new StandIcon({iconUrl: 'station_icon_db.png'})
 
         var osm = L.tileLayer('https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png', {
-          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Stand Data: <a href="https://bleeperbike.com/">Bleeper Bikes</a>, DublinBikes: <a href="https://developer.jcdecaux.com/#/opendata/vls?page=getstarted&contract=Dublin">JCDecaux</a>',
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Stand Data: <a href="https://bleeperbike.com/">Bleeper Bikes</a>, DublinBikes: <a href="https://developer.jcdecaux.com/#/opendata/vls?page=getstarted&contract=Dublin">JCDecaux</a> | <a href="/privacy.html">Privacy</a>',
             maxZoom: 19
         }).addTo(map);
 
@@ -122,7 +162,7 @@
               } else if(e.target.status == 401) {
                 var container = document.createElement('div')
                 var content = document.createElement('div')
-                content.innerHTML = "<span class=\"fas fa-times text-danger\"></span> Please check the API key above and try again.<br>"
+                content.innerHTML = "<span class=\"fas fa-times text-danger\"></span> Please check if you're logged in and try again.<br>"
                 container.appendChild(content)
                 var tryAgainLink = document.createElement('a')
                 tryAgainLink.addEventListener('click', function (e){
@@ -195,8 +235,9 @@
           }
 
           var request = new XMLHttpRequest();
-          request.open('POST', '/api/v0/stand/'+id+'?apiKey='+document.getElementById('apiKey').value, true);
+          request.open('POST', '/api/v0/stand/'+id, true);
           request.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+          request.setRequestHeader('Authorization', 'Bearer ' + document.getElementById('apiKey').value);
           request.onload = resolve
           request.onerror = reject
           request.send(JSON.stringify(standData));
@@ -221,13 +262,22 @@
         return "https://www.google.com/maps/dir/?api=1&origin=" + fromLatLngString +
           "&destination=" + toLatLngString + "&travelmode=" + travelMode;
       }
+
+      function login() {
+        ac.authorize({
+          audience: 'https://dublinbikeparking.com/update.html',
+          scope: '',
+          redirectUri: window.location.toString()
+        });
+      }
     </script>
   </head>
   <body>
     <div id="map">
     </div>
     <div class="leaflet-selector">
-      <input type="text" placeholder="apiKey" id="apiKey">
+      <input type="hidden" placeholder="apiKey" id="apiKey">
+      <button class="btn btn-primary" id="loginButton">Login</button>
     </div>
   </body>
 </html>
