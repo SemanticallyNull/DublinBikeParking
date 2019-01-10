@@ -2,6 +2,14 @@
 
 
 [[projects]]
+  digest = "1:b7453dcd64035c500930e3852a9324cfd92d2f379fface77361a4ba4cd3ada18"
+  name = "github.com/auth0-community/go-auth0"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "ddfdc88aaa5909a3d4e3ad0543a27f4a63a691e6"
+  version = "v1.0.0"
+
+[[projects]]
   digest = "1:ec6f9bf5e274c833c911923c9193867f3f18788c461f76f05f62bb1510e0ae65"
   name = "github.com/go-sql-driver/mysql"
   packages = ["."]
@@ -135,6 +143,18 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:b8fa1ff0fc20983395978b3f771bb10438accbfe19326b02e236c1d4bf1c91b2"
+  name = "golang.org/x/crypto"
+  packages = [
+    "ed25519",
+    "ed25519/internal/edwards25519",
+    "pbkdf2",
+  ]
+  pruneopts = "UT"
+  revision = "ff983b9c42bc9fbf91556e191cc8efb585c16908"
+
+[[projects]]
+  branch = "master"
   digest = "1:5193d913046443e59093d66a97a40c51f4a5ea4ceba60f3b3ecf89694de5d16f"
   name = "golang.org/x/net"
   packages = [
@@ -196,6 +216,19 @@
   version = "v1.4.7"
 
 [[projects]]
+  digest = "1:a4cde1eec9a17eb2399a50c6e1a9fe3fde039994de058f9dbf6592d157bfe97b"
+  name = "gopkg.in/square/go-jose.v2"
+  packages = [
+    ".",
+    "cipher",
+    "json",
+    "jwt",
+  ]
+  pruneopts = "UT"
+  revision = "e94fb177d3668d35ab39c61cbb2f311550557e83"
+  version = "v2.2.2"
+
+[[projects]]
   digest = "1:3c839a777de0e6da035c9de900b60cbec463b0a89351192c1ea083eaf9e0fce0"
   name = "gopkg.in/tomb.v1"
   packages = ["."]
@@ -222,7 +255,9 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/auth0-community/go-auth0",
     "github.com/google/uuid",
+    "github.com/gorilla/context",
     "github.com/gorilla/mux",
     "github.com/jinzhu/gorm",
     "github.com/jinzhu/gorm/dialects/mysql",
@@ -231,6 +266,7 @@
     "github.com/onsi/gomega",
     "github.com/onsi/gomega/gexec",
     "github.com/paulmach/go.geojson",
+    "gopkg.in/square/go-jose.v2",
     "gopkg.in/validator.v2",
   ]
   solver-name = "gps-cdcl"
