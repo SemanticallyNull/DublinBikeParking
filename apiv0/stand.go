@@ -34,7 +34,6 @@ type StandUpdate struct {
 	Stand     Stand
 	StandID   uint
 	UserEmail string
-	APIUserID uint
 	Update    string `sql:"type:text"`
 }
 
