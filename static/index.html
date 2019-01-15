@@ -31,7 +31,6 @@
       .info { padding: 6px 8px; font: 14px/16px Arial, Helvetica, sans-serif; background: white; background: rgba(255,255,255,0.8); box-shadow: 0 0 15px rgba(0,0,0,0.2); border-radius: 5px; } .info h4 { margin: 0 0 5px; color: #777; }
       .legend { text-align: left; line-height: 18px; color: #555; }
       .leaflet-popup-content { text-align: center; }
-      .leaflet-selector { position: fixed; top: 0; right: 0; margin-top: 10px; margin-right: 10px; z-index: 9999; }
       .icon-color { color: #148bbb; }
     </style>
     <script src="https://unpkg.com/leaflet@1.3.4/dist/leaflet.js"
@@ -186,22 +185,38 @@
           }
         ]}).addTo(map);
 
-        document.getElementById("myBikeSelector").addEventListener("click", function(e) {
-          markers.removeLayer(hireLayer);
-          markers.addLayer(standsLayer);
-          e.target.classList.add("btn-dark")
-          e.target.classList.remove("btn-outline-dark")
-          document.getElementById("hireBikeSelector").classList.remove("btn-dark")
-          document.getElementById("hireBikeSelector").classList.add("btn-outline-dark")
-        });
-        document.getElementById("hireBikeSelector").addEventListener("click", function(e) {
-          markers.removeLayer(standsLayer);
-          markers.addLayer(hireLayer);
-          e.target.classList.add("btn-dark")
-          e.target.classList.remove("btn-outline-dark")
-          document.getElementById("myBikeSelector").classList.remove("btn-dark")
-          document.getElementById("myBikeSelector").classList.add("btn-outline-dark")
-        });
+        var bikeTypeControl = L.control();
+        bikeTypeControl.onAdd = function (map) {
+            this._div = L.DomUtil.create('div', 'btn-group leaflet-selector');
+
+            var myBikeButton = L.DomUtil.create('button', 'btn btn-sm btn-dark')
+            var dublinBikesButton = L.DomUtil.create('button', 'btn btn-sm btn-outline-dark')
+
+            myBikeButton.innerHTML = "My Bike"
+            myBikeButton.addEventListener('click', function() {
+              markers.removeLayer(hireLayer);
+              markers.addLayer(standsLayer);
+              myBikeButton.classList.add("btn-dark")
+              myBikeButton.classList.remove("btn-outline-dark")
+              dublinBikesButton.classList.remove("btn-dark")
+              dublinBikesButton.classList.add("btn-outline-dark")
+            })
+            this._div.appendChild(myBikeButton)
+
+            dublinBikesButton.innerHTML = "DublinBikes"
+            dublinBikesButton.addEventListener('click', function() {
+              markers.removeLayer(standsLayer);
+              markers.addLayer(hireLayer);
+              dublinBikesButton.classList.add("btn-dark")
+              dublinBikesButton.classList.remove("btn-outline-dark")
+              myBikeButton.classList.remove("btn-dark")
+              myBikeButton.classList.add("btn-outline-dark")
+            })
+            this._div.appendChild(dublinBikesButton)
+
+            return this._div;
+        };
+        bikeTypeControl.addTo(map);
 
         var addMarker = L.marker();
         map.on('contextmenu', function(e) {
@@ -273,10 +288,6 @@
   </head>
   <body>
     <div id="map">
-    </div>
-    <div class="btn-group leaflet-selector">
-      <button type="button" class="btn btn-sm btn-dark" id="myBikeSelector">My Bike</button>
-      <button type="button" class="btn btn-sm btn-outline-dark" id="hireBikeSelector">DublinBikes</button>
     </div>
   </body>
 </html>
