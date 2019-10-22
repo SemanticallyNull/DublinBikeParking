@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"os"
 
-	"code.benchapman.ie/dublinbikeparking/apiv0"
+	"code.katiechapman.ie/dbp/apiv0"
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"

@@ -46,6 +46,7 @@ func authMiddleware(next http.Handler) http.Handler {
 			w.Write([]byte("Unauthorized"))
 		}
 		context.Set(r, "userEmail", out["email"])
+		context.Set(r, "userSub", out["sub"])
 
 		if err != nil {
 			fmt.Println(err)

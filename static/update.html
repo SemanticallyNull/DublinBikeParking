@@ -115,7 +115,7 @@
             maxZoom: 19
         }).addTo(map);
 
-        var standsLayer = new L.GeoJSON.AJAX("/api/v0/stand?dublinbikes=off",{onEachFeature:standIcon});
+        var standsLayer = new L.GeoJSON.AJAX("/api/v0/stand?dublinbikes=off&checked=unchecked",{onEachFeature:standIcon});
         standsLayer.on('data:loaded', function () {
           markers.addLayer(standsLayer);
           map.addLayer(markers);
@@ -145,12 +145,14 @@
 
         function standType(l, f, icon) {
           var form = document.createElement('form')
+          var checked = f.properties["checked"] ? "checked" : "";
           form.innerHTML = "<table>" +
             "<tr><td cellwidth=2><a class=\"btn btn-primary text-light\" href=\"https://www.google.com/maps/@?api=1&map_action=pano&viewpoint="+l.getLatLng().lat+","+l.getLatLng().lng+"\" target=\"_BLANK\">Street View</a></td></tr>" +
             "<tr><td><b>ID</b></td><td>"+f.properties["id"]+"</td></tr>" +
             "<tr><td><b>Type of Stands</b></td><td>"+standTypeMenu()+"</td></tr>" +
             "<tr><td><b>Location</b></td><td><input id=\"name\" type=\"text\" value=\""+f.properties["name"]+"\"></td></tr>" +
             "<tr><td><b>Number of Stands</b></td><td><input id=\"NumberOfStands\" type=\"number\" value=\""+f.properties["numberOfStands"]+"\"></td></tr>" +
+            "<tr><td><b>Checked</b></td><td><input id=\"checked\" type=\"checkbox\" "+checked+"  value=\"YES\"></td></tr>" +
             "<tr><td cellwidth=2><input type=\"submit\" class=\"btn btn-primary\"></td></tr>" +
             "</table>";
           form.addEventListener('submit',function(e) {

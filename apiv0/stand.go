@@ -24,7 +24,7 @@ type Stand struct {
 	Type           string `validate:"nonzero"`
 	NumberOfStands int
 	Notes          string
-	Checked        string `json:"-"`
+	Checked        string
 	Verified       bool
 	LastUpdateBy   string
 }
@@ -41,7 +41,11 @@ func (a *api) getStands(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("content-type", "application/json")
 	fc := geojson.NewFeatureCollection()
 
-	dbc := a.DB.Where("checked != ?", "")
+	dbc := a.DB
+
+	if checked := r.URL.Query().Get("checked"); checked != "unchecked" {
+		dbc = a.DB.Where("checked != ?", "")
+	}
 
 	if db := r.URL.Query().Get("dublinbikes"); db == "off" {
 		dbc = dbc.Where("type != ?", "DublinBikes")
@@ -69,6 +73,7 @@ func (a *api) getStands(w http.ResponseWriter, r *http.Request) {
 				"numberOfStands": stand.NumberOfStands,
 				"notes":          stand.Notes,
 				"source":         stand.Source,
+				"checked":        stand.Checked != "",
 				"verified":       stand.Verified,
 			},
 		})
@@ -135,14 +140,23 @@ func (a *api) updateStand(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	userEmail := context.Get(r, "userEmail").(string)
+	sub := context.Get(r, "userSub").(string)
+
+	checked := ""
+
+	if updatedStand.Checked != "" {
+		checked = sub
+	}
+
 	if originStand.ID != 0 {
-		userEmail := context.Get(r, "userEmail").(string)
 
 		tx := a.DB.Begin()
 		err = tx.Model(&originStand).Limit(1).Update(map[string]interface{}{
 			"name":             updatedStand.Name,
 			"type":             updatedStand.Type,
 			"number_of_stands": updatedStand.NumberOfStands,
+			"checked":			checked,
 			"last_update_by":   userEmail,
 		}).Error
 		if err != nil {
