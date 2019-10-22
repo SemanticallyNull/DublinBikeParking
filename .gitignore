@@ -1,3 +1,4 @@
 *.db
 private.yml
 .envrc
+.idea/
