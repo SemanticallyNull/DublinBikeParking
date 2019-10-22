@@ -145,14 +145,14 @@
 
         function standType(l, f, icon) {
           var form = document.createElement('form')
-          var checked = f.properties["checked"] ? "checked" : "";
+          var checked = f.properties["checked"] ? "checked=true" : "";
           form.innerHTML = "<table>" +
             "<tr><td cellwidth=2><a class=\"btn btn-primary text-light\" href=\"https://www.google.com/maps/@?api=1&map_action=pano&viewpoint="+l.getLatLng().lat+","+l.getLatLng().lng+"\" target=\"_BLANK\">Street View</a></td></tr>" +
             "<tr><td><b>ID</b></td><td>"+f.properties["id"]+"</td></tr>" +
             "<tr><td><b>Type of Stands</b></td><td>"+standTypeMenu()+"</td></tr>" +
             "<tr><td><b>Location</b></td><td><input id=\"name\" type=\"text\" value=\""+f.properties["name"]+"\"></td></tr>" +
             "<tr><td><b>Number of Stands</b></td><td><input id=\"NumberOfStands\" type=\"number\" value=\""+f.properties["numberOfStands"]+"\"></td></tr>" +
-            "<tr><td><b>Checked</b></td><td><input id=\"checked\" type=\"checkbox\" "+checked+"  value=\"YES\"></td></tr>" +
+            "<tr><td><b>Checked</b></td><td><input id=\"checked\" type=\"checkbox\" " + checked + " value=\"YES\"></td></tr>" +
             "<tr><td cellwidth=2><input type=\"submit\" class=\"btn btn-primary\"></td></tr>" +
             "</table>";
           form.addEventListener('submit',function(e) {
@@ -228,7 +228,9 @@
           standData = {}
           for (var i = 0; i < e.target.length; i++) {
             if(e.target[i].id != "") {
-              if(!isNaN(parseFloat(e.target[i].value))) {
+              if(e.target[i].type == "checkbox" && e.target[i].checked == false) {
+                standData[e.target[i].id] = ""
+              } else if(!isNaN(parseFloat(e.target[i].value))) {
                 standData[e.target[i].id] = parseFloat(e.target[i].value)
               } else {
                 standData[e.target[i].id] = e.target[i].value

@@ -10,7 +10,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
 	geojson "github.com/paulmach/go.geojson"
-	validator "gopkg.in/validator.v2"
+	"gopkg.in/validator.v2"
 )
 
 type Stand struct {
