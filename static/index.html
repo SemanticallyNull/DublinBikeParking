@@ -125,7 +125,9 @@
             standID = "<tr><td><b>Stand ID</b></td><td>" + f.properties["id"] + "</td></tr>"
           }
 
-          l.setIcon(icon).bindPopup("<table>" +
+          l.on('click', function() {
+            _paq.push(['trackEvent', 'stands', 'click', f.properties["id"]]);
+          }).setIcon(icon).bindPopup("<table>" +
             "<tr><td><b>Type of Stands</b></td><td>" + f.properties["type"] + "</td></tr>" +
             "<tr><td><b>Location</b></td><td>" +
               f.properties["name"] +
@@ -137,10 +139,12 @@
         }
 
         function nearMe(control) {
+          _paq.push(['trackEvent', 'nearMe', 'start']);
           if('geolocation' in navigator) {
             navigator.geolocation.getCurrentPosition(function(position) {
               var nearestStands = leafletKnn(standsLayer).nearest(L.latLng(position.coords.latitude, position.coords.longitude), 1, 2000);
               if(nearestStands.length > 0) {
+                _paq.push(['trackEvent', 'nearMe', 'foundStands']);
                 var stand = nearestStands[0].layer;
                 var currentLocation = L.latLng(position.coords.latitude,position.coords.longitude)
                 var distance = stand.getLatLng().distanceTo(currentLocation)
@@ -159,10 +163,12 @@
                 }, 750);
               } else {
                 alert("cannot find any stands within 2km of you, sorry");
+                _paq.push(['trackEvent', 'nearMe', 'noStands']);
               }
             });
           } else {
             alert('geolocation is not available in your browser, sorry!');
+            _paq.push(['trackEvent', 'nearMe', 'locationFailed']);
           }
         }
 
@@ -194,6 +200,7 @@
 
             myBikeButton.innerHTML = "My Bike"
             myBikeButton.addEventListener('click', function() {
+              _paq.push(['trackEvent', 'myBike']);
               markers.removeLayer(hireLayer);
               markers.addLayer(standsLayer);
               myBikeButton.classList.add("btn-dark")
@@ -205,6 +212,7 @@
 
             dublinBikesButton.innerHTML = "DublinBikes"
             dublinBikesButton.addEventListener('click', function() {
+              _paq.push(['trackEvent', 'dublinBikes']);
               markers.removeLayer(standsLayer);
               markers.addLayer(hireLayer);
               dublinBikesButton.classList.add("btn-dark")
@@ -220,6 +228,7 @@
 
         var addMarker = L.marker();
         map.on('contextmenu', function(e) {
+          _paq.push(['trackEvent', 'addStand', 'start']);
           addMarker.setLatLng(e.latlng).bindPopup("<form id=\"addMarker\"><table>" +
             "<input type=\"hidden\" id=\"lat\" value=\"" + e.latlng.lat + "\">" +
             "<input type=\"hidden\" id=\"lng\" value=\"" + e.latlng.lng + "\">" +
@@ -233,11 +242,14 @@
               addMarker.setPopupContent("<span class=\"fas fa-sync fa-spin\"></span> Submitting...")
               addStand(e).then(function(e) {
                 if(e.target.status == 200) {
+                  _paq.push(['trackEvent', 'addStand', 'success']);
                   addMarker.setPopupContent("<span class=\"fas fa-check text-success\"></span> Thank you for your submission. It will be reviewed soon!")
                 } else {
+                  _paq.push(['trackEvent', 'addStand', 'error']);
                   addMarker.setPopupContent("<span class=\"fas fa-times text-danger\"></span> There was an issue with your submission.<br><code>" + e.target.statusText + "</code>" )
                 }
               }, function(e){
+                _paq.push(['trackEvent', 'addStand', 'error']);
                 addMarker.setPopupContent("<span class=\"fas fa-times text-danger\"></span> There was an issue with your submission.<br><code>" + e.target.statusText + "</code>" )
               })
             })
@@ -289,5 +301,22 @@
   <body>
     <div id="map">
     </div>
+
+    <!-- Matomo -->
+    <script type="text/javascript">
+      var _paq = window._paq || [];
+      /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
+      _paq.push(["setDoNotTrack", true]);
+      _paq.push(['trackPageView']);
+      _paq.push(['enableLinkTracking']);
+      (function() {
+        var u="//cargobike.ie/analytics/";
+        _paq.push(['setTrackerUrl', u+'matomo.php']);
+        _paq.push(['setSiteId', '2']);
+        var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+        g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
+      })();
+    </script>
+    <!-- End Matomo Code -->
   </body>
 </html>
