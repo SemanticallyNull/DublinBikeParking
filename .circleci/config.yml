@@ -8,9 +8,8 @@ jobs:
       # specify the version
       - image: circleci/golang:1.13
 
-    working_directory: /app
+    working_directory: /go/src/github.com/semanticallynull/dbp
     steps:
-      - mkdir -p /app
       - checkout
 
       # specify any bash command here prefixed with `run: `
