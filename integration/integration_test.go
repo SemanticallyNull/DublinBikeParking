@@ -26,12 +26,6 @@ var _ = Describe("DublinBikeParking", func() {
 			Expect(resp.StatusCode).To(Equal(http.StatusOK))
 		})
 
-		It("returns a 200 for the BleeperData.json", func() {
-			resp, err := http.Get(fmt.Sprintf("http://localhost:%s/BleeperData.json", serverPort))
-			Expect(err).ToNot(HaveOccurred())
-			Expect(resp.StatusCode).To(Equal(http.StatusOK))
-		})
-
 		It("returns a 200 for the healthz endpoint", func() {
 			resp, err := http.Get(fmt.Sprintf("http://localhost:%s/healthz", serverPort))
 			Expect(err).ToNot(HaveOccurred())

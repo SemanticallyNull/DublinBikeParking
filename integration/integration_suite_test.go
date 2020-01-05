@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"testing"
 	"time"
@@ -27,7 +28,7 @@ func TestIntegration(t *testing.T) {
 
 var _ = BeforeSuite(func() {
 	var err error
-	binPath, err = gexec.Build("code.benchapman.ie/dublinbikeparking")
+	binPath, err = gexec.Build("code.katiechapman.ie/dbp")
 	Expect(err).ToNot(HaveOccurred())
 
 	gopath := os.Getenv("GOPATH")
@@ -35,7 +36,10 @@ var _ = BeforeSuite(func() {
 		gopath = build.Default.GOPATH
 	}
 
-	os.Chdir(filepath.Join(gopath, "src/code.benchapman.ie/dublinbikeparking"))
+	_, filename, _, _ := runtime.Caller(0)
+	base := filepath.Dir(filename)
+
+	os.Chdir(filepath.Join(base, ".."))
 	os.Setenv("PORT", getFreePort())
 
 	execBin()

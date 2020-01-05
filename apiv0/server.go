@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"net/http"
 
-	auth0 "github.com/auth0-community/go-auth0"
+	"github.com/auth0-community/go-auth0"
 	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
-	jose "gopkg.in/square/go-jose.v2"
+	"gopkg.in/square/go-jose.v2"
 )
 
 type api struct {
@@ -22,6 +22,7 @@ func NewAPIv0(r *mux.Router, db *gorm.DB) {
 
 	db.AutoMigrate(&Stand{})
 	db.AutoMigrate(&StandUpdate{})
+	db.AutoMigrate(&Theft{})
 
 	r.HandleFunc("/stand", apiHandler.getStands).Methods("GET")
 	r.HandleFunc("/stand", apiHandler.createStand).Methods("POST")

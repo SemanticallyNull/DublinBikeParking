@@ -5,12 +5,13 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	validator "gopkg.in/validator.v2"
+
 	"github.com/google/uuid"
 	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
 	geojson "github.com/paulmach/go.geojson"
-	"gopkg.in/validator.v2"
 )
 
 type Stand struct {
@@ -27,6 +28,7 @@ type Stand struct {
 	Checked        string
 	Verified       bool
 	LastUpdateBy   string
+	Thefts         []Theft
 }
 
 type StandUpdate struct {
@@ -58,10 +60,10 @@ func (a *api) getStands(w http.ResponseWriter, r *http.Request) {
 	}
 
 	stands := []Stand{}
-	dbc.Find(&stands)
+	dbc.Preload("Thefts").Find(&stands)
 
 	for _, stand := range stands {
-		fc.AddFeature(&geojson.Feature{
+		feature := &geojson.Feature{
 			Geometry: &geojson.Geometry{
 				Type:  geojson.GeometryPoint,
 				Point: []float64{stand.Lng, stand.Lat},
@@ -75,8 +77,17 @@ func (a *api) getStands(w http.ResponseWriter, r *http.Request) {
 				"source":         stand.Source,
 				"checked":        stand.Checked != "",
 				"verified":       stand.Verified,
+				"thefts":         []map[string]interface{}{},
 			},
-		})
+		}
+
+		for _, theft := range stand.Thefts {
+			feature.Properties["thefts"] = append(feature.Properties["thefts"].([]map[string]interface{}), map[string]interface{}{
+				"id": theft.ID,
+			})
+		}
+
+		fc.AddFeature(feature)
 	}
 
 	json.NewEncoder(w).Encode(fc)
@@ -156,7 +167,7 @@ func (a *api) updateStand(w http.ResponseWriter, r *http.Request) {
 			"name":             updatedStand.Name,
 			"type":             updatedStand.Type,
 			"number_of_stands": updatedStand.NumberOfStands,
-			"checked":			checked,
+			"checked":          checked,
 			"last_update_by":   userEmail,
 		}).Error
 		if err != nil {
