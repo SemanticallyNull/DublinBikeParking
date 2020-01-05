@@ -12,7 +12,16 @@ jobs:
     steps:
       - checkout
 
+      - restore_cache:
+          keys:
+            - v1-pkg-cache
+
       # specify any bash command here prefixed with `run: `
       - run: go get -v -t -d ./...
-      - run: go test -v ./...
 
+      - save_cache: # Store cache in the /go/pkg directory
+          key: v1-pkg-cache
+          paths:
+            - "/go/pkg"
+
+      - run: go test -v ./...
