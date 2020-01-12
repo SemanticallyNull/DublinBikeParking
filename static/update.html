@@ -181,7 +181,35 @@
             }, function(e){
               l.setPopupContent("<span class=\"fas fa-times text-danger\"></span> There was an issue with your submission.<br><code>" + e.target.statusText + "</code>" )
             })
-          })
+          });
+          var deleteBtn = document.createElement('button');
+          deleteBtn.classList.add('btn', 'btn-primary')
+          deleteBtn.innerHTML = "Delete";
+          deleteBtn.addEventListener('click', function(e) {
+            e.preventDefault()
+            deleteStand(f.properties["id"]).then(function(e) {
+              if(e.target.status == 202) {
+                l.setPopupContent("<span class=\"fas fa-check text-success\"></span> Thank you for your submission!")
+              } else if(e.target.status == 401) {
+                var container = document.createElement('div')
+                var content = document.createElement('div')
+                content.innerHTML = "<span class=\"fas fa-times text-danger\"></span> Please check if you're logged in and try again.<br>"
+                container.appendChild(content)
+                var tryAgainLink = document.createElement('a')
+                tryAgainLink.addEventListener('click', function (e){
+                  e.preventDefault()
+                  l.setPopupContent(form)
+                })
+                tryAgainLink.innerHTML = "<span class=\"fas fa-undo\"></span> Try again"
+                tryAgainLink.setAttribute('href', '#')
+                container.appendChild(tryAgainLink)
+                l.setPopupContent(container)
+              } else {
+                l.setPopupContent("<span class=\"fas fa-times text-danger\"></span> There was an issue with your submission.<br><code>" + e.target.statusText + "</code>" )
+              }
+            });
+          });
+          form.append(deleteBtn);
           l.setIcon(icon).bindPopup(form);
         }
 
@@ -245,6 +273,18 @@
           request.onload = resolve
           request.onerror = reject
           request.send(JSON.stringify(standData));
+        })
+      }
+
+      function deleteStand(id,e) {
+        return new Promise(function(resolve, reject) {
+          var request = new XMLHttpRequest();
+          request.open('DELETE', '/api/v0/stand/'+id, true);
+          request.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+          request.setRequestHeader('Authorization', 'Bearer ' + document.getElementById('apiKey').value);
+          request.onload = resolve;
+          request.onerror = reject;
+          request.send();
         })
       }
 

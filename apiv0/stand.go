@@ -144,13 +144,9 @@ func (a *api) createStand(w http.ResponseWriter, r *http.Request) {
 			"<a href=\"https://dublinbikeparking.com/update.html#19/" + fmt.Sprintf("%f/%f", stand.Lat, stand.Lng) + "\">Link to update page</a>"
 		message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
 		client := sendgrid.NewSendClient(a.SendgridAPIKey)
-		response, err := client.Send(message)
+		_, err := client.Send(message)
 		if err != nil {
 			log.Println(err)
-		} else {
-			fmt.Println(response.StatusCode)
-			fmt.Println(response.Body)
-			fmt.Println(response.Headers)
 		}
 	}()
 
@@ -239,4 +235,16 @@ func (a *api) updateStand(w http.ResponseWriter, r *http.Request) {
 	}
 
 	json.NewEncoder(w).Encode(originStand)
+}
+
+func (a *api) deleteStand(w http.ResponseWriter, r *http.Request) {
+	var stand Stand
+
+	vars := mux.Vars(r)
+
+	a.DB.Where("stand_id = ?", vars["id"]).First(&stand)
+
+	a.DB.Delete(&stand)
+
+	w.WriteHeader(http.StatusAccepted)
 }

@@ -36,6 +36,7 @@ func NewAPIv0(r *mux.Router, db *gorm.DB) {
 	r.HandleFunc("/stand", apiHandler.getStands).Methods("GET")
 	r.HandleFunc("/stand", apiHandler.createStand).Methods("POST")
 	r.Handle("/stand/{id}", authMiddleware(http.HandlerFunc(apiHandler.updateStand))).Methods("POST")
+	r.Handle("/stand/{id}", authMiddleware(http.HandlerFunc(apiHandler.deleteStand))).Methods("DELETE")
 }
 
 func authMiddleware(next http.Handler) http.Handler {
