@@ -18,6 +18,8 @@ require (
 	github.com/onsi/ginkgo v1.6.0
 	github.com/onsi/gomega v1.4.2
 	github.com/paulmach/go.geojson v1.4.0
+	github.com/sendgrid/rest v2.4.1+incompatible // indirect
+	github.com/sendgrid/sendgrid-go v3.5.0+incompatible
 	github.com/stretchr/testify v1.4.0 // indirect
 	golang.org/x/net v0.0.0-20181114220301-adae6a3d119a // indirect
 	google.golang.org/appengine v1.3.0 // indirect

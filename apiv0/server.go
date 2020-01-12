@@ -3,6 +3,7 @@ package apiv0
 import (
 	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/auth0-community/go-auth0"
 	"github.com/gorilla/context"
@@ -12,13 +13,21 @@ import (
 )
 
 type api struct {
-	DB *gorm.DB
+	DB             *gorm.DB
+	SendgridAPIKey string
 }
 
 func NewAPIv0(r *mux.Router, db *gorm.DB) {
 	apiHandler := &api{
 		DB: db,
 	}
+
+	if os.Getenv("SENDGRID_API_KEY") == "" {
+		fmt.Println("You must set a SENDGRID_API_KEY")
+		os.Exit(1)
+	}
+
+	apiHandler.SendgridAPIKey = os.Getenv("SENDGRID_API_KEY")
 
 	db.AutoMigrate(&Stand{})
 	db.AutoMigrate(&StandUpdate{})

@@ -2,8 +2,13 @@ package apiv0
 
 import (
 	"encoding/json"
+	"fmt"
+	"github.com/sendgrid/sendgrid-go"
 	"io/ioutil"
+	"log"
 	"net/http"
+
+	"github.com/sendgrid/sendgrid-go/helpers/mail"
 
 	validator "gopkg.in/validator.v2"
 
@@ -122,6 +127,32 @@ func (a *api) createStand(w http.ResponseWriter, r *http.Request) {
 	stand.StandID = id
 
 	a.DB.Create(&stand)
+
+	go func() {
+		from := mail.NewEmail("DublinBikeParking", "no-reply@dublinbikeparking.com")
+		subject := fmt.Sprintf("New Stand at '%s'", stand.Name)
+		to := mail.NewEmail("Katie Chapman", "hello@katiechapman.ie")
+		plainTextContent := "New stand on DublinBikeParking.com\n" +
+			"Stand ID: " + stand.StandID + "\n" +
+			"Name: " + stand.Name + "\n" +
+			"Coordinates: " + fmt.Sprintf("%f %f", stand.Lat, stand.Lng) + "\n" +
+			"https://dublinbikeparking.com/update.html#19/" + fmt.Sprintf("%f/%f", stand.Lat, stand.Lng)
+		htmlContent := "New stand on DublinBikeParking.com<br>" +
+			"<b>Stand ID:</b> " + stand.StandID + "<br>" +
+			"<b>Name:</b> " + stand.Name + "<br>" +
+			"<b>Coordinates:</b> " + fmt.Sprintf("%f %f", stand.Lat, stand.Lng) + "<br>" +
+			"<a href=\"https://dublinbikeparking.com/update.html#19/" + fmt.Sprintf("%f/%f", stand.Lat, stand.Lng) + "\">Link to update page</a>"
+		message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
+		client := sendgrid.NewSendClient(a.SendgridAPIKey)
+		response, err := client.Send(message)
+		if err != nil {
+			log.Println(err)
+		} else {
+			fmt.Println(response.StatusCode)
+			fmt.Println(response.Body)
+			fmt.Println(response.Headers)
+		}
+	}()
 
 	json.NewEncoder(w).Encode(stand)
 }
