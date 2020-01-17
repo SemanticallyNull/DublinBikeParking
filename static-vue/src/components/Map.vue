@@ -1,6 +1,8 @@
 <template>
-  <l-map class='map' :zoom='zoom' :center='center' :options='mapOptions'>
-    <l-tile-layer :url='url' :options="tileLayerOptions"></l-tile-layer>
+  <l-map class='map' :zoom='zoom' :center='center' :options='mapOptions'
+         @contextmenu="addStand">
+    <l-tile-layer :url='url' :options="tileLayerOptions">
+    </l-tile-layer>
     <l-marker-cluster ref="clusterRef" :options='clusterOptions'>
       <l-geo-json
         v-for='geojson in geojsons'
@@ -9,6 +11,10 @@
         :options='geojsonOptions'>
       </l-geo-json>
     </l-marker-cluster>
+    <l-marker ref="addMarker" v-if="addMarkerShow" @popupclose="hideAddMarker"
+              :lat-lng="addMarkerPosition">
+      <l-popup ref="addMarkerPopup" >FOO</l-popup>
+    </l-marker>
     <l-control>
       <div class="btn-group leaflet-selector">
         <button v-for="bikeType in Object.keys(bikeTypes)" v-bind:key="bikeType"
@@ -26,60 +32,35 @@
 </template>
 
 <script>
-import L from 'leaflet';
+import Vue from 'vue';
 import {
-  LMap, LTileLayer, LGeoJson, LControl,
+  LMap, LTileLayer, LGeoJson, LControl, LMarker, LPopup,
 } from 'vue2-leaflet';
 import LMarkerCluster from 'vue2-leaflet-markercluster';
 import axios from 'axios';
+import StandInfoPopup from './StandInfoPopup.vue';
+import standIcons from '../lib/stand-icons';
 
 const geojsons = [];
-
-const StandIcon = L.Icon.extend({
-  options: {
-    iconSize: [22, 22],
-  },
-});
-const standIcons = {
-  'Sheffield Stand': new StandIcon({ iconUrl: 'icons/stand_icon_sheffield.png' }),
-  'Wheel Only': new StandIcon({ iconUrl: 'icons/stand_icon_wheel_only.png' }),
-  Hoop: new StandIcon({ iconUrl: 'icons/stand_icon_hoop.png' }),
-  'Stainless Steel Curved': new StandIcon({ iconUrl: 'icons/stand_icon_ssc.png' }),
-  Railing: new StandIcon({ iconUrl: 'icons/stand_icon_railing.png' }),
-  DublinBikes: new StandIcon({ iconUrl: 'icons/station_icon_db.png' }),
-};
 
 const bikeTypes = {
   'My Bike': {
     query: 'dublinbikes=off',
+    standData: null,
   },
   DublinBikes: {
     query: 'dublinbikes=only',
+    standData: null,
   },
 };
 
 function standType(f, l) {
-  const noStands = f.properties.numberOfStands > 0 ? f.properties.numberOfStands : 'Unknown';
-
-  let unverifiedMessage = '';
-  if (!f.properties.verified) {
-    unverifiedMessage = '<tr><td colspan=2><small>This is a user submitted stand we have not verified yet.</small></td></tr>';
-  }
-
-  const urlParams = new URLSearchParams(window.location.search);
-  const standIDParam = urlParams.get('showIDs');
-  let standID = '';
-  if (standIDParam === 'true') {
-    standID = `<tr><td><b>Stand ID</b></td><td>${f.properties.id}</td></tr>`;
-  }
-
-  l.setIcon(standIcons[f.properties.type]).bindPopup(`<table>
-    <tr><td><b>Type of Stands</b></td><td>${f.properties.type}</td></tr>
-    <tr><td><b>Location</b></td><td>${f.properties.name}</td></tr>
-    <tr><td><b>Number of Stands</b></td><td>${noStands}</td></tr>
-    ${standID}
-    ${unverifiedMessage}
-    </table>`);
+  const StandInfo = Vue.extend(StandInfoPopup);
+  l.setIcon(standIcons[f.properties.type]).bindPopup(new StandInfo({
+    propsData: {
+      stand: f.properties,
+    },
+  }).$mount().$el);
 }
 
 export default {
@@ -88,8 +69,10 @@ export default {
     'l-map': LMap,
     'l-tile-layer': LTileLayer,
     'l-geo-json': LGeoJson,
+    'l-marker': LMarker,
     'l-marker-cluster': LMarkerCluster,
     'l-control': LControl,
+    'l-popup': LPopup,
   },
   data() {
     return {
@@ -111,6 +94,8 @@ export default {
       bikeTypes,
       activeBikeType: 'My Bike',
       geojsons,
+      addMarkerShow: false,
+      addMarkerPosition: { lat: 0, lng: 0 },
     };
   },
   methods: {
@@ -123,9 +108,22 @@ export default {
       this.updateMap();
     },
     updateMap() {
+      if (this.bikeTypes[this.activeBikeType].standData != null) {
+        this.geojsons.push(this.bikeTypes[this.activeBikeType].standData);
+        return;
+      }
       axios.get(`/api/v0/stand?${this.bikeTypes[this.activeBikeType].query}`).then((response) => {
         this.geojsons.push(response.data);
+        this.bikeTypes[this.activeBikeType].standData = response.data;
       });
+    },
+    addStand(e) {
+      this.addMarkerPosition = e.latlng;
+      this.addMarkerShow = true;
+      this.$nextTick(() => this.$refs.addMarker.mapObject.openPopup());
+    },
+    hideAddMarker() {
+      this.addMarkerShow = false;
     },
   },
   created() {
@@ -134,25 +132,10 @@ export default {
 };
 </script>
 
-<!-- Add 'scoped' attribute to limit CSS to this component only -->
 <style scoped>
 @import '~leaflet.markercluster/dist/MarkerCluster.css';
 @import '~leaflet.markercluster/dist/MarkerCluster.Default.css';
 
-h3 {
-  margin: 40px 0 0;
-}
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
-}
 .map {
   width: 100%;
   height: 100%;

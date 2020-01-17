@@ -2,6 +2,7 @@ import Vue from 'vue';
 import VueRouter from 'vue-router';
 import Home from '../views/Home.vue';
 import Privacy from '../views/Privacy.vue';
+import Edit from '../views/Edit.vue';
 
 Vue.use(VueRouter);
 
@@ -15,6 +16,11 @@ const routes = [
     path: '/privacy',
     name: 'privacy',
     component: Privacy,
+  },
+  {
+    path: '/edit/:id',
+    name: 'edit',
+    component: Edit,
   },
 ];
 
