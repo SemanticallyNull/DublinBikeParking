@@ -16,10 +16,10 @@ RUN npm install
 RUN npm install @vue/cli@3.7.0 -g
 
 ADD static-vue/ /go/src/app/
-CMD ["npm", "run", "build"]
+RUN npm run build
 
 # Now copy it into our base image.
-FROM gcr.io/distroless/base-debian10
+FROM gcr.io/distroless/base
 
 WORKDIR /app
 COPY --from=build-go /go/bin/dublinbikeparking /app/dublinbikeparking
