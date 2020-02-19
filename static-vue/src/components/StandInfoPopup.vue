@@ -9,6 +9,9 @@
         <td colspan=2><small>This is a user submitted stand we have not verified yet.</small></td>
       </tr>
     </table>
+    <router-link class="btn btn-primary" :to="{ name: 'edit', params: { id: stand.id }}">
+      <b-icon-pencil/> Edit
+    </router-link>
   </div>
 </template>
 

@@ -98,6 +98,27 @@ func (a *api) getStands(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(fc)
 }
 
+func (a *api) getStand(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("content-type", "application/json")
+
+	vars := mux.Vars(r)
+
+	stand := &Stand{}
+	a.DB.Where("`stand_id` = ?", vars["id"]).Preload("Thefts").First(stand)
+
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"id":             stand.StandID,
+		"name":           stand.Name,
+		"type":           stand.Type,
+		"numberOfStands": stand.NumberOfStands,
+		"notes":          stand.Notes,
+		"source":         stand.Source,
+		"checked":        stand.Checked != "",
+		"verified":       stand.Verified,
+		"thefts":         stand.Thefts,
+	})
+}
+
 func (a *api) createStand(w http.ResponseWriter, r *http.Request) {
 	var stand Stand
 
