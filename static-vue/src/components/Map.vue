@@ -76,7 +76,7 @@ export default {
   },
   data() {
     return {
-      url: 'https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png',
+      url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       zoom: 12,
       center: [53.34587706183283, -6.267379465984959],
       clusterOptions: {

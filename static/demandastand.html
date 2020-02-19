@@ -50,7 +50,7 @@
         })
         var sheffieldStand = new StandIcon({iconUrl: 'stand_icon_sheffield.png'})
 
-        var osm = L.tileLayer('https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png', {
+        var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
           attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Stand Data: collected by volunteers for Dublin Cycling Campaign and I Bike Dublin',
             maxZoom: 19
         }).addTo(map);

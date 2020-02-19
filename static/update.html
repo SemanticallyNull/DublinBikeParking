@@ -110,7 +110,7 @@
         var wheelOnlyStand = new StandIcon({iconUrl: 'stand_icon_wheel_only.png'})
         var dublinBikesStand = new StandIcon({iconUrl: 'station_icon_db.png'})
 
-        var osm = L.tileLayer('https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png', {
+        var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
           attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Stand Data: <a href="https://bleeperbike.com/">Bleeper Bikes</a>, DublinBikes: <a href="https://developer.jcdecaux.com/#/opendata/vls?page=getstarted&contract=Dublin">JCDecaux</a> | <a href="/privacy.html">Privacy</a>',
             maxZoom: 19
         }).addTo(map);
