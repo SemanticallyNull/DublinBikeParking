@@ -1,0 +1,5 @@
+static-vue/node_modules/
+.circleci/
+*.db
+.git
+.gitignore
