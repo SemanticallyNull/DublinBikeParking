@@ -1,5 +1,5 @@
 # Start by building the application.
-FROM golang:1.13 as build-go
+FROM golang:1.13-buster as build-go
 
 WORKDIR /go/src/app
 ADD . /go/src/app
@@ -19,7 +19,7 @@ ADD static-vue/ /go/src/app/
 RUN npm run build
 
 # Now copy it into our base image.
-FROM gcr.io/distroless/base
+FROM gcr.io/distroless/base-debian10
 
 WORKDIR /app
 COPY --from=build-go /go/bin/dublinbikeparking /app/dublinbikeparking
