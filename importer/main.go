@@ -6,7 +6,7 @@ import (
 	"os"
 	"strconv"
 
-	"code.katiechapman.ie/dbp/apiv0"
+	"code.katiechapman.ie/dublinbikeparking/apiv0"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 )

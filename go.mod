@@ -1,4 +1,4 @@
-module code.katiechapman.ie/dbp
+module code.katiechapman.ie/dublinbikeparking
 
 go 1.12
 
