@@ -19,7 +19,7 @@ ADD static-vue/ /go/src/app/
 RUN npm run build
 
 # Now copy it into our base image.
-FROM debian:buster
+FROM gcr.io/distroless/base-debian10
 
 WORKDIR /app
 COPY --from=build-go /go/bin/dublinbikeparking /app/dublinbikeparking
