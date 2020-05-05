@@ -37,5 +37,7 @@ export default {
 </script>
 
 <style scoped>
-
+  .leaflet-container a {
+    color: #ffffff;
+  }
 </style>

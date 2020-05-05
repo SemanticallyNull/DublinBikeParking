@@ -8,12 +8,12 @@
         v-for='geojson in geojsons'
         :key='geojson.features[0].properties.id'
         :geojson='geojson'
-        :options='geojsonOptions'>
+        :options='geoJsonOptions'>
       </l-geo-json>
     </l-marker-cluster>
     <l-marker ref="addMarker" v-if="addMarkerShow" @popupclose="hideAddMarker"
               :lat-lng="addMarkerPosition">
-      <l-popup ref="addMarkerPopup" >FOO</l-popup>
+      <l-popup ref="addMarkerPopup" >Foo</l-popup>
     </l-marker>
     <l-control>
       <div class="btn-group leaflet-selector">
@@ -38,8 +38,8 @@ import {
 } from 'vue2-leaflet';
 import LMarkerCluster from 'vue2-leaflet-markercluster';
 import axios from 'axios';
-import StandInfoPopup from './StandInfoPopup.vue';
 import standIcons from '../lib/stand-icons';
+import StandInfoPopup from './StandInfoPopup.vue';
 
 const geojsons = [];
 
@@ -54,14 +54,6 @@ const bikeTypes = {
   },
 };
 
-function standType(f, l) {
-  const StandInfo = Vue.extend(StandInfoPopup);
-  l.setIcon(standIcons[f.properties.type]).bindPopup(new StandInfo({
-    propsData: {
-      stand: f.properties,
-    },
-  }).$mount().$el);
-}
 
 export default {
   name: 'Map',
@@ -84,12 +76,21 @@ export default {
         disableClusteringAtZoom: 18,
       },
       mapOptions: {},
+      geoJsonOptions: {
+        onEachFeature: (f, l) => {
+          const StandInfo = Vue.extend(
+            { router: this.$router, auth: this.$auth, ...StandInfoPopup },
+          );
+          l.setIcon(standIcons[f.properties.type]).bindPopup(new StandInfo({
+            propsData: {
+              stand: f.properties,
+            },
+          }).$mount().$el);
+        },
+      },
       tileLayerOptions: {
         maxZoom: 18,
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Stand Data: <a href="https://bleeperbike.com/">Bleeper Bikes</a>, <a href="https://data.smartdublin.ie/dataset/dcc_public_cycle_parking_stands">DCC</a> DublinBikes: <a href="https://developer.jcdecaux.com/#/opendata/vls?page=getstarted&contract=Dublin">JCDecaux</a>  | <a href="/privacy">Privacy</a>',
-      },
-      geojsonOptions: {
-        onEachFeature: standType,
       },
       bikeTypes,
       activeBikeType: 'My Bike',
