@@ -29,6 +29,7 @@ type Stand struct {
 	Name           string
 	Type           string `validate:"nonzero"`
 	NumberOfStands int
+	ImageID        string
 	Notes          string
 	Checked        string
 	Verified       bool
@@ -79,6 +80,7 @@ func (a *api) getStands(w http.ResponseWriter, r *http.Request) {
 				"type":           stand.Type,
 				"numberOfStands": stand.NumberOfStands,
 				"notes":          stand.Notes,
+				"imageId":        stand.ImageID,
 				"source":         stand.Source,
 				"checked":        stand.Checked != "",
 				"verified":       stand.Verified,

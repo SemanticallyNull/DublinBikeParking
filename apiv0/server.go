@@ -2,13 +2,18 @@ package apiv0
 
 import (
 	"fmt"
+	"log"
 	"net/http"
+	"net/url"
 	"os"
+	"time"
 
 	"github.com/auth0-community/go-auth0"
+	"github.com/google/uuid"
 	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
+	minio "github.com/minio/minio-go/v6"
 	"gopkg.in/square/go-jose.v2"
 )
 
@@ -33,11 +38,95 @@ func NewAPIv0(r *mux.Router, db *gorm.DB) {
 	db.AutoMigrate(&StandUpdate{})
 	db.AutoMigrate(&Theft{})
 
+	endpoint := os.Getenv("S3_ENDPOINT")
+	accessKeyID := os.Getenv("S3_ACCESS_KEY_ID")
+	secretAccessKey := os.Getenv("S3_SECRET_ACCESS_KEY")
+	bucketName := os.Getenv("S3_BUCKET_NAME")
+	useSSL := true
+	if os.Getenv("S3_USE_SSL") == "false" {
+		useSSL = false
+	}
+
+	minioClient, err := minio.New(endpoint, accessKeyID, secretAccessKey, useSSL)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
 	r.HandleFunc("/stand", apiHandler.getStands).Methods("GET")
 	r.HandleFunc("/stand", apiHandler.createStand).Methods("POST")
 	r.HandleFunc("/stand/{id}", apiHandler.getStand).Methods("GET")
 	r.Handle("/stand/{id}", authMiddleware(http.HandlerFunc(apiHandler.updateStand))).Methods("POST")
 	r.Handle("/stand/{id}", authMiddleware(http.HandlerFunc(apiHandler.deleteStand))).Methods("DELETE")
+	r.HandleFunc("/image", handleImagePostFunc(minioClient, bucketName)).Methods("POST")
+	r.Handle("/image/{id}", authMiddleware(http.HandlerFunc(handleImageGetFunc(minioClient, bucketName)))).Methods("GET")
+}
+
+func handleImageGetFunc(minioClient *minio.Client, bucketName string) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+
+		_, err := minioClient.StatObject(bucketName, vars["id"], minio.StatObjectOptions{})
+		if err != nil {
+			switch minio.ToErrorResponse(err).StatusCode {
+			case 404:
+				w.WriteHeader(http.StatusNotFound)
+			default:
+				w.WriteHeader(http.StatusInternalServerError)
+			}
+			log.Println(err)
+			return
+		}
+
+		reqParams := make(url.Values)
+		presignedURL, err := minioClient.PresignedGetObject(bucketName, vars["id"], time.Minute*15, reqParams)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		fmt.Fprintf(w, "%s", presignedURL)
+	}
+}
+
+func handleImagePostFunc(minioClient *minio.Client, bucketName string) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		err := r.ParseMultipartForm(5 << 20)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Println(err)
+			fmt.Fprintf(w, "Image too large. Max Size: %v", 5<<20)
+			return
+		}
+
+		file, fileHeader, err := r.FormFile("filepond")
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Println(err)
+			fmt.Fprintf(w, "error uploading file")
+			return
+		}
+		defer file.Close()
+
+		contentType := fileHeader.Header.Get("Content-Type")
+		if !(contentType == "image/png" || contentType == "image/jpeg" || contentType == "image/gif") {
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprintf(w, "incorrect filetype")
+			return
+		}
+
+		fileName := uuid.New().String()
+		_, err = minioClient.PutObject(bucketName, fileName, file, fileHeader.Size, minio.PutObjectOptions{
+			ContentType: fileHeader.Header.Get("Content-Type"),
+		})
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Println(err)
+			fmt.Fprintf(w, "error uploading file")
+			return
+		}
+
+		fmt.Fprintf(w, "%s", fileName)
+	}
 }
 
 func authMiddleware(next http.Handler) http.Handler {

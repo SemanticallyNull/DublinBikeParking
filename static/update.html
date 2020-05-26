@@ -58,6 +58,11 @@
     <script type="text/javascript">
       var ac;
 
+      function imageIdLink(e) {
+        e.preventDefault()
+        console.log(e.target)
+      }
+
       window.addEventListener('load', function() {
         ac = new auth0.WebAuth({
           domain: "benchapman.eu.auth0.com",
@@ -147,14 +152,48 @@
           var form = document.createElement('form')
           var checked = f.properties["checked"] ? "checked=true" : "";
           form.innerHTML = "<table>" +
-            "<tr><td cellwidth=2><a class=\"btn btn-primary text-light\" href=\"https://www.google.com/maps/@?api=1&map_action=pano&viewpoint="+l.getLatLng().lat+","+l.getLatLng().lng+"\" target=\"_BLANK\">Street View</a></td></tr>" +
+            "<tr><td colspan=2>" +
+              "<a class=\"btn btn-primary text-light\" href=\"https://www.google.com/maps/@?api=1&map_action=pano&viewpoint="+l.getLatLng().lat+","+l.getLatLng().lng+"\" target=\"_BLANK\">Street View</a>" +
+              "<span id=\"imageLinkSlot\"></span>" +
+            "</td></tr>" +
             "<tr><td><b>ID</b></td><td>"+f.properties["id"]+"</td></tr>" +
             "<tr><td><b>Type of Stands</b></td><td>"+standTypeMenu()+"</td></tr>" +
             "<tr><td><b>Location</b></td><td><input id=\"name\" type=\"text\" value=\""+f.properties["name"]+"\"></td></tr>" +
             "<tr><td><b>Number of Stands</b></td><td><input id=\"NumberOfStands\" type=\"number\" value=\""+f.properties["numberOfStands"]+"\"></td></tr>" +
             "<tr><td><b>Checked</b></td><td><input id=\"checked\" type=\"checkbox\" " + checked + " value=\"YES\"></td></tr>" +
-            "<tr><td cellwidth=2><input type=\"submit\" class=\"btn btn-primary\"></td></tr>" +
+            "<tr><td colspan=2><input type=\"submit\" class=\"btn btn-primary\"></td></tr>" +
             "</table>";
+          if (f.properties["imageId"] && f.properties["imageId"] !== "") {
+            imageLink = document.createElement('a')
+            imageLink.classList.add("btn", "btn-primary", "text-light")
+            imageLink.target="_BLANK"
+            imageLink.innerText = "Image";
+            imageLink.setAttribute('data-imageid', f.properties["imageId"])
+            imageLink.addEventListener('click', function (e) {
+              console.log(e.target);
+              e.target.innerHTML = "Loading... <span class=\"fas fa-sync fa-spin\"></span>";
+              var imageId = e.target.getAttribute("data-imageid");
+
+              var request = new XMLHttpRequest();
+              request.open('GET', '/api/v0/image/' + imageId, true);
+              request.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+              request.setRequestHeader('Authorization', 'Bearer ' + document.getElementById('apiKey').value);
+              request.send();
+
+              request.onload = () => {
+                if (request.status != 200) { // analyze HTTP status of the response
+                  e.target.innerHTML = "<span class=\"fas fa-times text-danger\"></span> Failed to get link.<br><code>" + request.status + " " + request.response;
+                } else { // show the result
+                  e.target.innerHTML = "Image";
+                  e.target.href = request.response;
+                }
+              }
+              request.onerror = () => {
+                e.target.innerHTML = "<span class=\"fas fa-times text-danger\"></span> Failed to get link."
+              }
+            })
+            form.querySelector('#imageLinkSlot').append(imageLink);
+          }
           form.addEventListener('submit',function(e) {
             e.preventDefault();
             l.setPopupContent("<span class=\"fas fa-sync fa-spin\"></span> Submitting...")

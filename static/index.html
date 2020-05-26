@@ -23,6 +23,9 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
       integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
       crossorigin="anonymous">
+    <link rel="stylesheet" href="https://unpkg.com/filepond@4.13.7/dist/filepond.css"
+      integrity="sha384-qoy7VHMIa2Dmat5IGOpnVWUDsqPb0UmrjiiM6BYkxTglHDxVpRFi60f21umjzES7"
+      crossorigin="anonymous">
     <style type="text/css">
       html, body {padding:0;margin:0;height:100%;}
 
@@ -53,8 +56,24 @@
     <script src="https://unpkg.com/leaflet-easybutton@2.3.0/src/easy-button.js"
       integrity="sha384-GHKGgc0qNzZZpBzGWvVZWSRFNB+LYy8aJCBtgI0IpWul99UCBQcSP85Z9RLAorB/"
       crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/filepond-plugin-image-transform@3.7.3/dist/filepond-plugin-image-transform.js"
+      integrity="sha384-f2974/VlMSTV/FDf199k/O4w/NfXkzwcGtRehsfneIjIYOS/EaegQGJeC5aMVZrH"
+      crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/filepond-plugin-image-resize@2.0.7/dist/filepond-plugin-image-resize.js"
+      integrity="sha384-DevggmoCX8W0gxHIx5qmQYlhiHHNIKmVyeDC20ub7EvOALhXzHlaFY9hw1tcf5bZ"
+      crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/filepond@4.13.7/dist/filepond.js"
+      integrity="sha384-iElACePzOctQuCLp1QsllYNCB4SafmsG9J34fypmD3yJVcmpQ1ghBYhtUhYuS8Cb"
+      crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/filepond-plugin-image-exif-orientation@1.0.9/dist/filepond-plugin-image-exif-orientation.js"
+      integrity="sha384-y7C5DpcxyJLepNcJ3Njt7cutje0lsGNth2OfJrmshg/s1c252xtn97tJYhJ7Rle7"
+      crossorigin="anonymous"></script>
     <script type="text/javascript">
       window.addEventListener('load', function() {
+        FilePond.registerPlugin(FilePondPluginImageExifOrientation,
+                FilePondPluginImageResize,
+                FilePondPluginImageTransform);
+
         var map = L.map('map').setView([53.34587706183283, -6.267379465984959], 12);
         var hash = new L.Hash(map);
 
@@ -231,31 +250,57 @@
         var addMarker = L.marker();
         map.on('contextmenu', function(e) {
           _paq.push(['trackEvent', 'addStand', 'start']);
-          addMarker.setLatLng(e.latlng).bindPopup("<form id=\"addMarker\"><table>" +
-            "<input type=\"hidden\" id=\"lat\" value=\"" + e.latlng.lat + "\">" +
-            "<input type=\"hidden\" id=\"lng\" value=\"" + e.latlng.lng + "\">" +
-            "<tr><td><b>Type of Stands</b></td><td>"+standTypeMenu()+"</td></tr>" +
-            "<tr><td><b>Location</b></td><td><input id=\"name\" type=\"text\"></td></tr>" +
-            "<tr><td><b>Number of Stands</b></td><td><input id=\"NumberOfStands\" type=\"number\"></td></tr>" +
-            "<tr><td cellwidth=2><input type=\"submit\" class=\"btn btn-primary\"></td></tr>" +
-            "</table></form>").addTo(map).openPopup();
-            document.getElementById('addMarker').addEventListener('submit', function(e) {
-              e.preventDefault();
-              addMarker.setPopupContent("<span class=\"fas fa-sync fa-spin\"></span> Submitting...")
-              addStand(e).then(function(e) {
-                if(e.target.status == 200) {
-                  _paq.push(['trackEvent', 'addStand', 'success']);
-                  addMarker.setPopupContent("<span class=\"fas fa-check text-success\"></span> Thank you for your submission. It will be reviewed soon!")
-                } else {
-                  _paq.push(['trackEvent', 'addStand', 'error']);
-                  addMarker.setPopupContent("<span class=\"fas fa-times text-danger\"></span> There was an issue with your submission.<br><code>" + e.target.statusText + "</code>" )
-                }
-              }, function(e){
+          const createMarkerForm = document.createElement("form", { id: "addMarker" });
+          createMarkerForm.innerHTML = "<form id=\"addMarker\"><table>" +
+                  "<input type=\"hidden\" id=\"lat\" value=\"" + e.latlng.lat + "\">" +
+                  "<input type=\"hidden\" id=\"lng\" value=\"" + e.latlng.lng + "\">" +
+                  "<tr><td><b>Type of Stands</b></td><td>"+standTypeMenu()+"</td></tr>" +
+                  "<tr><td><b>Location</b></td><td><input id=\"name\" type=\"text\"></td></tr>" +
+                  "<tr><td><b>Number of Stands</b></td><td><input id=\"NumberOfStands\" type=\"number\"></td></tr>" +
+                  "<tr><td colspan=2>Uploading an image is <i>optional</i>. This image is used to verify" +
+                  "the stand where it's provided</td></tr>" +
+                  "<tr><td><b>Image</b></td><td id=\"uploadslot\"></td></tr>" +
+                  "<tr><td colspan=2><input type=\"submit\" class=\"btn btn-primary\"></td></tr>" +
+                  "</table></form>";
+          const imageUploadElement = document.createElement('input', { type: 'file' });
+          imageUploadElement.type = 'file';
+          const imageIdElement = document.createElement('input');
+          imageIdElement.type = 'hidden';
+          imageIdElement.id = 'ImageID';
+          createMarkerForm.querySelector('#uploadslot').append(imageUploadElement);
+          createMarkerForm.querySelector('#uploadslot').append(imageIdElement);
+          const pond = FilePond.create( imageUploadElement, {
+            server: '/api/v0/image',
+            imageResizeTargetWidth: 1200,
+            imageResizeUpscale: false
+          });
+          pond.onprocessfile = function (err, file) {
+            if(err) {
+              console.log(err);
+            }
+
+            imageIdElement.value = file.serverId;
+          };
+          addMarker.setLatLng(e.latlng).bindPopup(createMarkerForm).addTo(map).openPopup();
+          createMarkerForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            addMarker.setPopupContent("<span class=\"fas fa-sync fa-spin\"></span> Submitting...")
+            addStand(e).then(function(e) {
+              console.log(e)
+              if(e.target.status == 200) {
+                _paq.push(['trackEvent', 'addStand', 'success']);
+                addMarker.setPopupContent("<span class=\"fas fa-check text-success\"></span> Thank you for your submission. It will be reviewed soon!")
+              } else {
                 _paq.push(['trackEvent', 'addStand', 'error']);
                 addMarker.setPopupContent("<span class=\"fas fa-times text-danger\"></span> There was an issue with your submission.<br><code>" + e.target.statusText + "</code>" )
-              })
+              }
+            }, function(e){
+              console.log(e)
+              _paq.push(['trackEvent', 'addStand', 'error']);
+              addMarker.setPopupContent("<span class=\"fas fa-times text-danger\"></span> There was an issue with your submission.<br><code>" + e.target.statusText + "</code>" )
             })
-        })
+          });
+        });
       });
 
       function addStand(e) {
@@ -263,7 +308,7 @@
           standData = {}
           for (var i = 0; i < e.target.length; i++) {
             if(e.target[i].id != "") {
-              if(!isNaN(parseFloat(e.target[i].value))) {
+              if(e.target[i].id != "ImageID" && !isNaN(parseFloat(e.target[i].value))) {
                 standData[e.target[i].id] = parseFloat(e.target[i].value)
               } else {
                 standData[e.target[i].id] = e.target[i].value
