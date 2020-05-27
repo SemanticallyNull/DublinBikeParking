@@ -167,13 +167,22 @@ func authMiddleware(next http.Handler) http.Handler {
 		validator := auth0.NewValidator(configuration, nil)
 
 		token, err := validator.ValidateRequest(r)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Printf("could not write json: %s", err)
+			return
+		}
 		out := map[string]interface{}{}
 		err = validator.Claims(r, token, &out)
 		if err != nil {
 			fmt.Println(err)
 			fmt.Println("Token is not valid:", token)
 			w.WriteHeader(http.StatusUnauthorized)
-			w.Write([]byte("Unauthorized"))
+			_, err := w.Write([]byte("Unauthorized"))
+			if err != nil {
+				fmt.Println(err)
+			}
+			return
 		}
 		context.Set(r, "userEmail", out["email"])
 		context.Set(r, "userSub", out["sub"])
@@ -182,7 +191,11 @@ func authMiddleware(next http.Handler) http.Handler {
 			fmt.Println(err)
 			fmt.Println("Token is not valid:", token)
 			w.WriteHeader(http.StatusUnauthorized)
-			w.Write([]byte("Unauthorized"))
+			_, err := w.Write([]byte("Unauthorized"))
+			if err != nil {
+				fmt.Println(err)
+			}
+			return
 		} else {
 			next.ServeHTTP(w, r)
 		}

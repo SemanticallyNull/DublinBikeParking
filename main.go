@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -37,7 +38,12 @@ func main() {
 	apiv0.NewAPIv0(apiRouter, db)
 
 	r.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("ok"))
+		_, err := w.Write([]byte("ok"))
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Printf("could not write: %s", err)
+			return
+		}
 	})
 
 	if os.Getenv("DBP_UI_V2") == "true" {
