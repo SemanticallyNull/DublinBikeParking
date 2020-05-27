@@ -69,6 +69,7 @@ workflows:
       - test
       - build:
           requires:
+            - golangci-lint/lint
             - test
           filters:
             branches:
