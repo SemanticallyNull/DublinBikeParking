@@ -1,4 +1,8 @@
 version: 2.1
+
+orbs:
+  golangci-lint: timakin/golangci-lint@0.1.1
+
 executors:
   docker-publisher:
     environment:
@@ -61,6 +65,7 @@ workflows:
   version: 2
   build-master:
     jobs:
+      - golangci-lint/lint
       - test
       - build:
           requires:
