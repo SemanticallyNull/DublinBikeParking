@@ -1,7 +1,6 @@
 package integration_test
 
 import (
-	"go/build"
 	"net"
 	"os"
 	"os/exec"
@@ -31,15 +30,11 @@ var _ = BeforeSuite(func() {
 	binPath, err = gexec.Build("code.katiechapman.ie/dublinbikeparking")
 	Expect(err).ToNot(HaveOccurred())
 
-	gopath := os.Getenv("GOPATH")
-	if gopath == "" {
-		gopath = build.Default.GOPATH
-	}
-
 	_, filename, _, _ := runtime.Caller(0)
 	base := filepath.Dir(filename)
 
-	os.Chdir(filepath.Join(base, ".."))
+	err = os.Chdir(filepath.Join(base, ".."))
+	Expect(err).NotTo(HaveOccurred())
 	os.Setenv("PORT", getFreePort())
 
 	execBin()

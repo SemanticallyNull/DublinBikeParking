@@ -98,7 +98,10 @@ func (a *api) getStands(w http.ResponseWriter, r *http.Request) {
 		fc.AddFeature(feature)
 	}
 
-	json.NewEncoder(w).Encode(fc)
+	err := json.NewEncoder(w).Encode(fc)
+	if err != nil {
+		fmt.Printf("error encoding json: %s", err)
+	}
 }
 
 func (a *api) getStand(w http.ResponseWriter, r *http.Request) {
@@ -109,7 +112,7 @@ func (a *api) getStand(w http.ResponseWriter, r *http.Request) {
 	stand := &Stand{}
 	a.DB.Where("`stand_id` = ?", vars["id"]).Preload("Thefts").First(stand)
 
-	json.NewEncoder(w).Encode(map[string]interface{}{
+	err := json.NewEncoder(w).Encode(map[string]interface{}{
 		"id":             stand.StandID,
 		"name":           stand.Name,
 		"type":           stand.Type,
@@ -120,6 +123,9 @@ func (a *api) getStand(w http.ResponseWriter, r *http.Request) {
 		"verified":       stand.Verified,
 		"thefts":         stand.Thefts,
 	})
+	if err != nil {
+		fmt.Printf("error encoding json: %s", err)
+	}
 }
 
 func (a *api) createStand(w http.ResponseWriter, r *http.Request) {
@@ -128,19 +134,32 @@ func (a *api) createStand(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(err)
+		err := json.NewEncoder(w).Encode(err)
+		if err != nil {
+			fmt.Printf("error writing error: %s", err)
+			return
+		}
 		return
 	}
 
-	json.Unmarshal(body, &stand)
+	err = json.Unmarshal(body, &stand)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Printf("error writing error: %s", err)
+		return
+	}
 
 	err = validator.Validate(&stand)
 	if err != nil {
 		errs := err.(validator.ErrorMap)
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(map[string]interface{}{
+		err := json.NewEncoder(w).Encode(map[string]interface{}{
 			"errors": errs,
 		})
+		if err != nil {
+			fmt.Printf("error writing error: %s", err)
+			return
+		}
 		return
 	}
 
@@ -176,7 +195,12 @@ func (a *api) createStand(w http.ResponseWriter, r *http.Request) {
 		}()
 	}
 
-	json.NewEncoder(w).Encode(stand)
+	err = json.NewEncoder(w).Encode(stand)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Printf("could not write json: %s", err)
+		return
+	}
 }
 
 func (a *api) updateStand(w http.ResponseWriter, r *http.Request) {
@@ -189,18 +213,32 @@ func (a *api) updateStand(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(err)
+		err := json.NewEncoder(w).Encode(err)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Printf("could not write json: %s", err)
+			return
+		}
 		return
 	}
-	json.Unmarshal(body, &updatedStand)
+	err = json.Unmarshal(body, &updatedStand)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Printf("could not unmarshal json: %s", err)
+		return
+	}
 
 	err = validator.Validate(&updatedStand)
 	if err != nil {
 		errs := err.(validator.ErrorMap)
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(map[string]interface{}{
+		err := json.NewEncoder(w).Encode(map[string]interface{}{
 			"errors": errs,
 		})
+		if err != nil {
+			fmt.Printf("error encoding json: %s", err)
+			return
+		}
 		return
 	}
 
@@ -226,7 +264,12 @@ func (a *api) updateStand(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			tx.Rollback()
 			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(err.Error()))
+			_, err := w.Write([]byte(err.Error()))
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				fmt.Printf("could not write error: %s", err)
+				return
+			}
 			return
 		}
 		updateJson, err := json.Marshal(map[string]interface{}{
@@ -237,7 +280,12 @@ func (a *api) updateStand(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			tx.Rollback()
 			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(err.Error()))
+			_, err := w.Write([]byte(err.Error()))
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				fmt.Printf("could not write error: %s", err)
+				return
+			}
 			return
 		}
 		update := StandUpdate{
@@ -248,19 +296,34 @@ func (a *api) updateStand(w http.ResponseWriter, r *http.Request) {
 		if err := tx.Create(&update).Error; err != nil {
 			tx.Rollback()
 			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(err.Error()))
+			_, err := w.Write([]byte(err.Error()))
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				fmt.Printf("could not write error: %s", err)
+				return
+			}
 			return
 		}
 		tx.Commit()
 	} else {
-		json.NewEncoder(w).Encode(map[string]interface{}{
+		err := json.NewEncoder(w).Encode(map[string]interface{}{
 			"errors": []string{
 				"stand not found",
 			},
 		})
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Printf("could not write json: %s", err)
+			return
+		}
 	}
 
-	json.NewEncoder(w).Encode(originStand)
+	err = json.NewEncoder(w).Encode(originStand)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Printf("could not write json: %s", err)
+		return
+	}
 }
 
 func (a *api) deleteStand(w http.ResponseWriter, r *http.Request) {
