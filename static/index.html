@@ -74,6 +74,11 @@
                 FilePondPluginImageResize,
                 FilePondPluginImageTransform);
 
+        var imageFeatureFlag = false;
+        checkImageAvailability().then(function (featureFlag) {
+          imageFeatureFlag = featureFlag;
+        });
+
         var map = L.map('map').setView([53.34587706183283, -6.267379465984959], 12);
         var hash = new L.Hash(map);
 
@@ -251,36 +256,42 @@
         map.on('contextmenu', function(e) {
           _paq.push(['trackEvent', 'addStand', 'start']);
           const createMarkerForm = document.createElement("form", { id: "addMarker" });
+          var imageUpload = ""
+          if(imageFeatureFlag) {
+            imageUpload = "<tr><td colspan=2>Uploading an image is <i>optional</i>. This image is used to verify" +
+            "the stand where it's provided</td></tr>" +
+            "<tr><td><b>Image</b></td><td id=\"uploadslot\"></td></tr>";
+          }
           createMarkerForm.innerHTML = "<form id=\"addMarker\"><table>" +
                   "<input type=\"hidden\" id=\"lat\" value=\"" + e.latlng.lat + "\">" +
                   "<input type=\"hidden\" id=\"lng\" value=\"" + e.latlng.lng + "\">" +
                   "<tr><td><b>Type of Stands</b></td><td>"+standTypeMenu()+"</td></tr>" +
                   "<tr><td><b>Location</b></td><td><input id=\"name\" type=\"text\"></td></tr>" +
                   "<tr><td><b>Number of Stands</b></td><td><input id=\"NumberOfStands\" type=\"number\"></td></tr>" +
-                  "<tr><td colspan=2>Uploading an image is <i>optional</i>. This image is used to verify" +
-                  "the stand where it's provided</td></tr>" +
-                  "<tr><td><b>Image</b></td><td id=\"uploadslot\"></td></tr>" +
+                  imageUpload +
                   "<tr><td colspan=2><input type=\"submit\" class=\"btn btn-primary\"></td></tr>" +
                   "</table></form>";
-          const imageUploadElement = document.createElement('input', { type: 'file' });
-          imageUploadElement.type = 'file';
-          const imageIdElement = document.createElement('input');
-          imageIdElement.type = 'hidden';
-          imageIdElement.id = 'ImageID';
-          createMarkerForm.querySelector('#uploadslot').append(imageUploadElement);
-          createMarkerForm.querySelector('#uploadslot').append(imageIdElement);
-          const pond = FilePond.create( imageUploadElement, {
-            server: '/api/v0/image',
-            imageResizeTargetWidth: 1200,
-            imageResizeUpscale: false
-          });
-          pond.onprocessfile = function (err, file) {
-            if(err) {
-              console.log(err);
-            }
+          if(imageFeatureFlag) {
+            const imageUploadElement = document.createElement('input');
+            imageUploadElement.type = 'file';
+            const imageIdElement = document.createElement('input');
+            imageIdElement.type = 'hidden';
+            imageIdElement.id = 'ImageID';
+            createMarkerForm.querySelector('#uploadslot').append(imageUploadElement);
+            createMarkerForm.querySelector('#uploadslot').append(imageIdElement);
+            const pond = FilePond.create(imageUploadElement, {
+              server: '/api/v0/image',
+              imageResizeTargetWidth: 1200,
+              imageResizeUpscale: false
+            });
+            pond.onprocessfile = function (err, file) {
+              if (err) {
+                console.log(err);
+              }
 
-            imageIdElement.value = file.serverId;
-          };
+              imageIdElement.value = file.serverId;
+            };
+          }
           addMarker.setLatLng(e.latlng).bindPopup(createMarkerForm).addTo(map).openPopup();
           createMarkerForm.addEventListener('submit', function(e) {
             e.preventDefault();
@@ -342,6 +353,23 @@
 
         return "https://www.google.com/maps/dir/?api=1&origin=" + fromLatLngString +
           "&destination=" + toLatLngString + "&travelmode=" + travelMode;
+      }
+
+      function checkImageAvailability() {
+        return new Promise(function(resolve, reject) {
+          var request = new XMLHttpRequest();
+          request.open('OPTIONS', '/api/v0/image', true);
+          request.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+          request.onload = () => {
+            if(request.status === 200) {
+              resolve(true)
+            } else {
+              resolve(false)
+            }
+          }
+          request.onerror = reject
+          request.send();
+        })
       }
     </script>
   </head>

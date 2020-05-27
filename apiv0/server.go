@@ -28,28 +28,36 @@ func NewAPIv0(r *mux.Router, db *gorm.DB) {
 	}
 
 	if os.Getenv("SENDGRID_API_KEY") == "" {
-		fmt.Println("You must set a SENDGRID_API_KEY")
-		os.Exit(1)
+		fmt.Println("WARNING: SENDGRID_API_KEY is not set. No mails will be sent")
 	}
-
 	apiHandler.SendgridAPIKey = os.Getenv("SENDGRID_API_KEY")
+
+	if os.Getenv("S3_ENDPOINT") == "" {
+		fmt.Println("WARNING: S3_* variables ares not set. No images will be stored")
+	}
 
 	db.AutoMigrate(&Stand{})
 	db.AutoMigrate(&StandUpdate{})
 	db.AutoMigrate(&Theft{})
 
-	endpoint := os.Getenv("S3_ENDPOINT")
-	accessKeyID := os.Getenv("S3_ACCESS_KEY_ID")
-	secretAccessKey := os.Getenv("S3_SECRET_ACCESS_KEY")
-	bucketName := os.Getenv("S3_BUCKET_NAME")
-	useSSL := true
-	if os.Getenv("S3_USE_SSL") == "false" {
-		useSSL = false
-	}
+	var minioClient *minio.Client
+	var endpoint, accessKeyID, secretAccessKey, bucketName string
+	var useSSL bool
 
-	minioClient, err := minio.New(endpoint, accessKeyID, secretAccessKey, useSSL)
-	if err != nil {
-		log.Fatalln(err)
+	if os.Getenv("S3_ENDPOINT") != "" {
+		endpoint = os.Getenv("S3_ENDPOINT")
+		accessKeyID = os.Getenv("S3_ACCESS_KEY_ID")
+		secretAccessKey = os.Getenv("S3_SECRET_ACCESS_KEY")
+		bucketName = os.Getenv("S3_BUCKET_NAME")
+		useSSL = true
+		if os.Getenv("S3_USE_SSL") == "false" {
+			useSSL = false
+		}
+		var err error
+		minioClient, err = minio.New(endpoint, accessKeyID, secretAccessKey, useSSL)
+		if err != nil {
+			log.Fatalln(err)
+		}
 	}
 
 	r.HandleFunc("/stand", apiHandler.getStands).Methods("GET")
@@ -57,12 +65,28 @@ func NewAPIv0(r *mux.Router, db *gorm.DB) {
 	r.HandleFunc("/stand/{id}", apiHandler.getStand).Methods("GET")
 	r.Handle("/stand/{id}", authMiddleware(http.HandlerFunc(apiHandler.updateStand))).Methods("POST")
 	r.Handle("/stand/{id}", authMiddleware(http.HandlerFunc(apiHandler.deleteStand))).Methods("DELETE")
+	r.HandleFunc("/image", handleImageOptionsFunc(minioClient)).Methods("OPTIONS")
 	r.HandleFunc("/image", handleImagePostFunc(minioClient, bucketName)).Methods("POST")
 	r.Handle("/image/{id}", authMiddleware(http.HandlerFunc(handleImageGetFunc(minioClient, bucketName)))).Methods("GET")
 }
 
+func handleImageOptionsFunc(minioClient *minio.Client) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if minioClient == nil {
+			w.WriteHeader(http.StatusNotImplemented)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+	}
+}
 func handleImageGetFunc(minioClient *minio.Client, bucketName string) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
+		if minioClient == nil {
+			w.WriteHeader(http.StatusNotImplemented)
+			return
+		}
+
 		vars := mux.Vars(r)
 
 		_, err := minioClient.StatObject(bucketName, vars["id"], minio.StatObjectOptions{})
@@ -90,6 +114,11 @@ func handleImageGetFunc(minioClient *minio.Client, bucketName string) func(http.
 
 func handleImagePostFunc(minioClient *minio.Client, bucketName string) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
+		if minioClient == nil {
+			w.WriteHeader(http.StatusNotImplemented)
+			return
+		}
+
 		err := r.ParseMultipartForm(5 << 20)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
