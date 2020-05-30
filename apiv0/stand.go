@@ -242,7 +242,6 @@ func (a *api) updateStand(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userEmail := context.Get(r, "userEmail").(string)
 	sub := context.Get(r, "userSub").(string)
 
 	checked := ""
@@ -259,7 +258,7 @@ func (a *api) updateStand(w http.ResponseWriter, r *http.Request) {
 			"type":             updatedStand.Type,
 			"number_of_stands": updatedStand.NumberOfStands,
 			"checked":          checked,
-			"last_update_by":   userEmail,
+			"last_update_by":   sub,
 		}).Error
 		if err != nil {
 			tx.Rollback()
@@ -290,7 +289,7 @@ func (a *api) updateStand(w http.ResponseWriter, r *http.Request) {
 		}
 		update := StandUpdate{
 			Stand:     originStand,
-			UserEmail: userEmail,
+			UserEmail: sub,
 			Update:    string(updateJson),
 		}
 		if err := tx.Create(&update).Error; err != nil {

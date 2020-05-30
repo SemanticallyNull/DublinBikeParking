@@ -8,18 +8,21 @@ import (
 	"os"
 	"time"
 
-	"github.com/auth0-community/go-auth0"
+	"github.com/dgrijalva/jwt-go"
+	"github.com/dgrijalva/jwt-go/request"
 	"github.com/google/uuid"
 	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
 	minio "github.com/minio/minio-go/v6"
-	"gopkg.in/square/go-jose.v2"
+	"github.com/osstotalsoft/oidc-jwt-go"
+	"github.com/osstotalsoft/oidc-jwt-go/discovery"
 )
 
 type api struct {
 	DB             *gorm.DB
 	SendgridAPIKey string
+	validator      func(request *http.Request) (*jwt.Token, error)
 }
 
 func NewAPIv0(r *mux.Router, db *gorm.DB) {
@@ -44,6 +47,26 @@ func NewAPIv0(r *mux.Router, db *gorm.DB) {
 	var endpoint, accessKeyID, secretAccessKey, bucketName string
 	var useSSL bool
 
+	if os.Getenv("OIDC_AUTHORITY") == "" {
+		fmt.Println("ERROR: OIDC_AUTHORITY variable is not set.")
+		os.Exit(1)
+	}
+	if os.Getenv("OIDC_AUDIENCE") == "" {
+		fmt.Println("ERROR: OIDC_AUDIENCE variable is not set.")
+		os.Exit(1)
+	}
+
+	authority := os.Getenv("OIDC_AUTHORITY")
+	audience := os.Getenv("OIDC_AUDIENCE")
+
+	secretProvider := oidc.NewOidcSecretProvider(
+		discovery.NewClient(discovery.Options{
+			Authority: authority,
+		}),
+	)
+	validator := oidc.NewJWTValidator(request.AuthorizationHeaderExtractor, secretProvider, audience, authority)
+	apiHandler.validator = validator
+
 	if os.Getenv("S3_ENDPOINT") != "" {
 		endpoint = os.Getenv("S3_ENDPOINT")
 		accessKeyID = os.Getenv("S3_ACCESS_KEY_ID")
@@ -60,14 +83,18 @@ func NewAPIv0(r *mux.Router, db *gorm.DB) {
 		}
 	}
 
+	r.Handle("/acheck", apiHandler.authMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("OK"))
+	})))
 	r.HandleFunc("/stand", apiHandler.getStands).Methods("GET")
 	r.HandleFunc("/stand", apiHandler.createStand).Methods("POST")
 	r.HandleFunc("/stand/{id}", apiHandler.getStand).Methods("GET")
-	r.Handle("/stand/{id}", authMiddleware(http.HandlerFunc(apiHandler.updateStand))).Methods("POST")
-	r.Handle("/stand/{id}", authMiddleware(http.HandlerFunc(apiHandler.deleteStand))).Methods("DELETE")
+	r.Handle("/stand/{id}", apiHandler.authMiddleware(http.HandlerFunc(apiHandler.updateStand))).Methods("POST")
+	r.Handle("/stand/{id}", apiHandler.authMiddleware(http.HandlerFunc(apiHandler.deleteStand))).Methods("DELETE")
 	r.HandleFunc("/image", handleImageOptionsFunc(minioClient)).Methods("OPTIONS")
 	r.HandleFunc("/image", handleImagePostFunc(minioClient, bucketName)).Methods("POST")
-	r.Handle("/image/{id}", authMiddleware(http.HandlerFunc(handleImageGetFunc(minioClient, bucketName)))).Methods("GET")
+	r.Handle("/image/{id}", apiHandler.authMiddleware(http.HandlerFunc(handleImageGetFunc(minioClient, bucketName)))).Methods("GET")
 }
 
 func handleImageOptionsFunc(minioClient *minio.Client) func(http.ResponseWriter, *http.Request) {
@@ -158,46 +185,18 @@ func handleImagePostFunc(minioClient *minio.Client, bucketName string) func(http
 	}
 }
 
-func authMiddleware(next http.Handler) http.Handler {
+func (a *api) authMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		audience := []string{"0Hz3wMPMskh2qVpypXPzjwOykkYV1eZd"}
-		secretProvider := auth0.NewJWKClient(auth0.JWKClientOptions{URI: "https://benchapman.eu.auth0.com/.well-known/jwks.json"}, nil)
-
-		configuration := auth0.NewConfiguration(secretProvider, audience, "https://benchapman.eu.auth0.com/", jose.RS256)
-		validator := auth0.NewValidator(configuration, nil)
-
-		token, err := validator.ValidateRequest(r)
+		token, err := a.validator(r)
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			fmt.Printf("could not write json: %s", err)
-			return
-		}
-		out := map[string]interface{}{}
-		err = validator.Claims(r, token, &out)
-		if err != nil {
-			fmt.Println(err)
-			fmt.Println("Token is not valid:", token)
+			log.Println("AuthorizationFilter: Token is not valid", err)
 			w.WriteHeader(http.StatusUnauthorized)
-			_, err := w.Write([]byte("Unauthorized"))
-			if err != nil {
-				fmt.Println(err)
-			}
 			return
 		}
-		context.Set(r, "userEmail", out["email"])
-		context.Set(r, "userSub", out["sub"])
 
-		if err != nil {
-			fmt.Println(err)
-			fmt.Println("Token is not valid:", token)
-			w.WriteHeader(http.StatusUnauthorized)
-			_, err := w.Write([]byte("Unauthorized"))
-			if err != nil {
-				fmt.Println(err)
-			}
-			return
-		} else {
-			next.ServeHTTP(w, r)
-		}
+		claims := token.Claims.(jwt.MapClaims)
+		context.Set(r, "userSub", claims["sub"])
+
+		next.ServeHTTP(w, r)
 	})
 }

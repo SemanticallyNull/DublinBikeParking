@@ -16,3 +16,5 @@ All the configuration is done using environment variables
 | `S3_ACCESS_KEY_ID` | false | none | S3 access key ID |
 | `S3_SECRET_ACCESS_KEY` | false | none | S3 secret access key |
 | `S3_BUCKET_NAME` | false | none | S3 bucket name |
+| `OIDC_AUTHORITY` | false | none | The domain of the OIDC provider |
+| `OIDC_AUDIENCE` | false | none | The audience for which the JWT Token is validated against |
