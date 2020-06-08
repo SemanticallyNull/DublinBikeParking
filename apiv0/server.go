@@ -83,11 +83,6 @@ func NewAPIv0(r *mux.Router, db *gorm.DB) {
 		}
 	}
 
-	r.Handle("/acheck", apiHandler.authMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		okString := []byte("OK")
-		w.Write(okString)
-	})))
 	r.HandleFunc("/stand", apiHandler.getStands).Methods("GET")
 	r.HandleFunc("/stand", apiHandler.createStand).Methods("POST")
 	r.HandleFunc("/stand/{id}", apiHandler.getStand).Methods("GET")
