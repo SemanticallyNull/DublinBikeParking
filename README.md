@@ -1,6 +1,7 @@
 # Dublin Bike Parking
 
 [![CircleCI](https://circleci.com/gh/SemanticallyNull/DublinBikeParking.svg?style=svg)](https://circleci.com/gh/SemanticallyNull/DublinBikeParking)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FSemanticallyNull%2FDublinBikeParking.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FSemanticallyNull%2FDublinBikeParking?ref=badge_shield)
 
 ## Configuration
 
@@ -18,3 +19,6 @@ All the configuration is done using environment variables
 | `S3_BUCKET_NAME` | false | none | S3 bucket name |
 | `OIDC_AUTHORITY` | false | none | The domain of the OIDC provider |
 | `OIDC_AUDIENCE` | false | none | The audience for which the JWT Token is validated against |
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FSemanticallyNull%2FDublinBikeParking.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FSemanticallyNull%2FDublinBikeParking?ref=badge_large)
