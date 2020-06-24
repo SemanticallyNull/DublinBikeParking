@@ -61,6 +61,10 @@ jobs:
           command: |
             echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin https://docker.pkg.github.com/
             docker push $IMAGE_NAME:latest
+      - run:
+          name: Deploy Over SSH
+          command: |
+            ssh ben@sedna.katiechapman.ie "sudo /root/circleci"
 workflows:
   version: 2
   build-main:
