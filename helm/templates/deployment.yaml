@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "dublinbikeparking.fullname" . }}
+  labels:
+    {{- include "dublinbikeparking.labels" . | nindent 4 }}
+spec:
+{{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+{{- end }}
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 20%
+  selector:
+    matchLabels:
+      {{- include "dublinbikeparking.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+    {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      labels:
+        {{- include "dublinbikeparking.selectorLabels" . | nindent 8 }}
+    spec:
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          env:
+            - name: DBP_DB_DIALECT
+              value: mysql
+            - name: DBP_DB_CONNECTION_STRING
+              valueFrom:
+                secretKeyRef:
+                  name: dublinbikeparking-config
+                  key: dbp_db_connection_string
+            - name: SENDGRID_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: dublinbikeparking-config
+                  key: sendgrid_api_key
+            - name: S3_ENDPOINT
+              value: s3.eu-central-003.backblazeb2.com
+            - name: S3_ACCESS_KEY_ID
+              value: 003803a75952a430000000001
+            - name: S3_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: dublinbikeparking-config
+                  key: s3_secret_access_key
+            - name: S3_BUCKET_NAME
+              value: dublinbikeparking-images
+            - name: S3_USE_SSL
+              value: "true"
+            - name: OIDC_AUTHORITY
+              value: https://benchapman.eu.auth0.com/
+            - name: OIDC_AUDIENCE
+              value: 0Hz3wMPMskh2qVpypXPzjwOykkYV1eZd
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
