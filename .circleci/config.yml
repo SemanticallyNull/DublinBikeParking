@@ -64,7 +64,7 @@ jobs:
       - run:
           name: Deploy Over SSH
           command: |
-            ssh -o "StrictHostKeyChecking=no" ben@sedna.katiechapman.ie "sudo /root/circleci"
+            ssh -o "StrictHostKeyChecking=no" katie@sedna.katiechapman.ie "sudo /root/circleci"
 workflows:
   version: 2
   build-main:
