@@ -2,7 +2,7 @@ replicaCount: 5
 
 image:
   repository: docker.pkg.github.com/semanticallynull/dublinbikeparking/dublinbikeparking
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
   tag: ""
 
 imagePullSecrets: []

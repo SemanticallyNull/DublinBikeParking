@@ -6,7 +6,7 @@ orbs:
 executors:
   docker-publisher:
     environment:
-      IMAGE_NAME: docker.pkg.github.com/semanticallynull/dublinbikeparking/dublinbikeparking
+      IMAGE_NAME: katiechapman/dublinbikeparking
     docker:
       - image: circleci/buildpack-deps:stretch
 jobs:
