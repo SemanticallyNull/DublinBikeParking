@@ -1,7 +1,7 @@
 replicaCount: 5
 
 image:
-  repository: docker.pkg.github.com/semanticallynull/dublinbikeparking/dublinbikeparking
+  repository: katiechapman/dublinbikeparking
   pullPolicy: Always
   tag: ""
 
