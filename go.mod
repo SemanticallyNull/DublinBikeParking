@@ -3,10 +3,10 @@ module code.katiechapman.ie/dublinbikeparking
 go 1.12
 
 require (
-	github.com/auth0-community/go-auth0 v1.0.0
 	github.com/denisenkom/go-mssqldb v0.0.0-20191001013358-cfbb681360f0 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/erikstmartin/go-testdb v0.0.0-20160219214506-8d10e4a1bae5 // indirect
+	github.com/gin-gonic/gin v1.6.3
 	github.com/go-sql-driver/mysql v1.5.0 // indirect
 	github.com/google/uuid v1.1.0
 	github.com/gorilla/context v1.1.1
@@ -23,9 +23,8 @@ require (
 	github.com/paulmach/go.geojson v1.4.0
 	github.com/sendgrid/rest v2.4.1+incompatible // indirect
 	github.com/sendgrid/sendgrid-go v3.5.0+incompatible
+	github.com/slack-go/slack v0.6.5
 	github.com/stretchr/testify v1.5.1 // indirect
 	golang.org/x/net v0.0.0-20200202094626-16171245cfb2 // indirect
-	golang.org/x/sync v0.0.0-20181221193216-37e7f081c4d4 // indirect
-	gopkg.in/square/go-jose.v2 v2.2.2
 	gopkg.in/validator.v2 v2.0.0-20180514200540-135c24b11c19
 )

@@ -6,7 +6,8 @@ import (
 	"os"
 	"strconv"
 
-	"code.katiechapman.ie/dublinbikeparking/apiv0"
+	stand2 "code.katiechapman.ie/dublinbikeparking/stand"
+
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 )
@@ -31,7 +32,7 @@ func main() {
 	r, _ := os.Open("import.csv")
 	records, _ := csv.NewReader(r).ReadAll()
 	for ln, record := range records {
-		var stand apiv0.Stand
+		var stand stand2.Stand
 
 		fmt.Printf("%d - %#v", ln, record)
 		lat := record[27][1:9]

@@ -7,6 +7,8 @@ import (
 	"log"
 	"net/http"
 
+	"code.katiechapman.ie/dublinbikeparking/stand"
+
 	"github.com/sendgrid/sendgrid-go"
 
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
@@ -20,27 +22,9 @@ import (
 	geojson "github.com/paulmach/go.geojson"
 )
 
-type Stand struct {
-	gorm.Model
-	StandID        string
-	Lat            float64 `validate:"min=-90,max=90"`
-	Lng            float64 `validate:"min=-180,max=180"`
-	Source         string
-	SourceID       string
-	Name           string
-	Type           string `validate:"nonzero"`
-	NumberOfStands int
-	ImageID        string
-	Notes          string
-	Checked        string
-	Verified       bool
-	LastUpdateBy   string
-	Thefts         []Theft
-}
-
 type StandUpdate struct {
 	gorm.Model
-	Stand     Stand
+	Stand     stand.Stand
 	StandID   uint
 	UserEmail string
 	Update    string `sql:"type:text"`
@@ -66,33 +50,26 @@ func (a *api) getStands(w http.ResponseWriter, r *http.Request) {
 		dbc = dbc.Where("number_of_stands IS NULL")
 	}
 
-	stands := []Stand{}
-	dbc.Preload("Thefts").Find(&stands)
+	stands := []stand.Stand{}
+	dbc.Find(&stands)
 
-	for _, stand := range stands {
+	for _, s := range stands {
 		feature := &geojson.Feature{
 			Geometry: &geojson.Geometry{
 				Type:  geojson.GeometryPoint,
-				Point: []float64{stand.Lng, stand.Lat},
+				Point: []float64{s.Lng, s.Lat},
 			},
 			Properties: map[string]interface{}{
-				"id":             stand.StandID,
-				"name":           stand.Name,
-				"type":           stand.Type,
-				"numberOfStands": stand.NumberOfStands,
-				"notes":          stand.Notes,
-				"imageId":        stand.ImageID,
-				"source":         stand.Source,
-				"checked":        stand.Checked != "",
-				"verified":       stand.Verified,
-				"thefts":         []map[string]interface{}{},
+				"id":             s.StandID,
+				"name":           s.Name,
+				"type":           s.Type,
+				"numberOfStands": s.NumberOfStands,
+				"notes":          s.Notes,
+				"imageId":        s.ImageID,
+				"source":         s.Source,
+				"checked":        s.Checked != "",
+				"verified":       s.Verified,
 			},
-		}
-
-		for _, theft := range stand.Thefts {
-			feature.Properties["thefts"] = append(feature.Properties["thefts"].([]map[string]interface{}), map[string]interface{}{
-				"id": theft.ID,
-			})
 		}
 
 		fc.AddFeature(feature)
@@ -109,19 +86,18 @@ func (a *api) getStand(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
 
-	stand := &Stand{}
-	a.DB.Where("`stand_id` = ?", vars["id"]).Preload("Thefts").First(stand)
+	s := &stand.Stand{}
+	a.DB.Where("`stand_id` = ?", vars["id"]).First(s)
 
 	err := json.NewEncoder(w).Encode(map[string]interface{}{
-		"id":             stand.StandID,
-		"name":           stand.Name,
-		"type":           stand.Type,
-		"numberOfStands": stand.NumberOfStands,
-		"notes":          stand.Notes,
-		"source":         stand.Source,
-		"checked":        stand.Checked != "",
-		"verified":       stand.Verified,
-		"thefts":         stand.Thefts,
+		"id":             s.StandID,
+		"name":           s.Name,
+		"type":           s.Type,
+		"numberOfStands": s.NumberOfStands,
+		"notes":          s.Notes,
+		"source":         s.Source,
+		"checked":        s.Checked != "",
+		"verified":       s.Verified,
 	})
 	if err != nil {
 		fmt.Printf("error encoding json: %s", err)
@@ -129,7 +105,7 @@ func (a *api) getStand(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *api) createStand(w http.ResponseWriter, r *http.Request) {
-	var stand Stand
+	var stand stand.Stand
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -168,6 +144,7 @@ func (a *api) createStand(w http.ResponseWriter, r *http.Request) {
 	id := uuid.New().String()[:6]
 	stand.SourceID = id
 	stand.StandID = id
+	stand.Token = uuid.New().String()
 
 	a.DB.Create(&stand)
 
@@ -195,6 +172,15 @@ func (a *api) createStand(w http.ResponseWriter, r *http.Request) {
 		}()
 	}
 
+	if a.Slack != nil {
+		go func() {
+			err := a.Slack.PostNotification(stand)
+			if err != nil {
+				log.Println(err)
+			}
+		}()
+	}
+
 	err = json.NewEncoder(w).Encode(stand)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -204,7 +190,7 @@ func (a *api) createStand(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *api) updateStand(w http.ResponseWriter, r *http.Request) {
-	var originStand, updatedStand Stand
+	var originStand, updatedStand stand.Stand
 
 	vars := mux.Vars(r)
 
@@ -326,7 +312,7 @@ func (a *api) updateStand(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *api) deleteStand(w http.ResponseWriter, r *http.Request) {
-	var stand Stand
+	var stand stand.Stand
 
 	vars := mux.Vars(r)
 

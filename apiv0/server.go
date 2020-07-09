@@ -1,12 +1,18 @@
 package apiv0
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"net/url"
 	"os"
 	"time"
+
+	"code.katiechapman.ie/dublinbikeparking/stand"
+
+	"code.katiechapman.ie/dublinbikeparking/slack"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/dgrijalva/jwt-go/request"
@@ -22,6 +28,7 @@ import (
 type api struct {
 	DB             *gorm.DB
 	SendgridAPIKey string
+	Slack          *slack.SlackIntegration
 	validator      func(request *http.Request) (*jwt.Token, error)
 }
 
@@ -39,9 +46,14 @@ func NewAPIv0(r *mux.Router, db *gorm.DB) {
 		fmt.Println("WARNING: S3_* variables ares not set. No images will be stored")
 	}
 
-	db.AutoMigrate(&Stand{})
+	if webhookURL := os.Getenv("SLACK_WEBHOOK_URL"); webhookURL == "" {
+		fmt.Println("WARNING: S3_* variables ares not set. No images will be stored")
+	} else {
+		apiHandler.Slack = slack.NewSlackIntegration(webhookURL)
+	}
+
+	db.AutoMigrate(&stand.Stand{})
 	db.AutoMigrate(&StandUpdate{})
-	db.AutoMigrate(&Theft{})
 
 	var minioClient *minio.Client
 	var endpoint, accessKeyID, secretAccessKey, bucketName string
@@ -91,6 +103,7 @@ func NewAPIv0(r *mux.Router, db *gorm.DB) {
 	r.HandleFunc("/image", handleImageOptionsFunc(minioClient)).Methods("OPTIONS")
 	r.HandleFunc("/image", handleImagePostFunc(minioClient, bucketName)).Methods("POST")
 	r.Handle("/image/{id}", apiHandler.authMiddleware(http.HandlerFunc(handleImageGetFunc(minioClient, bucketName)))).Methods("GET")
+	r.HandleFunc("/slack", apiHandler.handleSlackMessage).Methods("POST")
 }
 
 func handleImageOptionsFunc(minioClient *minio.Client) func(http.ResponseWriter, *http.Request) {
@@ -181,6 +194,71 @@ func handleImagePostFunc(minioClient *minio.Client, bucketName string) func(http
 
 		fmt.Fprintf(w, "%s", fileName)
 	}
+}
+
+type SlackInteraction struct {
+	User struct {
+		ID string `json:"id"`
+	} `json:"user"`
+	ResponseURL string `json:"response_url"`
+	Actions     []struct {
+		ActionID string `json:"action_id"`
+		Value    string `json:"value"`
+	} `json:"actions"`
+}
+
+func (a *api) handleSlackMessage(w http.ResponseWriter, r *http.Request) {
+	payload := r.FormValue("payload")
+	interaction := &SlackInteraction{}
+	err := json.Unmarshal([]byte(payload), interaction)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Println(err)
+		fmt.Fprintf(w, "error approving slack message")
+		return
+	}
+
+	standID := (&url.URL{
+		RawQuery: interaction.Actions[0].Value,
+	}).Query().Get("id")
+	standToken := (&url.URL{
+		RawQuery: interaction.Actions[0].Value,
+	}).Query().Get("token")
+
+	go func() {
+		br := &bytes.Buffer{}
+		err = json.NewEncoder(br).Encode(struct {
+			ReplaceOriginal string `json:"replace_original"`
+			Text            string `json:"text"`
+		}{
+			ReplaceOriginal: "true",
+			Text:            fmt.Sprintf("<@%s> has %s stand ID %s", interaction.User.ID, interaction.Actions[0].ActionID, standID),
+		})
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		_, err = http.Post(interaction.ResponseURL, "application/json", br)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+	}()
+
+	s := &stand.Stand{}
+	err = a.DB.Where("stand_id = ? AND token = ?", standID, standToken).First(s).Error
+	if err != nil {
+		log.Println(err)
+	}
+
+	s.Checked = interaction.User.ID
+
+	err = a.DB.Save(s).Error
+	if err != nil {
+		log.Println(err)
+	}
+
+	w.WriteHeader(http.StatusOK)
 }
 
 func (a *api) authMiddleware(next http.Handler) http.Handler {

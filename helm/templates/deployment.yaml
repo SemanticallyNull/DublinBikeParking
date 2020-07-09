@@ -76,6 +76,12 @@ spec:
               value: https://benchapman.eu.auth0.com/
             - name: OIDC_AUDIENCE
               value: 0Hz3wMPMskh2qVpypXPzjwOykkYV1eZd
+            - name: DBP_DB_CONNECTION_STRING
+              valueFrom:
+               secretKeyRef:
+                 name: dublinbikeparking-config
+                 key: slack_webhook
+
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
