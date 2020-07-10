@@ -245,15 +245,13 @@ func (a *api) handleSlackMessage(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
-	s := &stand.Stand{}
-	err = a.DB.Where("stand_id = ? AND token = ?", standID, standToken).First(s).Error
+	s := stand.Stand{}
+	err = a.DB.Where("stand_id = ? AND token = ?", standID, standToken).First(&s).Error
 	if err != nil {
 		log.Println(err)
 	}
 
-	s.Checked = interaction.User.ID
-
-	err = a.DB.Save(s).Error
+	err = a.DB.Model(&s).Update("checked", interaction.User.ID).Error
 	if err != nil {
 		log.Println(err)
 	}
