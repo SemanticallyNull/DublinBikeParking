@@ -12,14 +12,6 @@ type SlackIntegration struct {
 	webhookURL string
 }
 
-type approvalMessage struct {
-	Coordinates   string
-	Location      string
-	ID            string
-	NoStands      string
-	ApprovalValue string
-}
-
 func NewSlackIntegration(webhookURL string) *SlackIntegration {
 	return &SlackIntegration{
 		webhookURL: webhookURL,
