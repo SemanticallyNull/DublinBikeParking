@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"code.katiechapman.ie/dublinbikeparking/apiv0"
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
@@ -55,7 +56,11 @@ func main() {
 
 	port := getPort()
 	log.Printf("Listening on port %s...", port)
-	err = http.ListenAndServe(":"+port, r)
+	err = http.ListenAndServe(":"+port, handlers.CORS(
+		handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"}),
+		handlers.AllowedMethods([]string{"GET", "POST", "PUT", "HEAD", "OPTIONS"}),
+		handlers.AllowedOrigins([]string{"https://dublinbikeparking.com/", "https://dbpimg.apps.katiechapman.ie/"}),
+	)(r))
 	if err != nil {
 		log.Fatalf("%s\n", err)
 	}
