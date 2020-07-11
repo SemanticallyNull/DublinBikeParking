@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Dublin Bike Parking</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Where can I park my bike in Dublin? Find bicycle parking stands in Dublin using this map">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.4/dist/leaflet.css"
+      integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
+      crossorigin="anonymous">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css"
+      integrity="sha384-lPzjPsFQL6te2x+VxmV6q1DpRxpRk0tmnl2cpwAO5y04ESyc752tnEWPKDfl1olr"
+      crossorigin="anonymous">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css"
+      integrity="sha384-5kMSQJ6S4Qj5i09mtMNrWpSi8iXw230pKU76xTmrpezGnNJQzj0NzXjQLLg+jE7k"
+      crossorigin="anonymous">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-easybutton@2.3.0/src/easy-button.css"
+      integrity="sha384-iNk4bdiUuP4VWx8c4KVwk07wshEQVvAe/8xwpcNR/5anLhH9SFPHkjLSXAwGwXKC"
+      crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css"
+      integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU"
+      crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+      integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+      crossorigin="anonymous">
+    <link rel="stylesheet" href="https://unpkg.com/filepond@4.13.7/dist/filepond.css"
+      integrity="sha384-qoy7VHMIa2Dmat5IGOpnVWUDsqPb0UmrjiiM6BYkxTglHDxVpRFi60f21umjzES7"
+      crossorigin="anonymous">
+    <style type="text/css">
+      html, body {padding:0;margin:0;height:100%;}
+
+      #map {
+        width:100%;
+        height:100%;
+      }
+      .info { padding: 6px 8px; font: 14px/16px Arial, Helvetica, sans-serif; background: white; background: rgba(255,255,255,0.8); box-shadow: 0 0 15px rgba(0,0,0,0.2); border-radius: 5px; } .info h4 { margin: 0 0 5px; color: #777; }
+      .legend { text-align: left; line-height: 18px; color: #555; }
+      .leaflet-popup-content { text-align: center; }
+      .icon-color { color: #148bbb; }
+      button {
+        width: 100%;
+        margin-top: 20px;
+        height: 50px;
+      }
+
+    </style>
+    <script src="https://unpkg.com/leaflet@1.3.4/dist/leaflet.js"
+      integrity="sha512-nMMmRyTVoLYqjP9hrbed9S+FzjZHW5gY1TWCHA5ckwXZBadntCNs8kEqAWdrb9O7rxbCaA4lKTIWjDXZxflOcA=="
+      crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/leaflet-hash@0.2.1/leaflet-hash.js"
+      integrity="sha384-2V+X2eD8Nz+G+FVKmPS5XkcMt40qrSGaHSoV8Ny7VAvPnHMfnLgrZ6qvNZVJ2ycb"
+      crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/leaflet-ajax@2.1.0/dist/leaflet.ajax.min.js"
+      integrity="sha384-sKs8ZrrxyJoElcPVznZwGpUTTXvkMYfHYxdIFzO8Hd0TA6emONMj8BwnsFf+6cZ/"
+      crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"
+      integrity="sha384-RLIyj5q1b5XJTn0tqUhucRZe40nFTocRP91R/NkRJHwAe4XxnTV77FXy/vGLiec2"
+      crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/leaflet-knn@0.1.0/leaflet-knn.min.js"
+      integrity="sha384-goDoVSh/ha1q7BF3AM8ZbCVDSRPQskogAUTfPxfs13/TJIYguhSGEg4afRJq1hmQ"
+      crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/leaflet-easybutton@2.3.0/src/easy-button.js"
+      integrity="sha384-GHKGgc0qNzZZpBzGWvVZWSRFNB+LYy8aJCBtgI0IpWul99UCBQcSP85Z9RLAorB/"
+      crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/filepond-plugin-image-transform@3.7.3/dist/filepond-plugin-image-transform.js"
+      integrity="sha384-f2974/VlMSTV/FDf199k/O4w/NfXkzwcGtRehsfneIjIYOS/EaegQGJeC5aMVZrH"
+      crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/filepond-plugin-image-resize@2.0.7/dist/filepond-plugin-image-resize.js"
+      integrity="sha384-DevggmoCX8W0gxHIx5qmQYlhiHHNIKmVyeDC20ub7EvOALhXzHlaFY9hw1tcf5bZ"
+      crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/filepond@4.13.7/dist/filepond.js"
+      integrity="sha384-iElACePzOctQuCLp1QsllYNCB4SafmsG9J34fypmD3yJVcmpQ1ghBYhtUhYuS8Cb"
+      crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/filepond-plugin-image-exif-orientation@1.0.9/dist/filepond-plugin-image-exif-orientation.js"
+      integrity="sha384-y7C5DpcxyJLepNcJ3Njt7cutje0lsGNth2OfJrmshg/s1c252xtn97tJYhJ7Rle7"
+      crossorigin="anonymous"></script>
+    <script type="text/javascript">
+      var data = []
+      var cursor = 0;
+      var marker = L.marker([0,0])
+      var map
+      var pond
+
+      window.addEventListener('load', function() {
+        FilePond.registerPlugin(FilePondPluginImageExifOrientation,
+                FilePondPluginImageResize,
+                FilePondPluginImageTransform);
+
+        map = L.map('map').setView([53.34587706183283, -6.267379465984959], 12);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Stand Data: <a href="https://bleeperbike.com/">Bleeper Bikes</a>, <a href="https://data.smartdublin.ie/dataset/dcc_public_cycle_parking_stands">DCC</a> DublinBikes: <a href="https://developer.jcdecaux.com/#/opendata/vls?page=getstarted&contract=Dublin">JCDecaux</a>  | <a href="/privacy.html">Privacy</a>',
+          maxZoom: 19
+        }).addTo(map);
+
+        pond = FilePond.create(document.getElementById('uploader'), {
+          imageResizeTargetWidth: 1200,
+          imageResizeUpscale: false
+        });
+
+        fetch('./standsfromhere.json').then((res) => res.json()).then((d) => {
+          data = d
+          marker.addTo(map);
+          update()
+        }).catch(console.log)
+
+        document.getElementById('next').addEventListener('click',next)
+        document.getElementById('previous').addEventListener('click',prev)
+      });
+
+      function next() {
+        if(cursor != data.length-1) {
+          cursor++
+        }
+        update()
+      }
+      function prev() {
+        if(cursor != 0) {
+          cursor--
+        }
+        update()
+      }
+      function update() {
+        marker.setLatLng([data[cursor].Lat, data[cursor].Lng])
+        map.setView([data[cursor].Lat, data[cursor].Lng], 17)
+        document.getElementById('location').innerHTML = data[cursor].StandID + " — " + data[cursor].Name
+        document.getElementById('nostands').innerHTML = data[cursor].NumberOfStands
+        document.getElementById('type').innerHTML = data[cursor].Type
+        pond.server = 'https://dublinbikeparking.com/api/v0/publicimage/' + data[cursor].StandID
+      }
+    </script>
+  </head>
+  <body>
+    <div class="container h-100">
+      <div class="row h-25">
+        <div class="col">
+          <div id="map">
+          </div>
+        </div>
+      </div>
+      <div class="row h-25">
+        <div class="col">
+          <h1 id="location">ID - Location</h1>
+          <table class="table">
+            <thead><tr><th>No Stands</th><th>Type</th></tr></thead>
+            <tbody><tr><td id="nostands"></td><td id="type"></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="row h-25">
+        <div class="col">
+          <div id="uploader"></div>
+        </div>
+      </div>
+      <div class="row h-25" id="question">
+        <div class="col text-center middle">
+          <button id="previous" class="btn btn-lg btn-outline-secondary np"><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-left" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+              <path fill-rule="evenodd" d="M5.854 4.646a.5.5 0 0 1 0 .708L3.207 8l2.647 2.646a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 0 1 .708 0z"/>
+              <path fill-rule="evenodd" d="M2.5 8a.5.5 0 0 1 .5-.5h10.5a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/>
+            </svg></button>
+        </div>
+        <div class="col text-center middle">
+          <button id="next" class="btn btn-lg btn-outline-secondary np"><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+              <path fill-rule="evenodd" d="M10.146 4.646a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L12.793 8l-2.647-2.646a.5.5 0 0 1 0-.708z"/>
+              <path fill-rule="evenodd" d="M2 8a.5.5 0 0 1 .5-.5H13a.5.5 0 0 1 0 1H2.5A.5.5 0 0 1 2 8z"/>
+            </svg></button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Matomo -->
+    <script type="text/javascript">
+      var _paq = window._paq || [];
+      /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
+      _paq.push(["setDoNotTrack", true]);
+      _paq.push(['trackPageView']);
+      _paq.push(['enableLinkTracking']);
+      (function() {
+        var u="//cargobike.ie/analytics/";
+        _paq.push(['setTrackerUrl', u+'matomo.php']);
+        _paq.push(['setSiteId', '2']);
+        var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+        g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
+      })();
+    </script>
+    <!-- End Matomo Code -->
+  </body>
+</html>
