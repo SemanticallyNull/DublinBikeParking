@@ -308,14 +308,17 @@ func (a *api) handleSlackMessage(w http.ResponseWriter, r *http.Request) {
 	}()
 
 	s := stand.Stand{}
-	err = a.DB.Where("stand_id = ? AND token = ?", standID, standToken).First(&s).Error
-	if err != nil {
-		log.Println(err)
-	}
 
-	err = a.DB.Model(&s).Update("checked", interaction.User.ID).Error
-	if err != nil {
-		log.Println(err)
+	var errSw error
+	switch interaction.Actions[0].ActionID {
+	case "approve":
+		errSw = a.DB.Model(&s).Where("stand_id = ? AND token = ?", standID, standToken).Update("checked", interaction.User.ID).Error
+	default:
+		errSw = a.DB.Model(&s).Where("stand_id = ? AND token = ?", standID, standToken).Update("deleted_at", time.Now()).Error
+	}
+	if errSw != nil {
+		log.Println(errSw)
+		return
 	}
 
 	w.WriteHeader(http.StatusOK)

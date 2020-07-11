@@ -19,8 +19,8 @@ func NewSlackIntegration(webhookURL string) *SlackIntegration {
 }
 
 func (s *SlackIntegration) PostNotification(stand stand.Stand) error {
-	approveButton := slack.NewButtonBlockElement("approve", fmt.Sprintf("id=%s&token=%s", stand.StandID, "token"), slack.NewTextBlockObject("plain_text", "Approve", false, false))
-	denyButton := slack.NewButtonBlockElement("deny", fmt.Sprintf("id=%s&token=%s", stand.StandID, "token"), slack.NewTextBlockObject("plain_text", "Deny", false, false))
+	approveButton := slack.NewButtonBlockElement("approve", fmt.Sprintf("id=%s&token=%s", stand.StandID, stand.Token), slack.NewTextBlockObject("plain_text", "Approve", false, false))
+	denyButton := slack.NewButtonBlockElement("deny", fmt.Sprintf("id=%s&token=%s", stand.StandID, stand.Token), slack.NewTextBlockObject("plain_text", "Deny", false, false))
 	approveButton.Style = "primary"
 	denyButton.Style = "danger"
 
