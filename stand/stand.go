@@ -15,6 +15,7 @@ type Stand struct {
 	Type           string `validate:"nonzero"`
 	NumberOfStands int
 	ImageID        string
+	PublicImageURL string
 	Notes          string
 	Checked        string
 	Verified       bool

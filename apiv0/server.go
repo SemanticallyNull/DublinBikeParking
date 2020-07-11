@@ -102,6 +102,7 @@ func NewAPIv0(r *mux.Router, db *gorm.DB) {
 	r.Handle("/stand/{id}", apiHandler.authMiddleware(http.HandlerFunc(apiHandler.deleteStand))).Methods("DELETE")
 	r.HandleFunc("/image", handleImageOptionsFunc(minioClient)).Methods("OPTIONS")
 	r.HandleFunc("/image", handleImagePostFunc(minioClient, bucketName)).Methods("POST")
+	r.HandleFunc("/publicimage/{id}", apiHandler.handlePublicImagePostFunc(minioClient, "dublinbikeparking-public")).Methods("POST")
 	r.Handle("/image/{id}", apiHandler.authMiddleware(http.HandlerFunc(handleImageGetFunc(minioClient, bucketName)))).Methods("GET")
 	r.HandleFunc("/slack", apiHandler.handleSlackMessage).Methods("POST")
 }
@@ -185,6 +186,67 @@ func handleImagePostFunc(minioClient *minio.Client, bucketName string) func(http
 			ContentType:     fileHeader.Header.Get("Content-Type"),
 			RetainUntilDate: &fileExpiration,
 		})
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Println(err)
+			fmt.Fprintf(w, "error uploading file")
+			return
+		}
+
+		fmt.Fprintf(w, "%s", fileName)
+	}
+}
+
+func (a api) handlePublicImagePostFunc(minioClient *minio.Client, bucketName string) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if minioClient == nil {
+			w.WriteHeader(http.StatusNotImplemented)
+			return
+		}
+
+		vars := mux.Vars(r)
+
+		var stnd stand.Stand
+		a.DB.Where("stand_id = ?", vars["id"]).First(&stnd)
+
+		err := r.ParseMultipartForm(5 << 20)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Println(err)
+			fmt.Fprintf(w, "Image too large. Max Size: %v", 5<<20)
+			return
+		}
+
+		file, fileHeader, err := r.FormFile("filepond")
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Println(err)
+			fmt.Fprintf(w, "error uploading file")
+			return
+		}
+		defer file.Close()
+
+		contentType := fileHeader.Header.Get("Content-Type")
+		if !(contentType == "image/png" || contentType == "image/jpeg" || contentType == "image/gif") {
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprintf(w, "incorrect filetype")
+			return
+		}
+
+		fileName := uuid.New().String()
+		_, err = minioClient.PutObject(bucketName, fileName, file, fileHeader.Size, minio.PutObjectOptions{
+			ContentType: fileHeader.Header.Get("Content-Type"),
+		})
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Println(err)
+			fmt.Fprintf(w, "error uploading file")
+			return
+		}
+
+		err = a.DB.Model(&stnd).Limit(1).Update(map[string]interface{}{
+			"public_image_url": "https://f003.backblazeb2.com/file/dublinbikeparking-public/" + fileName,
+		}).Error
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Println(err)
