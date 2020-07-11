@@ -69,11 +69,9 @@ workflows:
   version: 2
   build-main:
     jobs:
-      - golangci-lint/lint
       - test
       - build:
           requires:
-            - golangci-lint/lint
             - test
           filters:
             branches:
