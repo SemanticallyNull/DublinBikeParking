@@ -146,7 +146,7 @@
 
           var publicImage = ""
           if(!f.properties["publicImageURL"] && f.properties["publicImageURL"] != "") {
-            unverifiedMessage = "<tr><td>Image</td><td><a href=\""+f.properties["publicImageURL"]+"\">Link to image</a></td></tr>"
+            publicImage = "<tr><td>Image</td><td><a href=\""+f.properties["publicImageURL"]+"\">Link to image</a></td></tr>"
           }
 
           var urlParams = new URLSearchParams(window.location.search);
