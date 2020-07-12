@@ -7,19 +7,16 @@ import (
 	"log"
 	"net/http"
 
-	"code.katiechapman.ie/dublinbikeparking/stand"
-
-	"github.com/sendgrid/sendgrid-go"
-
-	"github.com/sendgrid/sendgrid-go/helpers/mail"
-
-	validator "gopkg.in/validator.v2"
-
 	"github.com/google/uuid"
 	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
 	geojson "github.com/paulmach/go.geojson"
+	"github.com/sendgrid/sendgrid-go"
+	"github.com/sendgrid/sendgrid-go/helpers/mail"
+	"gopkg.in/validator.v2"
+
+	"code.katiechapman.ie/dublinbikeparking/stand"
 )
 
 type StandUpdate struct {
