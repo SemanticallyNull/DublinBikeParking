@@ -19,7 +19,7 @@ import (
 	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
-	minio "github.com/minio/minio-go/v6"
+	"github.com/minio/minio-go/v6"
 	"github.com/osstotalsoft/oidc-jwt-go"
 	"github.com/osstotalsoft/oidc-jwt-go/discovery"
 )
