@@ -183,8 +183,7 @@ func handleImagePostFunc(minioClient *minio.Client, bucketName string) func(http
 		fileName := uuid.New().String()
 		fileExpiration := time.Now().Add(time.Hour * 24 * 14)
 		_, err = minioClient.PutObject(bucketName, fileName, file, fileHeader.Size, minio.PutObjectOptions{
-			ContentType:     fileHeader.Header.Get("Content-Type"),
-			RetainUntilDate: &fileExpiration,
+			ContentType: fileHeader.Header.Get("Content-Type"),
 		})
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
