@@ -144,6 +144,11 @@
             unverifiedMessage = "<tr><td colspan=2><small>This is a user submitted stand we have not verified yet.</small></td></tr>"
           }
 
+          var publicImage = ""
+          if(!f.properties["publicImageURL"] && f.properties["publicImageURL"] != "") {
+            unverifiedMessage = "<tr><td>Image</td><td><a href=\""+f.properties["publicImageURL"]+"\">Link to image</a></td></tr>"
+          }
+
           var urlParams = new URLSearchParams(window.location.search);
           var standIDParam = urlParams.get('showIDs');
           var standID = ""
@@ -159,6 +164,7 @@
               f.properties["name"] +
             "</td></tr>" +
             "<tr><td><b>Number of Stands</b></td><td>" + noStands + "</td></tr>" +
+            publicImage +
             standID +
             unverifiedMessage +
             "</table>");

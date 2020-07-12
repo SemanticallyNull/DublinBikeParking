@@ -69,6 +69,7 @@ func (a *api) getStands(w http.ResponseWriter, r *http.Request) {
 				"source":         s.Source,
 				"checked":        s.Checked != "",
 				"verified":       s.Verified,
+				"publicImageURL": s.PublicImageURL,
 			},
 		}
 
@@ -98,6 +99,7 @@ func (a *api) getStand(w http.ResponseWriter, r *http.Request) {
 		"source":         s.Source,
 		"checked":        s.Checked != "",
 		"verified":       s.Verified,
+		"publicImageURL": s.PublicImageURL,
 	})
 	if err != nil {
 		fmt.Printf("error encoding json: %s", err)
