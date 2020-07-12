@@ -145,7 +145,7 @@
           }
 
           var publicImage = ""
-          if(!f.properties["publicImageURL"] && f.properties["publicImageURL"] != "") {
+          if(f.properties["publicImageURL"] && f.properties["publicImageURL"] != "") {
             publicImage = "<tr><td>Image</td><td><a href=\""+f.properties["publicImageURL"]+"\">Link to image</a></td></tr>"
           }
 
