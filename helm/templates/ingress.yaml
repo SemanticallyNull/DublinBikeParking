@@ -1,0 +1,24 @@
+kind: Ingress
+apiVersion: extensions/v1beta1
+metadata:
+  name: {{ include "dublinbikeparking.fullname" . }}
+  namespace: default
+  labels:
+    {{- include "dublinbikeparking.labels" . | nindent 4 }}
+
+spec:
+  rules:
+    - host: dublinbikeparking.com
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: {{ include "dublinbikeparking.fullname" . }}
+              servicePort: http
+    - host: www.dublinbikeparking.com
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: {{ include "dublinbikeparking.fullname" . }}
+              servicePort: http
