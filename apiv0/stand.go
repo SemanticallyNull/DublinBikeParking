@@ -47,9 +47,7 @@ func (a *api) getStands(w http.ResponseWriter, r *http.Request) {
 	db := r.URL.Query().Get("dublinbikes") == "only"
 	review := r.URL.Query().Get("review") == "true"
 
-	fmt.Printf("%v %v %v %v %v\n", checked && !db && !review && cache.expiry.After(time.Now()), checked, !db, !review, cache.expiry.After(time.Now()))
 	if checked && !db && !review && cache.expiry.After(time.Now()) {
-		fmt.Println("cachehit")
 		beeline.AddField(ctx, "cached", true)
 		err := json.NewEncoder(w).Encode(cache.featureCollection)
 		if err != nil {
@@ -57,8 +55,6 @@ func (a *api) getStands(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-
-	fmt.Println("cachemiss")
 
 	ctx, span := beeline.StartSpan(ctx, "getStands: db")
 	beeline.AddField(ctx, "cached", false)
