@@ -105,8 +105,7 @@
           markers.addLayer(standsLayer);
           map.addLayer(markers);
         });
-        var hireLayer = new L.GeoJSON.AJAX("/api/v0/stand?dublinbikes=only",{onEachFeature:standIcon});
-        hireLayer.on('data:loaded', function () {});
+        var hireLayer = null;
 
         function standIcon(f,l){
           switch(f.properties.type) {
@@ -245,12 +244,24 @@
             dublinBikesButton.innerHTML = "DublinBikes"
             dublinBikesButton.addEventListener('click', function() {
               _paq.push(['trackEvent', 'dublinBikes']);
-              markers.removeLayer(standsLayer);
-              markers.addLayer(hireLayer);
-              dublinBikesButton.classList.add("btn-dark")
-              dublinBikesButton.classList.remove("btn-outline-dark")
-              myBikeButton.classList.remove("btn-dark")
-              myBikeButton.classList.add("btn-outline-dark")
+              if(hireLayer == null) {
+                hireLayer = new L.GeoJSON.AJAX("/api/v0/stand?dublinbikes=only",{onEachFeature:standIcon});
+                hireLayer.on('data:loaded', function () {
+                  markers.removeLayer(standsLayer);
+                  markers.addLayer(hireLayer);
+                  dublinBikesButton.classList.add("btn-dark")
+                  dublinBikesButton.classList.remove("btn-outline-dark")
+                  myBikeButton.classList.remove("btn-dark")
+                  myBikeButton.classList.add("btn-outline-dark")
+                });
+              } else {
+                markers.removeLayer(standsLayer);
+                markers.addLayer(hireLayer);
+                dublinBikesButton.classList.add("btn-dark")
+                dublinBikesButton.classList.remove("btn-outline-dark")
+                myBikeButton.classList.remove("btn-dark")
+                myBikeButton.classList.add("btn-outline-dark")
+              }
             })
             this._div.appendChild(dublinBikesButton)
 
