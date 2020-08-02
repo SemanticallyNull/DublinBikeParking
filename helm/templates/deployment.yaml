@@ -79,9 +79,14 @@ spec:
               value: 0Hz3wMPMskh2qVpypXPzjwOykkYV1eZd
             - name: SLACK_WEBHOOK_URL
               valueFrom:
-               secretKeyRef:
-                 name: dublinbikeparking-config
-                 key: slack_webhook
+                secretKeyRef:
+                  name: dublinbikeparking-config
+                  key: slack_webhook
+            - name: DBP_HONEYCOMB_WRITEKEY
+              valueFrom:
+                secretKeyRef:
+                  name: dublinbikeparking-config
+                  key: dbp_honeycomb_writekey
 
       {{- with .Values.nodeSelector }}
       nodeSelector:

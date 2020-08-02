@@ -10,6 +10,10 @@ import (
 	"os"
 	"time"
 
+	"github.com/honeycombio/beeline-go/wrappers/hnynethttp"
+
+	"github.com/honeycombio/beeline-go"
+
 	"code.katiechapman.ie/dublinbikeparking/stand"
 
 	"code.katiechapman.ie/dublinbikeparking/slack"
@@ -49,6 +53,14 @@ func NewAPIv0(r *mux.Router, db *gorm.DB) {
 		fmt.Println("WARNING: S3_* variables ares not set. No images will be stored")
 	} else {
 		apiHandler.Slack = slack.NewSlackIntegration(webhookURL)
+	}
+
+	if honeycombWriteKey := os.Getenv("DBP_HONEYCOMB_WRITEKEY"); honeycombWriteKey != "" {
+		beeline.Init(beeline.Config{
+			WriteKey:    honeycombWriteKey,
+			Dataset:     "DublinBikeParking",
+			ServiceName: "dbp",
+		})
 	}
 
 	db.AutoMigrate(&stand.Stand{})
@@ -94,6 +106,7 @@ func NewAPIv0(r *mux.Router, db *gorm.DB) {
 		}
 	}
 
+	r.Use(hnynethttp.WrapHandler)
 	r.HandleFunc("/stand", apiHandler.getStands).Methods("GET")
 	r.HandleFunc("/stand", apiHandler.createStand).Methods("POST")
 	r.HandleFunc("/stand/{id}", apiHandler.getStand).Methods("GET")

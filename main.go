@@ -6,11 +6,12 @@ import (
 	"net/http"
 	"os"
 
-	"code.katiechapman.ie/dublinbikeparking/apiv0"
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
+
+	"code.katiechapman.ie/dublinbikeparking/apiv0"
 )
 
 const StaticDirectoryV1 = "./static"

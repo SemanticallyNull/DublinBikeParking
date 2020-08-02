@@ -6,6 +6,9 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"time"
+
+	"github.com/honeycombio/beeline-go"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/context"
@@ -27,28 +30,61 @@ type StandUpdate struct {
 	Update    string `sql:"type:text"`
 }
 
+type geoJSONCache struct {
+	featureCollection *geojson.FeatureCollection
+	expiry            time.Time
+}
+
+var cache = geoJSONCache{}
+
 func (a *api) getStands(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
 	w.Header().Add("content-type", "application/json")
 	fc := geojson.NewFeatureCollection()
 
+	checked := r.URL.Query().Get("checked") != "unchecked"
+	db := r.URL.Query().Get("dublinbikes") == "only"
+	review := r.URL.Query().Get("review") == "true"
+
+	fmt.Printf("%v %v %v %v %v\n", checked && !db && !review && cache.expiry.After(time.Now()), checked, !db, !review, cache.expiry.After(time.Now()))
+	if checked && !db && !review && cache.expiry.After(time.Now()) {
+		fmt.Println("cachehit")
+		beeline.AddField(ctx, "cached", true)
+		err := json.NewEncoder(w).Encode(cache.featureCollection)
+		if err != nil {
+			fmt.Printf("error encoding json: %s", err)
+		}
+		return
+	}
+
+	fmt.Println("cachemiss")
+
+	ctx, span := beeline.StartSpan(ctx, "getStands: db")
+	beeline.AddField(ctx, "cached", false)
+
 	dbc := a.DB
 
-	if checked := r.URL.Query().Get("checked"); checked != "unchecked" {
+	if checked {
 		dbc = a.DB.Where("checked != ?", "")
 	}
 
-	if db := r.URL.Query().Get("dublinbikes"); db == "off" {
-		dbc = dbc.Where("type != ?", "DublinBikes")
-	} else if db == "only" {
+	if db {
 		dbc = dbc.Where("type = ?", "DublinBikes")
+	} else {
+		dbc = dbc.Where("type != ?", "DublinBikes")
 	}
 
-	if r.URL.Query().Get("review") == "true" {
+	if review {
 		dbc = dbc.Where("number_of_stands IS NULL")
 	}
 
 	stands := []stand.Stand{}
 	dbc.Find(&stands)
+
+	span.Send()
+
+	ctx, span = beeline.StartSpan(ctx, "getStands: toGeoJSON")
 
 	for _, s := range stands {
 		feature := &geojson.Feature{
@@ -72,6 +108,13 @@ func (a *api) getStands(w http.ResponseWriter, r *http.Request) {
 
 		fc.AddFeature(feature)
 	}
+
+	if checked && !db && !review {
+		cache.featureCollection = fc
+		cache.expiry = time.Now().Add(time.Hour)
+	}
+
+	span.Send()
 
 	err := json.NewEncoder(w).Encode(fc)
 	if err != nil {
