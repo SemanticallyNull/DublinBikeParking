@@ -1,6 +1,6 @@
 # Dublin Bike Parking
 
-[![CircleCI](https://circleci.com/gh/SemanticallyNull/DublinBikeParking.svg?style=svg&branch=main)](https://circleci.com/gh/SemanticallyNull/DublinBikeParking)
+[![CircleCI](https://circleci.com/gh/SemanticallyNull/DublinBikeParking.svg?style=svg)](https://circleci.com/gh/SemanticallyNull/DublinBikeParking)
 
 ## Configuration
 
