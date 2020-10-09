@@ -11,7 +11,7 @@
   "dependencies": {
     "@auth0/auth0-spa-js": "^1.8.0",
     "axios": "^0.19.2",
-    "bootstrap": "^4.4.1",
+    "bootstrap": "^4.5.2",
     "bootstrap-vue": "^2.3.0",
     "core-js": "^3.6.5",
     "leaflet": "^1.6.0",
