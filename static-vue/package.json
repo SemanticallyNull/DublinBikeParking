@@ -10,11 +10,11 @@
   },
   "dependencies": {
     "@auth0/auth0-spa-js": "^1.8.0",
-    "axios": "^0.19.2",
     "bootstrap": "^4.5.2",
+    "axios": "^0.20.0",
     "bootstrap-vue": "^2.3.0",
     "core-js": "^3.6.5",
-    "leaflet": "^1.6.0",
+    "leaflet": "^1.7.1",
     "vue": "^2.6.10",
     "vue-router": "^3.3.1",
     "vue2-leaflet": "^2.5.2",
