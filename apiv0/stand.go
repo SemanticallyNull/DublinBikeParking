@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/honeycombio/beeline-go"
@@ -127,7 +128,7 @@ func (a *api) getStand(w http.ResponseWriter, r *http.Request) {
 	s := &stand.Stand{}
 	a.DB.Where("`stand_id` = ?", vars["id"]).First(s)
 
-	err := json.NewEncoder(w).Encode(map[string]interface{}{
+	standData := map[string]interface{}{
 		"id":             s.StandID,
 		"name":           s.Name,
 		"type":           s.Type,
@@ -137,10 +138,30 @@ func (a *api) getStand(w http.ResponseWriter, r *http.Request) {
 		"checked":        s.Checked != "",
 		"verified":       s.Verified,
 		"publicImageURL": s.PublicImageURL,
-	})
+	}
+
+	if s.Type == "DublinBikes" {
+		dbAPIKey := os.Getenv("DUBLINBIKES_API_KEY")
+		if dbAPIKey != "" {
+			resp, err := http.Get(fmt.Sprintf("https://api.jcdecaux.com/vls/v1/stations/%s?contract=dublin&apiKey=%s", s.SourceID, dbAPIKey))
+			if err == nil && resp.StatusCode == 200 {
+				ld := LiveData{}
+				json.NewDecoder(resp.Body).Decode(&ld)
+				standData["bikesAvailable"] = ld.AvailableBikes
+				standData["standsAvailable"] = ld.AvailableBikeStands
+			}
+		}
+	}
+
+	err := json.NewEncoder(w).Encode(standData)
 	if err != nil {
 		fmt.Printf("error encoding json: %s", err)
 	}
+}
+
+type LiveData struct {
+	AvailableBikes int `json:"available_bikes"`
+	AvailableBikeStands int `json:"available_bike_stands"`
 }
 
 func (a *api) createStand(w http.ResponseWriter, r *http.Request) {
