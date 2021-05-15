@@ -135,7 +135,7 @@
           }
         }
 
-        function standType(l, f, icon) {
+        async function standType(l, f, icon) {
           var noStands = f.properties["numberOfStands"] > 0 ? f.properties["numberOfStands"] : "Unknown"
 
           var unverifiedMessage = ""
@@ -155,14 +155,28 @@
             standID = "<tr><td><b>Stand ID</b></td><td>" + f.properties["id"] + "</td></tr>"
           }
 
+          var liveData = ""
+          if(f.properties["type"] == "DublinBikes") {
+            liveData = "<tr><td><b>Bikes Available</b></td><td id=\"" + f.properties["id"] + "_bikesavail\">Loading...</td></tr>"
+            liveData += "<tr><td><b>Stands Available</b></td><td id=\"" + f.properties["id"] + "_standsavail\">Loading...</td></tr>"
+          }
+
           l.on('click', function() {
             _paq.push(['trackEvent', 'stands', 'click']);
+            fetch("/api/v0/stand/" + f.properties["id"]).then(function (resp) {
+              return resp.json()
+            }).then(function (data) {
+              console.log(data)
+              document.getElementById(f.properties["id"] + "_bikesavail").innerText = data["bikesAvailable"]
+              document.getElementById(f.properties["id"] + "_standsavail").innerText = data["standsAvailable"]
+            }).catch(console.log)
           }).setIcon(icon).bindPopup("<table>" +
             "<tr><td><b>Type of Stands</b></td><td>" + f.properties["type"] + "</td></tr>" +
             "<tr><td><b>Location</b></td><td>" +
               f.properties["name"] +
             "</td></tr>" +
             "<tr><td><b>Number of Stands</b></td><td>" + noStands + "</td></tr>" +
+            liveData +
             publicImage +
             standID +
             unverifiedMessage +
