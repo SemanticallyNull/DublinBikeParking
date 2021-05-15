@@ -82,6 +82,11 @@ spec:
                 secretKeyRef:
                   name: dublinbikeparking-config
                   key: slack_webhook
+            - name: DUBLINBIKES_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: dublinbikeparking-config
+                  key: dublinbikes_api_key
             - name: DBP_HONEYCOMB_WRITEKEY
               valueFrom:
                 secretKeyRef:
