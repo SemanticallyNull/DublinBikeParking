@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "bootstrap-vue": "^2.18.1",
-    "@auth0/auth0-spa-js": "^1.13.1",
+    "@auth0/auth0-spa-js": "^1.14.0",
     "bootstrap": "^4.5.2",
     "axios": "^0.21.1",
     "core-js": "^3.6.5",
