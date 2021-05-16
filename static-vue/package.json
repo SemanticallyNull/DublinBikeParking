@@ -13,7 +13,7 @@
     "@auth0/auth0-spa-js": "^1.13.1",
     "bootstrap": "^4.5.2",
     "axios": "^0.21.1",
-    "core-js": "^3.6.5",
+    "core-js": "^3.11.0",
     "leaflet": "^1.7.1",
     "vue": "^2.6.12",
     "vue-router": "^3.4.8",
