@@ -182,6 +182,19 @@
             unverifiedMessage = "<tr><td colspan=2><small>This is a user submitted stand we have not verified yet.</small></td></tr>"
           }
 
+          var appURL = ""
+          switch (f.properties["type"]) {
+            case "Moby":
+              appURL = "<tr><td colspan='2'><a href=\"https://app.mobymove.com/\">Get the Moby app</a></td></tr>"
+              break
+            case "Bleeper":
+              appURL = "<tr><td colspan='2'><a href=\"https://www.bleeperactive.com/how-it-works\">Get the Bleeper app</a></td></tr>"
+              break
+            case "DublinBikes":
+              appURL = "<tr><td colspan='2'><a href=\"https://www.dublinbikes.ie/\">Get the DublinBikes app</a></td></tr>"
+              break
+          }
+
           l.on('click', function() {
             _paq.push(['trackEvent', 'stands', 'click']);
           }).setIcon(icon).bindPopup("<table>" +
@@ -191,6 +204,7 @@
             liveData +
             publicImage +
             standID +
+            appURL +
             unverifiedMessage +
             "</table>");
         }
