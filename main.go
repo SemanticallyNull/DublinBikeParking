@@ -15,7 +15,6 @@ import (
 )
 
 const StaticDirectoryV1 = "./static"
-const StaticDirectoryV2 = "./static-vue/dist"
 
 func main() {
 	var dialect = "sqlite3"
@@ -47,12 +46,8 @@ func main() {
 		}
 	})
 
-	if os.Getenv("DBP_UI_V2") == "true" {
-		r.NotFoundHandler = r.NewRoute().HandlerFunc(serverHandler).GetHandler()
-	} else {
-		fs := http.FileServer(http.Dir(StaticDirectoryV1))
-		r.PathPrefix("/").Handler(fs)
-	}
+	fs := http.FileServer(http.Dir(StaticDirectoryV1))
+	r.PathPrefix("/").Handler(fs)
 
 	port := getPort()
 	log.Printf("Listening on port %s...", port)
@@ -60,14 +55,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("%s\n", err)
 	}
-}
-
-func serverHandler(w http.ResponseWriter, r *http.Request) {
-	if _, err := os.Stat(StaticDirectoryV2 + r.URL.Path); err != nil {
-		http.ServeFile(w, r, StaticDirectoryV2+"/index.html")
-		return
-	}
-	http.ServeFile(w, r, StaticDirectoryV2+r.URL.Path)
 }
 
 func getPort() string {
