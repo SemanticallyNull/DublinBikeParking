@@ -94,6 +94,8 @@
         var railingStand = new StandIcon({iconUrl: 'stand_icon_railing.png'})
         var wheelOnlyStand = new StandIcon({iconUrl: 'stand_icon_wheel_only.png'})
         var dublinBikesStand = new StandIcon({iconUrl: 'station_icon_db.png'})
+        var mobyBike = new StandIcon({iconUrl: 'hire_icon_moby.png'})
+        var bleeperBike = new StandIcon({iconUrl: 'hire_icon_bleeper.png'})
 
         var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
           attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Stand Data: <a href="https://bleeperbike.com/">Bleeper Bikes</a>, <a href="https://data.smartdublin.ie/dataset/dcc_public_cycle_parking_stands">DCC</a> DublinBikes: <a href="https://developer.jcdecaux.com/#/opendata/vls?page=getstarted&contract=Dublin">JCDecaux</a>  | <a href="/privacy.html">Privacy</a>',
@@ -127,7 +129,13 @@
               break;
             case "DublinBikes":
               standType(l,f,dublinBikesStand);
-                break;
+              break;
+            case "Bleeper":
+              standType(l,f,bleeperBike);
+              break;
+            case "Moby":
+              standType(l,f,mobyBike);
+              break;
             default:
               l.setIcon(sheffieldStand).bindPopup("<table>" +
                 "<tr><td><b>Type of Stands</b></td><td>" + f.properties["type"] + "</td></tr>" +
@@ -136,13 +144,6 @@
         }
 
         async function standType(l, f, icon) {
-          var noStands = f.properties["numberOfStands"] > 0 ? f.properties["numberOfStands"] : "Unknown"
-
-          var unverifiedMessage = ""
-          if(!f.properties["verified"]) {
-            unverifiedMessage = "<tr><td colspan=2><small>This is a user submitted stand we have not verified yet.</small></td></tr>"
-          }
-
           var publicImage = ""
           if(f.properties["publicImageURL"] && f.properties["publicImageURL"] != "") {
             publicImage = "<tr><td><b>Image</b></td><td><a onClick=\"_paq.push(['trackEvent', 'stands', 'imageLink']);\" href=\""+f.properties["publicImageURL"]+"\">Link to image</a></td></tr>"
@@ -157,25 +158,36 @@
 
           var liveData = ""
           if(f.properties["type"] == "DublinBikes") {
-            liveData = "<tr><td><b>Bikes Available</b></td><td id=\"" + f.properties["id"] + "_bikesavail\">Loading...</td></tr>"
-            liveData += "<tr><td><b>Stands Available</b></td><td id=\"" + f.properties["id"] + "_standsavail\">Loading...</td></tr>"
+            liveData = "<tr><td><b>Bikes Available</b></td><td>" + f.properties["bikesAvailable"] + "</td></tr>"
+            liveData += "<tr><td><b>Stands Available</b></td><td>" + f.properties["standsAvailable"] + "</td></tr>"
+          }
+
+          var location = ""
+          if(f.properties["name"] && f.properties["name"] != "") {
+            location = "<tr><td><b>Location</b></td><td>" +
+            f.properties["name"] +
+            "</td></tr>"
+          }
+
+          var noStands = ""
+          if(f.properties["numberOfStands"] && f.properties["numberOfStands"] != "") {
+            var num = f.properties["numberOfStands"] > 0 ? f.properties["numberOfStands"] : "Unknown"
+            noStands = "<tr><td><b>Number of Stands</b></td><td>" +
+                    num +
+                    "</td></tr>"
+          }
+
+          var unverifiedMessage = ""
+          if(!f.properties["verified"]) {
+            unverifiedMessage = "<tr><td colspan=2><small>This is a user submitted stand we have not verified yet.</small></td></tr>"
           }
 
           l.on('click', function() {
             _paq.push(['trackEvent', 'stands', 'click']);
-            fetch("/api/v0/stand/" + f.properties["id"]).then(function (resp) {
-              return resp.json()
-            }).then(function (data) {
-              console.log(data)
-              document.getElementById(f.properties["id"] + "_bikesavail").innerText = data["bikesAvailable"]
-              document.getElementById(f.properties["id"] + "_standsavail").innerText = data["standsAvailable"]
-            }).catch(console.log)
           }).setIcon(icon).bindPopup("<table>" +
-            "<tr><td><b>Type of Stands</b></td><td>" + f.properties["type"] + "</td></tr>" +
-            "<tr><td><b>Location</b></td><td>" +
-              f.properties["name"] +
-            "</td></tr>" +
-            "<tr><td><b>Number of Stands</b></td><td>" + noStands + "</td></tr>" +
+            "<tr><td><b>Type</b></td><td>" + f.properties["type"] + "</td></tr>" +
+            location +
+            noStands +
             liveData +
             publicImage +
             standID +
@@ -255,11 +267,11 @@
             })
             this._div.appendChild(myBikeButton)
 
-            dublinBikesButton.innerHTML = "DublinBikes"
+            dublinBikesButton.innerHTML = "Hire Bikes"
             dublinBikesButton.addEventListener('click', function() {
               _paq.push(['trackEvent', 'dublinBikes']);
               if(hireLayer == null) {
-                hireLayer = new L.GeoJSON.AJAX("/api/v0/stand?dublinbikes=only",{onEachFeature:standIcon});
+                hireLayer = new L.GeoJSON.AJAX("/api/v0/hirebikes",{onEachFeature:standIcon});
                 hireLayer.on('data:loaded', function () {
                   markers.removeLayer(standsLayer);
                   markers.addLayer(hireLayer);

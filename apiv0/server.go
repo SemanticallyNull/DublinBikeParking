@@ -10,18 +10,15 @@ import (
 	"os"
 	"time"
 
-	"github.com/honeycombio/beeline-go/wrappers/hnynethttp"
-
-	"github.com/honeycombio/beeline-go"
-
-	"code.katiechapman.ie/dublinbikeparking/stand"
-
 	"code.katiechapman.ie/dublinbikeparking/slack"
+	"code.katiechapman.ie/dublinbikeparking/stand"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/dgrijalva/jwt-go/request"
 	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
+	"github.com/honeycombio/beeline-go"
+	"github.com/honeycombio/beeline-go/wrappers/hnynethttp"
 	"github.com/jinzhu/gorm"
 	"github.com/minio/minio-go/v6"
 	"github.com/osstotalsoft/oidc-jwt-go"
@@ -107,6 +104,7 @@ func NewAPIv0(r *mux.Router, db *gorm.DB) {
 	}
 
 	r.Use(hnynethttp.WrapHandler)
+	r.HandleFunc("/hirebikes", apiHandler.getHireBikes).Methods("GET")
 	r.HandleFunc("/stand", apiHandler.getStands).Methods("GET")
 	r.HandleFunc("/stand", apiHandler.createStand).Methods("POST")
 	r.HandleFunc("/stand/{id}", apiHandler.getStand).Methods("GET")

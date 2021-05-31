@@ -160,7 +160,7 @@ func (a *api) getStand(w http.ResponseWriter, r *http.Request) {
 }
 
 type LiveData struct {
-	AvailableBikes int `json:"available_bikes"`
+	AvailableBikes      int `json:"available_bikes"`
 	AvailableBikeStands int `json:"available_bike_stands"`
 }
 
