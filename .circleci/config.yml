@@ -32,7 +32,7 @@ jobs:
           key: v1-pkg-cache
           paths:
             - "/go/pkg"
-  build:
+  build_and_publish:
     executor: docker-publisher
     steps:
       - checkout
@@ -40,22 +40,6 @@ jobs:
       - run:
           name: Build Docker image
           command: docker build -t $IMAGE_NAME:latest .
-      - run:
-          name: Archive Docker image
-          command: docker save -o image.tar $IMAGE_NAME
-      - persist_to_workspace:
-          root: .
-          paths:
-            - ./image.tar
-  publish-latest:
-    executor: docker-publisher
-    steps:
-      - attach_workspace:
-          at: /tmp/workspace
-      - setup_remote_docker
-      - run:
-          name: Load archived Docker image
-          command: docker load -i /tmp/workspace/image.tar
       - run:
           name: Publish Docker Image to Docker Hub
           command: |
@@ -70,15 +54,9 @@ workflows:
   build-main:
     jobs:
       - test
-      - build:
+      - build_and_publish:
           requires:
             - test
-          filters:
-            branches:
-              only: main
-      - publish-latest:
-          requires:
-            - build
           filters:
             branches:
               only: main
