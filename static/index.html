@@ -195,18 +195,45 @@
               break
           }
 
+          infoTable = document.createElement("table")
+          infoTable.innerHTML = "<tr><td><b>Type</b></td><td>" + f.properties["type"] + "</td></tr>" +
+                  location +
+                  noStands +
+                  liveData +
+                  publicImage +
+                  standID +
+                  appURL +
+                  "<tr><td>&nbsp;</td></tr></td></tr>" +
+                  "<tr><td></td><td id='missing'></td></tr>" +
+                  unverifiedMessage;
+
+          missingLink = document.createElement("a")
+          missingLink.innerText = "Report missing"
+          missingLink.href = "#"
+          missingLink.setAttribute("data-id", f.properties["id"])
+          missingLink.addEventListener('click', (e) => {
+            e.preventDefault()
+
+            missingStand(e.target.getAttribute("data-id")).then(function(e) {
+              console.log(e)
+              if(e.target.status == 200) {
+                _paq.push(['trackEvent', 'missingStand', 'success']);
+                l.setPopupContent("<span class=\"fas fa-check text-success\"></span> Thank you for your submission. It will be reviewed soon!")
+              } else {
+                _paq.push(['trackEvent', 'missingStand', 'error']);
+                l.setPopupContent("<span class=\"fas fa-times text-danger\"></span> There was an issue with your submission.<br><code>" + e.target.statusText + "</code>" )
+              }
+            }, function(e){
+              console.log(e)
+              _paq.push(['trackEvent', 'missingStand', 'error']);
+              l.setPopupContent("<span class=\"fas fa-times text-danger\"></span> There was an issue with your submission.<br><code>" + e.target.statusText + "</code>" )
+            })
+          })
+          infoTable.querySelector('#missing').appendChild(missingLink)
+
           l.on('click', function() {
             _paq.push(['trackEvent', 'stands', 'click']);
-          }).setIcon(icon).bindPopup("<table>" +
-            "<tr><td><b>Type</b></td><td>" + f.properties["type"] + "</td></tr>" +
-            location +
-            noStands +
-            liveData +
-            publicImage +
-            standID +
-            appURL +
-            unverifiedMessage +
-            "</table>");
+          }).setIcon(icon).bindPopup(infoTable);
         }
 
         function nearMe(control) {
@@ -392,6 +419,16 @@
           request.send(JSON.stringify(standData));
         })
       }
+      function missingStand(id) {
+        return new Promise(function(resolve, reject) {
+          var request = new XMLHttpRequest();
+          request.open('GET', '/api/v0/stand/'+id+'/missing', true);
+          request.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+          request.onload = resolve
+          request.onerror = reject
+          request.send()
+        })
+      }
 
       function standTypeMenu() {
         var standMenu = "<select id=\"type\">"
@@ -427,6 +464,10 @@
           request.onerror = reject
           request.send();
         })
+      }
+
+      function isHireBike(type) {
+        return type === "DublinBikes" || type === "Moby" || type === "Bleeper"
       }
     </script>
   </head>

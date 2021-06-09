@@ -119,6 +119,47 @@ func (a *api) getStands(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (a *api) standMissing(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("content-type", "application/json")
+	vars := mux.Vars(r)
+
+	s := &stand.Stand{}
+	if query := a.DB.Where("`stand_id` = ?", vars["id"]).First(s); query.Error != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(query.Error)
+		return
+	}
+
+	if a.SendgridAPIKey != "" {
+		go func() {
+			from := mail.NewEmail("DublinBikeParking", "no-reply@dublinbikeparking.com")
+			subject := fmt.Sprintf("Stand Missing at '%s'", s.Name)
+			to := mail.NewEmail("Katie Chapman", "hello@katiechapman.ie")
+			plainTextContent := "Stand missing DublinBikeParking.com\n" +
+				"Stand ID: " + s.StandID + "\n" +
+				"Name: " + s.Name + "\n" +
+				"Coordinates: " + fmt.Sprintf("%f %f", s.Lat, s.Lng) + "\n" +
+				"https://dublinbikeparking.com/update.html#19/" + fmt.Sprintf("%f/%f", s.Lat, s.Lng)
+			htmlContent := "Stand missing DublinBikeParking.com<br>" +
+				"<b>Stand ID:</b> " + s.StandID + "<br>" +
+				"<b>Name:</b> " + s.Name + "<br>" +
+				"<b>Coordinates:</b> " + fmt.Sprintf("%f %f", s.Lat, s.Lng) + "<br>" +
+				"<a href=\"https://dublinbikeparking.com/update.html#19/" + fmt.Sprintf("%f/%f", s.Lat, s.Lng) + "\">Link to update page</a>"
+			message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
+			client := sendgrid.NewSendClient(a.SendgridAPIKey)
+			_, err := client.Send(message)
+			if err != nil {
+				log.Println(err)
+			}
+		}()
+	}
+
+	err := json.NewEncoder(w).Encode("OK")
+	if err != nil {
+		fmt.Printf("error encoding json: %s", err)
+	}
+}
+
 func (a *api) getStand(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("content-type", "application/json")
 	w.Header().Add("cache-control", "max-age=3600")

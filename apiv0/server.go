@@ -108,6 +108,7 @@ func NewAPIv0(r *mux.Router, db *gorm.DB) {
 	r.HandleFunc("/stand", apiHandler.getStands).Methods("GET")
 	r.HandleFunc("/stand", apiHandler.createStand).Methods("POST")
 	r.HandleFunc("/stand/{id}", apiHandler.getStand).Methods("GET")
+	r.HandleFunc("/stand/{id}/missing", apiHandler.standMissing).Methods("GET")
 	r.Handle("/stand/{id}", apiHandler.authMiddleware(http.HandlerFunc(apiHandler.updateStand))).Methods("POST")
 	r.Handle("/stand/{id}", apiHandler.authMiddleware(http.HandlerFunc(apiHandler.deleteStand))).Methods("DELETE")
 	r.HandleFunc("/image", handleImageOptionsFunc(minioClient)).Methods("OPTIONS")
