@@ -147,6 +147,7 @@ func (a *api) getHireBikes(w http.ResponseWriter, r *http.Request) {
 					"numberOfStands":  bike.NoStands,
 					"bikesAvailable":  bike.AvailableBikes,
 					"standsAvailable": bike.AvailableStands,
+					"verified":        true,
 				},
 			}
 			fc.AddFeature(feature)
