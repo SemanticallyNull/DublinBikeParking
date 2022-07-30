@@ -1,4 +1,4 @@
-replicaCount: 5
+replicaCount: 2
 
 image:
   repository: katiechapman/dublinbikeparking
