@@ -13,8 +13,8 @@ import (
 	"code.katiechapman.ie/dublinbikeparking/slack"
 	"code.katiechapman.ie/dublinbikeparking/stand"
 
-	"github.com/dgrijalva/jwt-go"
-	"github.com/dgrijalva/jwt-go/request"
+	"github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v4/request"
 	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
 	"github.com/honeycombio/beeline-go"
