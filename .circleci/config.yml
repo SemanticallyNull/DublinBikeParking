@@ -13,9 +13,8 @@ jobs:
   test:
     docker:
       # specify the version
-      - image: circleci/golang:1.13
+      - image: cimg/go:1.18
 
-    working_directory: /go/src/github.com/semanticallynull/dbp
     steps:
       - checkout
 
