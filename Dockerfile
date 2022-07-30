@@ -1,5 +1,5 @@
 # Start by building the application.
-FROM golang:1.16-buster as build-go
+FROM golang:1.18-buster as build-go
 
 WORKDIR /go/src/app
 ADD . /go/src/app
