@@ -13,12 +13,16 @@ spec:
         paths:
           - path: /
             backend:
-              serviceName: {{ include "dublinbikeparking.fullname" . }}
-              servicePort: http
+              service:
+                name: {{ include "dublinbikeparking.fullname" . }}
+                port:
+                  name: http
     - host: www.dublinbikeparking.com
       http:
         paths:
           - path: /
             backend:
-              serviceName: {{ include "dublinbikeparking.fullname" . }}
-              servicePort: http
+              service:
+                name: {{ include "dublinbikeparking.fullname" . }}
+                port:
+                  name: http
