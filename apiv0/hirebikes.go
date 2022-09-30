@@ -73,8 +73,8 @@ func (a *api) getHireBikes(w http.ResponseWriter, r *http.Request) {
 		}
 
 		for _, bike := range data {
-			lng := bike["longitude"].(float64)
-			lat := bike["latitude"].(float64)
+			lng := bike["lon"].(float64)
+			lat := bike["lat"].(float64)
 			feature := &geojson.Feature{
 				Geometry: &geojson.Geometry{
 					Type:  geojson.GeometryPoint,
