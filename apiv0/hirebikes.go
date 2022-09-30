@@ -59,14 +59,16 @@ func (a *api) getHireBikes(w http.ResponseWriter, r *http.Request) {
 	g, ctx := errgroup.WithContext(ctx)
 
 	g.Go(func() error {
-		resp, err := http.Get("https://bleeperbike.staging.derilinx.com/last_snapshot")
-		if err != nil && resp.StatusCode == 200 {
+		resp, err := http.Get("https://data.smartdublin.ie/bleeperbike-api/last_snapshot")
+		if err != nil {
+			fmt.Println(err)
 			return err
 		}
 
 		var data []map[string]interface{}
 		err = json.NewDecoder(resp.Body).Decode(&data)
 		if err != nil {
+			return err
 			return err
 		}
 
