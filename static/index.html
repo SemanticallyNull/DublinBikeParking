@@ -89,6 +89,7 @@
           }
         })
         var sheffieldStand = new StandIcon({iconUrl: 'stand_icon_sheffield.png'})
+        var prideStand = new StandIcon({iconUrl: 'stand_icon_pride.png'})
         var hoopStand = new StandIcon({iconUrl: 'stand_icon_hoop.png'})
         var sscStand = new StandIcon({iconUrl: 'stand_icon_ssc.png'})
         var railingStand = new StandIcon({iconUrl: 'stand_icon_railing.png'})
@@ -111,6 +112,9 @@
 
         function standIcon(f,l){
           switch(f.properties.type) {
+            case "Pride":
+              standType(l,f,prideStand);
+              break;
             case "Sheffield Stand":
               standType(l,f,sheffieldStand);
               break;
