@@ -103,8 +103,6 @@
             maxZoom: 19
         }).addTo(map);
 
-        L.marker([53.34445, -6.26741], {icon: prideStand}).addTo(map).bindPopup("Street 66");
-
         var standsLayer = new L.GeoJSON.AJAX("/api/v0/stand?dublinbikes=off",{onEachFeature:standIcon});
         standsLayer.on('data:loaded', function () {
           markers.addLayer(standsLayer);
