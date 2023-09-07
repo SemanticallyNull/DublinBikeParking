@@ -141,7 +141,7 @@
         async function standType(l, f, icon) {
           var publicImage = ""
           if(f.properties["publicImageURL"] && f.properties["publicImageURL"] != "") {
-            publicImage = "<tr><td><b>Image</b></td><td><a onClick=\"_paq.push(['trackEvent', 'stands', 'imageLink']);\" href=\""+f.properties["publicImageURL"]+"\">Link to image</a></td></tr>"
+            publicImage = "<tr><td><b>Image</b></td><td><a href=\""+f.properties["publicImageURL"]+"\">Link to image</a></td></tr>"
           }
 
           var urlParams = new URLSearchParams(window.location.search);
@@ -212,32 +212,26 @@
             missingStand(e.target.getAttribute("data-id")).then(function(e) {
               console.log(e)
               if(e.target.status == 200) {
-                _paq.push(['trackEvent', 'missingStand', 'success']);
                 l.setPopupContent("<span class=\"fas fa-check text-success\"></span> Thank you for your submission. It will be reviewed soon!")
               } else {
-                _paq.push(['trackEvent', 'missingStand', 'error']);
                 l.setPopupContent("<span class=\"fas fa-times text-danger\"></span> There was an issue with your submission.<br><code>" + e.target.statusText + "</code>" )
               }
             }, function(e){
               console.log(e)
-              _paq.push(['trackEvent', 'missingStand', 'error']);
               l.setPopupContent("<span class=\"fas fa-times text-danger\"></span> There was an issue with your submission.<br><code>" + e.target.statusText + "</code>" )
             })
           })
           infoTable.querySelector('#missing').appendChild(missingLink)
 
           l.on('click', function() {
-            _paq.push(['trackEvent', 'stands', 'click']);
           }).setIcon(icon).bindPopup(infoTable);
         }
 
         function nearMe(control) {
-          _paq.push(['trackEvent', 'nearMe', 'start']);
           if('geolocation' in navigator) {
             navigator.geolocation.getCurrentPosition(function(position) {
               var nearestStands = leafletKnn(standsLayer).nearest(L.latLng(position.coords.latitude, position.coords.longitude), 1, 2000);
               if(nearestStands.length > 0) {
-                _paq.push(['trackEvent', 'nearMe', 'foundStands']);
                 var stand = nearestStands[0].layer;
                 var currentLocation = L.latLng(position.coords.latitude,position.coords.longitude)
                 var distance = stand.getLatLng().distanceTo(currentLocation)
@@ -256,12 +250,10 @@
                 }, 750);
               } else {
                 alert("cannot find any stands within 2km of you, sorry");
-                _paq.push(['trackEvent', 'nearMe', 'noStands']);
               }
             });
           } else {
             alert('geolocation is not available in your browser, sorry!');
-            _paq.push(['trackEvent', 'nearMe', 'locationFailed']);
           }
         }
 
@@ -286,7 +278,6 @@
 
         var addMarker = L.marker();
         map.on('contextmenu', function(e) {
-          _paq.push(['trackEvent', 'addStand', 'start']);
           const createMarkerForm = document.createElement("form", { id: "addMarker" });
           var imageUpload = ""
           if(imageFeatureFlag) {
@@ -331,15 +322,12 @@
             addStand(e).then(function(e) {
               console.log(e)
               if(e.target.status == 200) {
-                _paq.push(['trackEvent', 'addStand', 'success']);
                 addMarker.setPopupContent("<span class=\"fas fa-check text-success\"></span> Thank you for your submission. It will be reviewed soon!")
               } else {
-                _paq.push(['trackEvent', 'addStand', 'error']);
                 addMarker.setPopupContent("<span class=\"fas fa-times text-danger\"></span> There was an issue with your submission.<br><code>" + e.target.statusText + "</code>" )
               }
             }, function(e){
               console.log(e)
-              _paq.push(['trackEvent', 'addStand', 'error']);
               addMarker.setPopupContent("<span class=\"fas fa-times text-danger\"></span> There was an issue with your submission.<br><code>" + e.target.statusText + "</code>" )
             })
           });
