@@ -109,7 +109,6 @@
           markers.addLayer(standsLayer);
           map.addLayer(markers);
         });
-        var hireLayer = null;
 
         function standIcon(f,l){
           switch(f.properties.type) {
@@ -131,15 +130,6 @@
               break;
             case "Railing":
               standType(l,f,railingStand);
-              break;
-            case "DublinBikes":
-              standType(l,f,dublinBikesStand);
-              break;
-            case "Bleeper":
-              standType(l,f,bleeperBike);
-              break;
-            case "Moby":
-              standType(l,f,mobyBike);
               break;
             default:
               l.setIcon(sheffieldStand).bindPopup("<table>" +
@@ -422,10 +412,6 @@
           request.onerror = reject
           request.send();
         })
-      }
-
-      function isHireBike(type) {
-        return type === "DublinBikes" || type === "Moby" || type === "Bleeper"
       }
     </script>
   </head>
