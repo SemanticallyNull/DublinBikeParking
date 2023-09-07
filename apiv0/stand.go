@@ -130,6 +130,15 @@ func (a *api) standMissing(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if s.Token == "" {
+		token := uuid.New().String()
+		if query := a.DB.Model(&s).Where("`stand_id` = ?", vars["id"]).Update("token", token); query.Error != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(query.Error)
+			return
+		}
+	}
+
 	if a.SendgridAPIKey != "" {
 		go func() {
 			from := mail.NewEmail("DublinBikeParking", "no-reply@dublinbikeparking.com")
