@@ -123,8 +123,8 @@ func (a *api) standMissing(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("content-type", "application/json")
 	vars := mux.Vars(r)
 
-	s := &stand.Stand{}
-	if query := a.DB.Where("`stand_id` = ?", vars["id"]).First(s); query.Error != nil {
+	s := stand.Stand{}
+	if query := a.DB.Where("`stand_id` = ?", vars["id"]).First(&s); query.Error != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(query.Error)
 		return
@@ -148,6 +148,15 @@ func (a *api) standMissing(w http.ResponseWriter, r *http.Request) {
 			message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
 			client := sendgrid.NewSendClient(a.SendgridAPIKey)
 			_, err := client.Send(message)
+			if err != nil {
+				log.Println(err)
+			}
+		}()
+	}
+
+	if a.Slack != nil {
+		go func() {
+			err := a.Slack.PostMissingNotification(s)
 			if err != nil {
 				log.Println(err)
 			}
@@ -275,7 +284,7 @@ func (a *api) createStand(w http.ResponseWriter, r *http.Request) {
 
 	if a.Slack != nil {
 		go func() {
-			err := a.Slack.PostNotification(stand)
+			err := a.Slack.PostCreateNotification(stand)
 			if err != nil {
 				log.Println(err)
 			}

@@ -171,6 +171,8 @@ func (a *api) handleSlackMessage(w http.ResponseWriter, r *http.Request) {
 
 	var errSw error
 	switch interaction.Actions[0].ActionID {
+	case "dont_hide":
+		break
 	case "approve":
 		errSw = a.DB.Model(&s).Where("stand_id = ? AND token = ?", standID, standToken).Update("checked", interaction.User.ID).Error
 	default:

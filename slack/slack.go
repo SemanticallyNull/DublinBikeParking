@@ -18,7 +18,7 @@ func NewSlackIntegration(webhookURL string) *SlackIntegration {
 	}
 }
 
-func (s *SlackIntegration) PostNotification(stand stand.Stand) error {
+func (s *SlackIntegration) PostCreateNotification(stand stand.Stand) error {
 	approveButton := slack.NewButtonBlockElement("approve", fmt.Sprintf("id=%s&token=%s", stand.StandID, stand.Token), slack.NewTextBlockObject("plain_text", "Approve", false, false))
 	denyButton := slack.NewButtonBlockElement("deny", fmt.Sprintf("id=%s&token=%s", stand.StandID, stand.Token), slack.NewTextBlockObject("plain_text", "Deny", false, false))
 	approveButton.Style = "primary"
@@ -28,6 +28,44 @@ func (s *SlackIntegration) PostNotification(stand stand.Stand) error {
 		slack.NewTextBlockObject(
 			"mrkdwn",
 			fmt.Sprintf("A new bike stand has been submitted:\n*<https://dublinbikeparking.com/update.html#18/%f/%f|%s>*", stand.Lat, stand.Lng, stand.Name),
+			false,
+			false,
+		),
+		[]*slack.TextBlockObject{
+			slack.NewTextBlockObject("mrkdwn", fmt.Sprintf("*ID:*\n%s", stand.StandID), false, false),
+			slack.NewTextBlockObject("mrkdwn", fmt.Sprintf("*Number Of Stands:*\n%d", stand.NumberOfStands), false, false),
+			slack.NewTextBlockObject("mrkdwn", fmt.Sprintf("*Location:*\n%s", stand.Name), false, false),
+			slack.NewTextBlockObject("mrkdwn", fmt.Sprintf("*Coordinates:*\n%f/%f", stand.Lat, stand.Lng), false, false),
+		},
+		nil,
+	)
+	bma := slack.NewActionBlock(
+		"approval_actions",
+		approveButton,
+		denyButton,
+	)
+
+	if err := slack.PostWebhook(s.webhookURL, &slack.WebhookMessage{
+		Blocks: &slack.Blocks{
+			BlockSet: []slack.Block{bms, bma},
+		},
+	}); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *SlackIntegration) PostMissingNotification(stand stand.Stand) error {
+	approveButton := slack.NewButtonBlockElement("hide_stand", fmt.Sprintf("id=%s&token=%s", stand.StandID, stand.Token), slack.NewTextBlockObject("plain_text", "Hide Stand", false, false))
+	denyButton := slack.NewButtonBlockElement("dont_hide", fmt.Sprintf("id=%s&token=%s", stand.StandID, stand.Token), slack.NewTextBlockObject("plain_text", "Don't Hide Stand", false, false))
+	approveButton.Style = "primary"
+	denyButton.Style = "danger"
+
+	bms := slack.NewSectionBlock(
+		slack.NewTextBlockObject(
+			"mrkdwn",
+			fmt.Sprintf("A bike stand has been maked as missing:\n*<https://dublinbikeparking.com/update.html#18/%f/%f|%s>*", stand.Lat, stand.Lng, stand.Name),
 			false,
 			false,
 		),
