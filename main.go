@@ -1,12 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"os"
 
-	"github.com/gorilla/mux"
+	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
@@ -32,22 +31,19 @@ func main() {
 		panic(err)
 	}
 
-	r := mux.NewRouter()
+	r := gin.New()
 
-	apiRouter := r.PathPrefix("/api/v0").Subrouter()
+	apiRouter := r.Group("/api/v0")
 	apiv0.NewAPIv0(apiRouter, db)
 
-	r.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
-		_, err := w.Write([]byte("ok"))
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			fmt.Printf("could not write: %s", err)
-			return
-		}
+	r.GET("/healthz", func(c *gin.Context) {
+		c.String(http.StatusOK, "ok")
 	})
 
-	fs := http.FileServer(http.Dir(StaticDirectoryV1))
-	r.PathPrefix("/").Handler(fs)
+	r.Static("/static", StaticDirectoryV1)
+	r.NoRoute(func(c *gin.Context) {
+		c.File(StaticDirectoryV1 + "/index.html")
+	})
 
 	port := getPort()
 	log.Printf("Listening on port %s...", port)

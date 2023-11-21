@@ -88,73 +88,84 @@
             iconSize: [22,22]
           }
         })
-        var sheffieldStand = new StandIcon({iconUrl: 'stand_icon_sheffield.png'})
-        var prideStand = new StandIcon({iconUrl: 'stand_icon_pride.png'})
-        var hoopStand = new StandIcon({iconUrl: 'stand_icon_hoop.png'})
-        var sscStand = new StandIcon({iconUrl: 'stand_icon_ssc.png'})
-        var railingStand = new StandIcon({iconUrl: 'stand_icon_railing.png'})
-        var wheelOnlyStand = new StandIcon({iconUrl: 'stand_icon_wheel_only.png'})
-        var dublinBikesStand = new StandIcon({iconUrl: 'station_icon_db.png'})
-        var mobyBike = new StandIcon({iconUrl: 'hire_icon_moby.png'})
-        var bleeperBike = new StandIcon({iconUrl: 'hire_icon_bleeper.png'})
+        var sheffieldStand = new StandIcon({iconUrl: 'static/stand_icon_sheffield.png'})
+        var prideStand = new StandIcon({iconUrl: 'static/stand_icon_pride.png'})
+        var hoopStand = new StandIcon({iconUrl: 'static/stand_icon_hoop.png'})
+        var sscStand = new StandIcon({iconUrl: 'static/stand_icon_ssc.png'})
+        var railingStand = new StandIcon({iconUrl: 'static/stand_icon_railing.png'})
+        var wheelOnlyStand = new StandIcon({iconUrl: 'static/stand_icon_wheel_only.png'})
+        var dublinBikesStand = new StandIcon({iconUrl: 'static/station_icon_db.png'})
+        var mobyBike = new StandIcon({iconUrl: 'static/hire_icon_moby.png'})
+        var bleeperBike = new StandIcon({iconUrl: 'static/hire_icon_bleeper.png'})
 
         var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Stand Data: <a href="https://bleeperbike.com/">Bleeper Bikes</a>, <a href="https://data.smartdublin.ie/dataset/dcc_public_cycle_parking_stands">DCC</a> DublinBikes: <a href="https://developer.jcdecaux.com/#/opendata/vls?page=getstarted&contract=Dublin">JCDecaux</a>  | <a href="/privacy.html">Privacy</a>',
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Stand Data: <a href="https://bleeperbike.com/">Bleeper Bikes</a>, <a href="https://data.smartdublin.ie/dataset/dcc_public_cycle_parking_stands">DCC</a> DublinBikes: <a href="https://developer.jcdecaux.com/#/opendata/vls?page=getstarted&contract=Dublin">JCDecaux</a>  | <a href="/static/privacy.html">Privacy</a>',
             maxZoom: 19
         }).addTo(map);
 
-        var standsLayer = new L.GeoJSON.AJAX("/api/v0/st" +
-                "and?dublinbikes=off",{onEachFeature:standIcon});
+        var standsLayer = new L.GeoJSON.AJAX("/api/v0/stand",{onEachFeature:standIcon});
         standsLayer.on('data:loaded', function () {
           markers.addLayer(standsLayer);
           map.addLayer(markers);
         });
         var hireLayer = null;
 
+        var myBikeButton, dublinBikesButton;
         var bikeTypeControl = L.control();
         bikeTypeControl.onAdd = function (map) {
           this._div = L.DomUtil.create('div', 'btn-group leaflet-selector');
 
-          var myBikeButton = L.DomUtil.create('button', 'btn btn-sm btn-dark')
-          var dublinBikesButton = L.DomUtil.create('button', 'btn btn-sm btn-outline-dark')
+          myBikeButton = L.DomUtil.create('button', 'btn btn-sm btn-dark')
+          dublinBikesButton = L.DomUtil.create('button', 'btn btn-sm btn-outline-dark')
 
           myBikeButton.innerHTML = "My Bike"
           myBikeButton.addEventListener('click', function() {
-            markers.removeLayer(hireLayer);
-            markers.addLayer(standsLayer);
-            myBikeButton.classList.add("btn-dark")
-            myBikeButton.classList.remove("btn-outline-dark")
-            dublinBikesButton.classList.remove("btn-dark")
-            dublinBikesButton.classList.add("btn-outline-dark")
+            window.history.pushState({}, null, "/")
+
+            showMyBike();
           })
           this._div.appendChild(myBikeButton)
 
           dublinBikesButton.innerHTML = "Hire Bikes"
           dublinBikesButton.addEventListener('click', function() {
-            if(hireLayer == null) {
-              hireLayer = new L.GeoJSON.AJAX("/api/v0/hirebikes",{onEachFeature:standIcon});
-              hireLayer.on('data:loaded', function () {
-                markers.removeLayer(standsLayer);
-                markers.addLayer(hireLayer);
-                dublinBikesButton.classList.add("btn-dark")
-                dublinBikesButton.classList.remove("btn-outline-dark")
-                myBikeButton.classList.remove("btn-dark")
-                myBikeButton.classList.add("btn-outline-dark")
-              });
-            } else {
-              markers.removeLayer(standsLayer);
-              markers.addLayer(hireLayer);
-              dublinBikesButton.classList.add("btn-dark")
-              dublinBikesButton.classList.remove("btn-outline-dark")
-              myBikeButton.classList.remove("btn-dark")
-              myBikeButton.classList.add("btn-outline-dark")
-            }
+            window.history.pushState({}, null, "/hirebikes")
+
+            showHireBike();
           })
           this._div.appendChild(dublinBikesButton)
 
           return this._div;
         };
         bikeTypeControl.addTo(map);
+
+        function showMyBike() {
+          markers.removeLayer(hireLayer);
+          markers.addLayer(standsLayer);
+          myBikeButton.classList.add("btn-dark")
+          myBikeButton.classList.remove("btn-outline-dark")
+          dublinBikesButton.classList.remove("btn-dark")
+          dublinBikesButton.classList.add("btn-outline-dark")
+        }
+        function showHireBike() {
+          if (hireLayer == null) {
+            hireLayer = new L.GeoJSON.AJAX("/api/v0/hirebikes", {onEachFeature: standIcon});
+            hireLayer.on('data:loaded', function () {
+              markers.removeLayer(standsLayer);
+              markers.addLayer(hireLayer);
+              dublinBikesButton.classList.add("btn-dark")
+              dublinBikesButton.classList.remove("btn-outline-dark")
+              myBikeButton.classList.remove("btn-dark")
+              myBikeButton.classList.add("btn-outline-dark")
+            });
+          } else {
+            markers.removeLayer(standsLayer);
+            markers.addLayer(hireLayer);
+            dublinBikesButton.classList.add("btn-dark")
+            dublinBikesButton.classList.remove("btn-outline-dark")
+            myBikeButton.classList.remove("btn-dark")
+            myBikeButton.classList.add("btn-outline-dark")
+          }
+        }
 
         function standIcon(f,l){
           switch(f.properties.type) {
@@ -387,6 +398,10 @@
             })
           });
         });
+
+        if (window.location.pathname === "/hirebikes") {
+          showHireBike()
+        }
       });
 
       function addStand(e) {

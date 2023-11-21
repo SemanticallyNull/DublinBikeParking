@@ -4,12 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	geojson "github.com/paulmach/go.geojson"
-
-	"net/http"
 )
 
 var _ = Describe("DublinBikeParking", func() {
@@ -21,7 +20,7 @@ var _ = Describe("DublinBikeParking", func() {
 		})
 
 		It("returns a 200 for the stand_icon_sheffield.png", func() {
-			resp, err := http.Get(fmt.Sprintf("http://localhost:%s/stand_icon_sheffield.png", serverPort))
+			resp, err := http.Get(fmt.Sprintf("http://localhost:%s/static/stand_icon_sheffield.png", serverPort))
 			Expect(err).ToNot(HaveOccurred())
 			Expect(resp.StatusCode).To(Equal(http.StatusOK))
 		})

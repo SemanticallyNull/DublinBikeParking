@@ -10,15 +10,15 @@ import (
 	"os"
 	"time"
 
+	"github.com/gin-gonic/gin"
+
 	"github.com/semanticallynull/dublinbikeparking/slack"
 	"github.com/semanticallynull/dublinbikeparking/stand"
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/golang-jwt/jwt/v4/request"
 	"github.com/gorilla/context"
-	"github.com/gorilla/mux"
 	"github.com/honeycombio/beeline-go"
-	"github.com/honeycombio/beeline-go/wrappers/hnynethttp"
 	"github.com/jinzhu/gorm"
 	"github.com/minio/minio-go/v6"
 	"github.com/osstotalsoft/oidc-jwt-go"
@@ -32,7 +32,7 @@ type api struct {
 	validator      func(request *http.Request) (*jwt.Token, error)
 }
 
-func NewAPIv0(r *mux.Router, db *gorm.DB) {
+func NewAPIv0(r *gin.RouterGroup, db *gorm.DB) {
 	apiHandler := &api{
 		DB: db,
 	}
@@ -103,19 +103,21 @@ func NewAPIv0(r *mux.Router, db *gorm.DB) {
 		}
 	}
 
-	r.Use(hnynethttp.WrapHandler)
-	r.HandleFunc("/hirebikes", apiHandler.getHireBikes).Methods("GET")
-	r.HandleFunc("/stand", apiHandler.getStands).Methods("GET")
-	r.HandleFunc("/stand", apiHandler.createStand).Methods("POST")
-	r.HandleFunc("/stand/{id}", apiHandler.getStand).Methods("GET")
-	r.HandleFunc("/stand/{id}/missing", apiHandler.standMissing).Methods("GET")
-	r.Handle("/stand/{id}", apiHandler.authMiddleware(http.HandlerFunc(apiHandler.updateStand))).Methods("POST")
-	r.Handle("/stand/{id}", apiHandler.authMiddleware(http.HandlerFunc(apiHandler.deleteStand))).Methods("DELETE")
-	r.HandleFunc("/image", handleImageOptionsFunc(minioClient)).Methods("OPTIONS")
-	r.HandleFunc("/image", handleImagePostFunc(minioClient, bucketName)).Methods("POST")
-	r.HandleFunc("/publicimage/{id}", apiHandler.handlePublicImagePostFunc(minioClient, "dublinbikeparking-public")).Methods("POST")
-	r.Handle("/image/{id}", apiHandler.authMiddleware(http.HandlerFunc(handleImageGetFunc(minioClient, bucketName)))).Methods("GET")
-	r.HandleFunc("/slack", apiHandler.handleSlackMessage).Methods("POST")
+	r.GET("/hirebikes", wrap(apiHandler.getHireBikes))
+	r.GET("/stand", wrap(apiHandler.getStands))
+	r.POST("/stand", wrap(apiHandler.createStand))
+	r.GET("/stand/{id}", wrap(apiHandler.getStand))
+	r.GET("/stand/{id}/missing", wrap(apiHandler.standMissing))
+	r.OPTIONS("/image", wrap(handleImageOptionsFunc(minioClient)))
+	r.POST("/image", wrap(handleImagePostFunc(minioClient, bucketName)))
+	r.POST("/publicimage/{id}", wrap(apiHandler.handlePublicImagePostFunc(minioClient, "dublinbikeparking-public")))
+	r.POST("/slack", wrap(apiHandler.handleSlackMessage))
+}
+
+func wrap(handlerFunc http.HandlerFunc) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		handlerFunc(c.Writer, c.Request)
+	}
 }
 
 type SlackInteraction struct {
