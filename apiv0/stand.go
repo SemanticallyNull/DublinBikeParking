@@ -3,6 +3,7 @@ package apiv0
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -315,7 +316,7 @@ func (a *api) updateStand(w http.ResponseWriter, r *http.Request) {
 
 	a.DB.Where("stand_id = ?", vars["id"]).First(&originStand)
 
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		err := json.NewEncoder(w).Encode(err)

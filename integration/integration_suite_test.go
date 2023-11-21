@@ -27,7 +27,7 @@ func TestIntegration(t *testing.T) {
 
 var _ = BeforeSuite(func() {
 	var err error
-	binPath, err = gexec.Build("code.katiechapman.ie/dublinbikeparking")
+	binPath, err = gexec.Build("github.com/semanticallynull/dublinbikeparking")
 	Expect(err).ToNot(HaveOccurred())
 
 	_, filename, _, _ := runtime.Caller(0)
