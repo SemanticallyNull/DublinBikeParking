@@ -59,7 +59,7 @@ func (a *api) getHireBikes(w http.ResponseWriter, r *http.Request) {
 	g, ctx := errgroup.WithContext(ctx)
 
 	g.Go(func() error {
-		resp, err := http.Get("https://data.smartdublin.ie/bleeperbike-api/last_snapshot")
+		resp, err := http.Get("https://data.smartdublin.ie/bleeperbike-api/last_snapshot/")
 		if err != nil {
 			fmt.Println(err)
 			return err
@@ -69,12 +69,14 @@ func (a *api) getHireBikes(w http.ResponseWriter, r *http.Request) {
 		err = json.NewDecoder(resp.Body).Decode(&data)
 		if err != nil {
 			return err
-			return err
 		}
 
 		for _, bike := range data {
 			lng := bike["lon"].(float64)
 			lat := bike["lat"].(float64)
+			if lat == 0 || lng == 0 {
+				continue
+			}
 			feature := &geojson.Feature{
 				Geometry: &geojson.Geometry{
 					Type:  geojson.GeometryPoint,
@@ -90,36 +92,39 @@ func (a *api) getHireBikes(w http.ResponseWriter, r *http.Request) {
 
 		return err
 	})
-	g.Go(func() error {
-		resp, err := http.Get("https://data.smartdublin.ie/mobybikes-api/last_reading")
-		if err != nil && resp.StatusCode == 200 {
-			return err
-		}
-
-		var data []map[string]interface{}
-		err = json.NewDecoder(resp.Body).Decode(&data)
-		if err != nil {
-			return err
-		}
-
-		for _, bike := range data {
-			lng := bike["Longitude"].(float64)
-			lat := bike["Latitude"].(float64)
-			feature := &geojson.Feature{
-				Geometry: &geojson.Geometry{
-					Type:  geojson.GeometryPoint,
-					Point: []float64{lng, lat},
-				},
-				Properties: map[string]interface{}{
-					"type":     "Moby",
-					"verified": true,
-				},
-			}
-			fc.AddFeature(feature)
-		}
-
-		return err
-	})
+	//g.Go(func() error {
+	//	resp, err := http.Get("https://data.smartdublin.ie/mobybikes-api/last_reading/")
+	//	if err != nil && resp.StatusCode == 200 {
+	//		return err
+	//	}
+	//
+	//	var data []map[string]interface{}
+	//	err = json.NewDecoder(resp.Body).Decode(&data)
+	//	if err != nil {
+	//		return err
+	//	}
+	//
+	//	for _, bike := range data {
+	//		lng := bike["Longitude"].(float64)
+	//		lat := bike["Latitude"].(float64)
+	//		if lat == 0 || lng == 0 {
+	//			continue
+	//		}
+	//		feature := &geojson.Feature{
+	//			Geometry: &geojson.Geometry{
+	//				Type:  geojson.GeometryPoint,
+	//				Point: []float64{lng, lat},
+	//			},
+	//			Properties: map[string]interface{}{
+	//				"type":     "Moby",
+	//				"verified": true,
+	//			},
+	//		}
+	//		fc.AddFeature(feature)
+	//	}
+	//
+	//	return err
+	//})
 	g.Go(func() error {
 		dbAPIKey := os.Getenv("DUBLINBIKES_API_KEY")
 		if dbAPIKey == "" {
