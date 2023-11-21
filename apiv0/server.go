@@ -15,21 +15,15 @@ import (
 	"github.com/semanticallynull/dublinbikeparking/slack"
 	"github.com/semanticallynull/dublinbikeparking/stand"
 
-	"github.com/golang-jwt/jwt/v4"
-	"github.com/golang-jwt/jwt/v4/request"
-	"github.com/gorilla/context"
 	"github.com/honeycombio/beeline-go"
 	"github.com/jinzhu/gorm"
 	"github.com/minio/minio-go/v6"
-	"github.com/osstotalsoft/oidc-jwt-go"
-	"github.com/osstotalsoft/oidc-jwt-go/discovery"
 )
 
 type api struct {
 	DB             *gorm.DB
 	SendgridAPIKey string
 	Slack          *slack.SlackIntegration
-	validator      func(request *http.Request) (*jwt.Token, error)
 }
 
 func NewAPIv0(r *gin.RouterGroup, db *gorm.DB) {
@@ -66,26 +60,6 @@ func NewAPIv0(r *gin.RouterGroup, db *gorm.DB) {
 	var minioClient *minio.Client
 	var endpoint, accessKeyID, secretAccessKey, bucketName string
 	var useSSL bool
-
-	if os.Getenv("OIDC_AUTHORITY") == "" {
-		fmt.Println("ERROR: OIDC_AUTHORITY variable is not set.")
-		os.Exit(1)
-	}
-	if os.Getenv("OIDC_AUDIENCE") == "" {
-		fmt.Println("ERROR: OIDC_AUDIENCE variable is not set.")
-		os.Exit(1)
-	}
-
-	authority := os.Getenv("OIDC_AUTHORITY")
-	audience := os.Getenv("OIDC_AUDIENCE")
-
-	secretProvider := oidc.NewOidcSecretProvider(
-		discovery.NewClient(discovery.Options{
-			Authority: authority,
-		}),
-	)
-	validator := oidc.NewJWTValidator(request.AuthorizationHeaderExtractor, secretProvider, audience, authority)
-	apiHandler.validator = validator
 
 	if os.Getenv("S3_ENDPOINT") != "" {
 		endpoint = os.Getenv("S3_ENDPOINT")
@@ -186,20 +160,4 @@ func (a *api) handleSlackMessage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-}
-
-func (a *api) authMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		token, err := a.validator(r)
-		if err != nil {
-			log.Println("AuthorizationFilter: Token is not valid", err)
-			w.WriteHeader(http.StatusUnauthorized)
-			return
-		}
-
-		claims := token.Claims.(jwt.MapClaims)
-		context.Set(r, "userSub", claims["sub"])
-
-		next.ServeHTTP(w, r)
-	})
 }
