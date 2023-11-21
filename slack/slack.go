@@ -3,7 +3,7 @@ package slack
 import (
 	"fmt"
 
-	"code.katiechapman.ie/dublinbikeparking/stand"
+	"github.com/semanticallynull/dublinbikeparking/stand"
 
 	"github.com/slack-go/slack"
 )

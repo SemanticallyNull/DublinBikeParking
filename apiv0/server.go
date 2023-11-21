@@ -10,8 +10,8 @@ import (
 	"os"
 	"time"
 
-	"code.katiechapman.ie/dublinbikeparking/slack"
-	"code.katiechapman.ie/dublinbikeparking/stand"
+	"github.com/semanticallynull/dublinbikeparking/slack"
+	"github.com/semanticallynull/dublinbikeparking/stand"
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/golang-jwt/jwt/v4/request"

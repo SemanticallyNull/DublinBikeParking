@@ -7,10 +7,11 @@ import (
 	"net/url"
 	"time"
 
-	"code.katiechapman.ie/dublinbikeparking/stand"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/minio/minio-go/v6"
+
+	"github.com/semanticallynull/dublinbikeparking/stand"
 )
 
 func handleImageOptionsFunc(minioClient *minio.Client) func(http.ResponseWriter, *http.Request) {

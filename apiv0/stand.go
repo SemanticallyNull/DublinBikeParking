@@ -20,7 +20,7 @@ import (
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 	"gopkg.in/validator.v2"
 
-	"code.katiechapman.ie/dublinbikeparking/stand"
+	"github.com/semanticallynull/dublinbikeparking/stand"
 )
 
 type StandUpdate struct {

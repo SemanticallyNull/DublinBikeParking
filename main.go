@@ -11,7 +11,7 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 
-	"code.katiechapman.ie/dublinbikeparking/apiv0"
+	"github.com/semanticallynull/dublinbikeparking/apiv0"
 )
 
 const StaticDirectoryV1 = "./static"
