@@ -99,7 +99,7 @@
   justify-content: center;
   gap: 5px;
   background: var(--gold);
-  color: var(--navy);
+  color: var(--white);
   border-radius: var(--radius-sm);
   font-family: var(--font-display);
   font-size: 12px;

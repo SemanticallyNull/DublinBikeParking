@@ -25,9 +25,9 @@
   justify-content: center;
   width: 32px;
   height: 32px;
-  background: rgba(232, 184, 75, 0.08);
+  background: var(--gold);
   border-radius: 7px;
-  border: 1px solid rgba(232, 184, 75, 0.2);
+  border: 1px solid var(--gold-hover);
   flex-shrink: 0;
 }
 
@@ -77,7 +77,7 @@
   align-items: center;
   gap: 6px;
   background: var(--gold);
-  color: var(--navy);
+  color: var(--white);
   font-family: var(--font-display);
   font-size: 13px;
   font-weight: 700;

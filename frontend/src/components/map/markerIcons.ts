@@ -13,8 +13,8 @@ function buildIcon(type: string, isActive: boolean): L.DivIcon {
         <circle cx="${r}" cy="${r}" r="${r * 0.32}" fill="white" opacity="0.7"/>
        </svg>`
     : `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="${r}" cy="${r}" r="${r - 2}" fill="#0E2052" stroke="#E8B84B" stroke-width="2"/>
-        <circle cx="${r}" cy="${r}" r="${r * 0.32}" fill="#E8B84B"/>
+        <circle cx="${r}" cy="${r}" r="${r - 2}" fill="#0E2052" stroke="#5A94C8" stroke-width="2"/>
+        <circle cx="${r}" cy="${r}" r="${r * 0.32}" fill="#5A94C8"/>
        </svg>`
 
   const className = ['stand-marker', isToaster ? 'toaster' : '', isActive ? 'active' : '']
@@ -36,9 +36,9 @@ export function getStandIcon(type: string, isActive = false): L.DivIcon {
 export function getPlacementIcon(): L.DivIcon {
   return L.divIcon({
     html: `<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="16" cy="16" r="14" fill="#E8B84B" stroke="white" stroke-width="2.5" stroke-dasharray="5 3" opacity="0.9"/>
-      <line x1="16" y1="8" x2="16" y2="24" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
-      <line x1="8" y1="16" x2="24" y2="16" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="16" cy="16" r="14" fill="#0E2052" stroke="#5A94C8" stroke-width="2"/>
+      <line x1="16" y1="10" x2="16" y2="22" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="10" y1="16" x2="22" y2="16" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
     </svg>`,
     className: 'stand-marker placement-pin',
     iconSize: [32, 32],

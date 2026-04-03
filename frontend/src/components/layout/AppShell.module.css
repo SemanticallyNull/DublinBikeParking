@@ -12,7 +12,7 @@
   justify-content: center;
   gap: 8px;
   background: var(--gold);
-  color: var(--navy);
+  color: var(--white);
   font-family: var(--font-display);
   font-size: 13px;
   font-weight: 700;
@@ -25,9 +25,9 @@
 }
 
 .placementCancel {
-  background: rgba(14, 32, 82, 0.12);
-  border: 1px solid rgba(14, 32, 82, 0.2);
-  color: var(--navy);
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: var(--white);
   font-family: var(--font-display);
   font-size: 12px;
   font-weight: 700;
@@ -41,7 +41,7 @@
 }
 
 .placementCancel:hover {
-  background: rgba(14, 32, 82, 0.2);
+  background: rgba(255, 255, 255, 0.25);
 }
 
 .body {
@@ -88,5 +88,9 @@
   .sidePanel {
     display: flex;
     flex-direction: column;
+  }
+
+  .mobileOnly {
+    display: none;
   }
 }

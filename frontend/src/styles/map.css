@@ -38,7 +38,7 @@
 .marker-cluster-small,
 .marker-cluster-medium,
 .marker-cluster-large {
-  background: rgba(14, 32, 82, 0.18) !important;
+  background: transparent !important;
 }
 
 .marker-cluster-small div,
@@ -49,9 +49,13 @@
   font-family: var(--font-display) !important;
   font-weight: 700 !important;
   font-size: 14px !important;
-  line-height: 40px !important;
+  line-height: 1 !important;
   border-radius: 50% !important;
-  box-shadow: 0 2px 12px rgba(14, 32, 82, 0.3) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 !important;
+  box-shadow: 0 2px 8px rgba(14, 32, 82, 0.35) !important;
 }
 
 /* Stand markers */
@@ -60,12 +64,12 @@
 }
 
 .stand-marker:hover {
-  filter: drop-shadow(0 0 6px rgba(232, 184, 75, 0.8)) drop-shadow(0 2px 6px rgba(14, 32, 82, 0.4));
+  filter: drop-shadow(0 2px 8px rgba(14, 32, 82, 0.5));
   z-index: 1000 !important;
 }
 
 .stand-marker.active {
-  filter: drop-shadow(0 0 8px rgba(232, 184, 75, 0.9)) drop-shadow(0 3px 8px rgba(14, 32, 82, 0.5));
+  filter: drop-shadow(0 3px 10px rgba(14, 32, 82, 0.6));
   z-index: 1000 !important;
 }
 

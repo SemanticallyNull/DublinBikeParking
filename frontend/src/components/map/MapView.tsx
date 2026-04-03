@@ -20,8 +20,6 @@ interface Props {
   addPin?: { lat: number; lng: number } | null
   onSelect: (feature: StandFeature) => void
   onMapClick: (lat: number, lng: number) => void
-  onAddSuccess: () => void
-  onAddCancel: () => void
 }
 
 function MapEvents({ placementMode, onMapClick }: { placementMode: boolean; onMapClick: (lat: number, lng: number) => void }) {
@@ -33,7 +31,7 @@ function MapEvents({ placementMode, onMapClick }: { placementMode: boolean; onMa
   return null
 }
 
-export function MapView({ features, selectedId, placementMode, userPosition, addPin, onSelect, onMapClick, onAddSuccess, onAddCancel }: Props) {
+export function MapView({ features, selectedId, placementMode, userPosition, addPin, onSelect, onMapClick }: Props) {
   const mapRef = useRef<LeafletMap | null>(null)
 
   return (
@@ -48,7 +46,7 @@ export function MapView({ features, selectedId, placementMode, userPosition, add
       <TileLayer url={CARTO_VOYAGER} attribution={ATTRIBUTION} subdomains="abcd" maxZoom={20} />
       <StandsLayer features={features} selectedId={selectedId} onSelect={onSelect} />
       {userPosition && <GeolocationMarker position={userPosition} />}
-      {addPin && <AddStandPin lat={addPin.lat} lng={addPin.lng} onSuccess={onAddSuccess} onCancel={onAddCancel} />}
+      {addPin && <AddStandPin lat={addPin.lat} lng={addPin.lng} />}
       <MapEvents placementMode={placementMode} onMapClick={onMapClick} />
       <MapHashSync />
     </MapContainer>

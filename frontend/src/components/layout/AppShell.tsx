@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { AppHeader } from './AppHeader'
 import { MapView } from '../map/MapView'
 import { StandDetailPanel } from '../panels/StandDetailPanel'
+import { AddStandForm } from '../panels/AddStandForm'
 import { BottomSheet } from '../ui/BottomSheet'
 import { FloatingButton } from '../ui/FloatingButton'
 import { NearestStandResult } from '../panels/NearestStandResult'
@@ -50,13 +51,13 @@ export function AppShell({
 }: Props) {
   // Prevent body scroll when panel is open on desktop
   useEffect(() => {
-    if (selectedStand) {
+    if (selectedStand || addPin) {
       document.body.classList.add('panel-open')
     } else {
       document.body.classList.remove('panel-open')
     }
     return () => document.body.classList.remove('panel-open')
-  }, [selectedStand])
+  }, [selectedStand, addPin])
 
   return (
     <div className={styles.shell}>
@@ -94,8 +95,6 @@ export function AppShell({
             addPin={addPin}
             onSelect={onSelect}
             onMapClick={onMapClick}
-            onAddSuccess={onAddSuccess}
-            onAddCancel={onAddCancel}
           />
 
           {/* Nearest stand result card — overlays map */}
@@ -112,29 +111,27 @@ export function AppShell({
         </div>
 
         {/* Desktop side panel */}
-        {selectedStand && (
+        {(selectedStand || addPin) && (
           <aside className={styles.sidePanel}>
-            <StandDetailPanel
-              feature={selectedStand}
-              queryParams={queryParams}
-              onClose={onClose}
-            />
+            {addPin
+              ? <AddStandForm lat={addPin.lat} lng={addPin.lng} onSuccess={onAddSuccess} onCancel={onAddCancel} />
+              : <StandDetailPanel feature={selectedStand!} queryParams={queryParams} onClose={onClose} />
+            }
           </aside>
         )}
       </div>
 
-      {/* Mobile bottom sheet */}
-      <BottomSheet open={!!selectedStand} onClose={onClose}>
-        {selectedStand && (
-          <div className="bottom-sheet-content">
-            <StandDetailPanel
-              feature={selectedStand}
-              queryParams={queryParams}
-              onClose={onClose}
-            />
-          </div>
-        )}
-      </BottomSheet>
+      {/* Mobile bottom sheet — hidden on desktop via CSS */}
+      <div className={styles.mobileOnly}>
+        <BottomSheet open={!!(selectedStand || addPin)} onClose={addPin ? onAddCancel : onClose}>
+          {addPin
+            ? <div className="bottom-sheet-content"><AddStandForm lat={addPin.lat} lng={addPin.lng} onSuccess={onAddSuccess} onCancel={onAddCancel} /></div>
+            : selectedStand
+              ? <div className="bottom-sheet-content"><StandDetailPanel feature={selectedStand} queryParams={queryParams} onClose={onClose} /></div>
+              : null
+          }
+        </BottomSheet>
+      </div>
     </div>
   )
 }
