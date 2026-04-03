@@ -165,8 +165,7 @@ func main() {
 			continue
 		}
 		if warnMsg != "" {
-			dist := nearestDist(lat, lng, existing)
-			warnings = append(warnings, warningEntry{dist, warnMsg, sourceID, lat, lng, nStands, name})
+			warnings = append(warnings, warningEntry{nearestDist(lat, lng, existing), warnMsg, sourceID, lat, lng, nStands, name})
 		}
 
 		s := stand.Stand{
@@ -242,34 +241,37 @@ func nearestDist(lat, lng float64, existing []stand.Stand) float64 {
 //   - skip true: likely duplicate, do not import.
 //   - msg non-empty with skip false: suspicious proximity, import but warn.
 //
+// Rules are applied to the nearest existing stand, not the first one found.
 // Stand count is only used as a signal when both sides have a recorded value > 0.
 func checkDuplicate(lat, lng float64, nStands int, existing []stand.Stand) (replaceTarget *stand.Stand, skip bool, msg string) {
+	// Find the nearest existing stand first.
+	var nearest *stand.Stand
+	minDist := math.MaxFloat64
 	for i := range existing {
-		e := &existing[i]
-		dist := haversine(lat, lng, e.Lat, e.Lng)
-		sameCount := nStands > 0 && e.NumberOfStands > 0 && nStands == e.NumberOfStands
-
-		switch {
-		case dist <= 1:
-			// Within 1m — same physical rack, replace with the newer data.
-			return e, false, fmt.Sprintf("%.2fm from %s/%s", dist, e.Source, e.SourceID)
-
-		case dist <= 5:
-			// Within 5m — same physical rack regardless of count.
-			return nil, true, fmt.Sprintf("%.1fm from %s/%s (too close)", dist, e.Source, e.SourceID)
-
-		case dist <= 20 && sameCount:
-			// Close + identical stand count — almost certainly the same stand.
-			return nil, true, fmt.Sprintf("%.1fm from %s/%s, same count (%d)", dist, e.Source, e.SourceID, nStands)
-
-		case dist <= 20:
-			// Close but counts differ — could be opposite side of road.
-			return nil, false, fmt.Sprintf("%.1fm from %s/%s (counts differ: incoming %d, existing %d)", dist, e.Source, e.SourceID, nStands, e.NumberOfStands)
-
-		case dist <= 50 && sameCount:
-			// Same count, suspiciously nearby.
-			return nil, false, fmt.Sprintf("%.1fm from %s/%s, same count (%d)", dist, e.Source, e.SourceID, nStands)
+		if d := haversine(lat, lng, existing[i].Lat, existing[i].Lng); d < minDist {
+			minDist = d
+			nearest = &existing[i]
 		}
+	}
+	if nearest == nil {
+		return nil, false, ""
+	}
+
+	e := nearest
+	dist := minDist
+	sameCount := nStands > 0 && e.NumberOfStands > 0 && nStands == e.NumberOfStands
+
+	switch {
+	case dist <= 1:
+		return e, false, fmt.Sprintf("%.2fm from %s/%s", dist, e.Source, e.SourceID)
+	case dist <= 5:
+		return nil, true, fmt.Sprintf("%.1fm from %s/%s (too close)", dist, e.Source, e.SourceID)
+	case dist <= 20 && sameCount:
+		return nil, true, fmt.Sprintf("%.1fm from %s/%s, same count (%d)", dist, e.Source, e.SourceID, nStands)
+	case dist <= 20:
+		return nil, false, fmt.Sprintf("%.1fm from %s/%s (counts differ: incoming %d, existing %d)", dist, e.Source, e.SourceID, nStands, e.NumberOfStands)
+	case dist <= 50 && sameCount:
+		return nil, false, fmt.Sprintf("%.1fm from %s/%s, same count (%d)", dist, e.Source, e.SourceID, nStands)
 	}
 	return nil, false, ""
 }
