@@ -33,6 +33,16 @@ func main() {
 
 	r := gin.New()
 
+	r.Use(func(c *gin.Context) {
+		if c.GetHeader("X-Forwarded-Proto") == "http" {
+			target := "https://" + c.Request.Host + c.Request.RequestURI
+			c.Redirect(http.StatusMovedPermanently, target)
+			c.Abort()
+			return
+		}
+		c.Next()
+	})
+
 	apiRouter := r.Group("/api/v0")
 	apiv0.NewAPIv0(apiRouter, db)
 
