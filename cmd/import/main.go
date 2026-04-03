@@ -3,7 +3,13 @@
 //
 // Usage:
 //
-//	go run ./cmd/import [--dry-run] [--radius 15] [--type "Sheffield Stand"] [--url <geojson-url>]
+//	go run ./cmd/import [--dry-run] [--radius 5] [--warn-radius 25] [--type "Sheffield Stand"] [--url <geojson-url>]
+//
+// Deduplication:
+//   - Stands within --radius metres of an existing stand are skipped (true duplicates at the same rack).
+//   - Stands within --warn-radius metres are imported but flagged — use this to catch
+//     suspicious near-neighbours that may need manual review. Roads are typically 8–12m
+//     wide, so opposite-side-of-road stands will often fall in this band.
 //
 // Environment variables (same as main server):
 //
@@ -49,7 +55,8 @@ type geometry struct {
 
 func main() {
 	dryRun := flag.Bool("dry-run", false, "Print what would be inserted without writing to the database")
-	radiusM := flag.Float64("radius", 15, "Deduplication radius in metres — skip import if an existing stand is within this distance")
+	radiusM := flag.Float64("radius", 5, "Skip import if an existing stand is within this many metres (same physical rack)")
+	warnRadiusM := flag.Float64("warn-radius", 25, "Warn (but still import) if an existing stand is within this many metres")
 	defaultType := flag.String("type", "Sheffield Stand", "Stand type to assign when the source data doesn't specify one")
 	sourceURL := flag.String("url", defaultURL, "GeoJSON source URL")
 	flag.Parse()
@@ -85,6 +92,7 @@ func main() {
 
 	var (
 		imported    int
+		warned      int
 		skippedDup  int
 		skippedProx int
 		skippedErr  int
@@ -108,12 +116,19 @@ func main() {
 			continue
 		}
 
-		// 2. Skip if any existing stand is within the dedup radius.
+		// 2. Skip if any existing stand is within the hard dedup radius (same physical rack).
 		if near := nearestWithin(existing, lat, lng, *radiusM); near != nil {
-			log.Printf("  SKIP (%.1fm away from %s %s): FID=%s lat=%.6f lng=%.6f",
+			log.Printf("  SKIP  %.1fm → existing %s/%s: FID=%s lat=%.6f lng=%.6f",
 				haversine(lat, lng, near.Lat, near.Lng), near.Source, near.SourceID, sourceID, lat, lng)
 			skippedProx++
 			continue
+		}
+
+		// 3. Warn (but still import) if a stand is suspiciously close — e.g. opposite side of road.
+		if near := nearestWithin(existing, lat, lng, *warnRadiusM); near != nil {
+			log.Printf("  WARN  %.1fm → existing %s/%s: FID=%s lat=%.6f lng=%.6f — importing anyway, check manually",
+				haversine(lat, lng, near.Lat, near.Lng), near.Source, near.SourceID, sourceID, lat, lng)
+			warned++
 		}
 
 		s := stand.Stand{
@@ -143,10 +158,11 @@ func main() {
 	}
 
 	fmt.Printf("\nDone.\n")
-	fmt.Printf("  Imported:          %d\n", imported)
-	fmt.Printf("  Skipped (dup ID):  %d\n", skippedDup)
-	fmt.Printf("  Skipped (nearby):  %d\n", skippedProx)
-	fmt.Printf("  Skipped (error):   %d\n", skippedErr)
+	fmt.Printf("  Imported:             %d\n", imported)
+	fmt.Printf("  Warned (5–25m away):  %d\n", warned)
+	fmt.Printf("  Skipped (dup ID):     %d\n", skippedDup)
+	fmt.Printf("  Skipped (<5m away):   %d\n", skippedProx)
+	fmt.Printf("  Skipped (error):      %d\n", skippedErr)
 	if *dryRun {
 		fmt.Println("  (dry-run — nothing written)")
 	}
