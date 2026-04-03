@@ -122,24 +122,63 @@
   cursor: default;
 }
 
-/* Override FilePond styles to match design */
-:global(.filepond--root) {
-  font-family: var(--font-body);
-  font-size: 13px;
-}
-
-:global(.filepond--panel-root) {
-  background-color: var(--surface);
+.dropzone {
+  padding: 20px;
   border: 1.5px dashed var(--border);
-  border-radius: var(--radius-sm) !important;
-}
-
-:global(.filepond--label-action) {
-  color: var(--sky);
-  text-decoration: none;
-  font-weight: 600;
-}
-
-:global(.filepond--drop-label) {
+  border-radius: var(--radius-sm);
+  background: var(--surface);
   color: var(--muted);
+  font-size: 13px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.dropzone:hover {
+  border-color: var(--sky);
+  background: rgba(90, 148, 200, 0.05);
+}
+
+.dropzoneActive {
+  border-color: var(--gold);
+  background: rgba(90, 148, 200, 0.08);
+  color: var(--text);
+}
+
+.dropzoneUploading {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.dropzoneError {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.uploadDone {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--success);
+  padding: 10px 12px;
+  background: rgba(22, 163, 74, 0.07);
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(22, 163, 74, 0.2);
+}
+
+.uploadRemove {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 12px;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+}
+
+.uploadRemove:hover {
+  color: var(--danger);
 }

@@ -12,14 +12,9 @@
     "leaflet": "^1.9.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-dropzone": "^15.0.0",
     "react-leaflet": "^4.2.1",
-    "react-leaflet-cluster": "^2.1.0",
-    "filepond": "^4.31.1",
-    "filepond-plugin-image-exif-orientation": "^1.0.11",
-    "filepond-plugin-image-preview": "^4.6.12",
-    "filepond-plugin-image-resize": "^2.0.10",
-    "filepond-plugin-image-transform": "^3.8.7",
-    "react-filepond": "^7.1.2"
+    "react-leaflet-cluster": "^2.1.0"
   },
   "devDependencies": {
     "@types/leaflet": "^1.9.14",
