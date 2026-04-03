@@ -1,6 +1,6 @@
 module github.com/semanticallynull/dublinbikeparking
 
-go 1.23.0
+go 1.24.0
 
 toolchain go1.24.2
 
@@ -17,7 +17,7 @@ require (
 	github.com/paulmach/go.geojson v1.5.0
 	github.com/sendgrid/sendgrid-go v3.16.0+incompatible
 	github.com/slack-go/slack v0.16.0
-	golang.org/x/sync v0.14.0
+	golang.org/x/sync v0.18.0
 	gopkg.in/validator.v2 v2.0.1
 )
 
@@ -60,10 +60,10 @@ require (
 	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	golang.org/x/arch v0.17.0 // indirect
-	golang.org/x/crypto v0.38.0 // indirect
-	golang.org/x/net v0.40.0 // indirect
-	golang.org/x/sys v0.33.0 // indirect
-	golang.org/x/text v0.25.0 // indirect
+	golang.org/x/crypto v0.45.0 // indirect
+	golang.org/x/net v0.47.0 // indirect
+	golang.org/x/sys v0.38.0 // indirect
+	golang.org/x/text v0.31.0 // indirect
 	google.golang.org/protobuf v1.36.6 // indirect
 	gopkg.in/alexcesaro/statsd.v2 v2.0.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
