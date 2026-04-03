@@ -1,53 +1,69 @@
 version: 2.1
 
 orbs:
-  golangci-lint: timakin/golangci-lint@0.1.1
   heroku: circleci/heroku@1.2.6
 
-executors:
-  docker-publisher:
-    environment:
-      IMAGE_NAME: katiechapman/dublinbikeparking
-    docker:
-      - image: circleci/buildpack-deps:stretch
 jobs:
-  test:
+  test-go:
     docker:
-      # specify the version
       - image: cimg/go:1.21
-
     steps:
       - checkout
-
       - restore_cache:
           keys:
-            - v2-pkg-cache
-
-      # specify any bash command here prefixed with `run: `
+            - v3-go-pkg-{{ checksum "go.sum" }}
+            - v3-go-pkg-
       - run: go get -v -t -d ./...
-
       - run: go test -v ./...
-
-      - save_cache: # Store cache in the /go/pkg directory
-          key: v2-pkg-cache
+      - save_cache:
+          key: v3-go-pkg-{{ checksum "go.sum" }}
           paths:
             - "/go/pkg"
-  deploy:
-    executor: heroku/default
+
+  build-frontend:
+    docker:
+      - image: cimg/node:22.0
     steps:
       - checkout
+      - restore_cache:
+          keys:
+            - v1-npm-{{ checksum "frontend/package-lock.json" }}
+            - v1-npm-
+      - run:
+          name: Install dependencies
+          command: cd frontend && npm ci
+      - save_cache:
+          key: v1-npm-{{ checksum "frontend/package-lock.json" }}
+          paths:
+            - frontend/node_modules
+      - run:
+          name: Type-check and build
+          command: cd frontend && npm run build
+      - persist_to_workspace:
+          root: .
+          paths:
+            - static
+
+  deploy:
+    executor:
+      name: heroku/default
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
       - heroku/install
       - heroku/deploy-via-git:
           app-name: dublinbikeparking
 
 workflows:
-  version: 2
-  build-main:
+  build-and-deploy:
     jobs:
-      - test
+      - test-go
+      - build-frontend
       - deploy:
           requires:
-            - test
+            - test-go
+            - build-frontend
           filters:
             branches:
               only: main

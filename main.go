@@ -41,6 +41,10 @@ func main() {
 	})
 
 	r.Static("/static", StaticDirectoryV1)
+	r.Static("/assets", StaticDirectoryV1+"/assets")
+	r.StaticFile("/manifest.webmanifest", StaticDirectoryV1+"/manifest.webmanifest")
+	r.StaticFile("/sw.js", StaticDirectoryV1+"/sw.js")
+	r.StaticFile("/registerSW.js", StaticDirectoryV1+"/registerSW.js")
 	r.NoRoute(func(c *gin.Context) {
 		c.File(StaticDirectoryV1 + "/index.html")
 	})

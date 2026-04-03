@@ -1,0 +1,150 @@
+.header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 54px;
+  padding: 0 14px;
+  background: var(--navy);
+  border-bottom: 1px solid rgba(108, 150, 187, 0.15);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 500;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.logoMark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: var(--gold);
+  border-radius: 7px;
+  border: 1px solid var(--gold-hover);
+  flex-shrink: 0;
+}
+
+.logoText {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+}
+
+.logoName {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--white);
+}
+
+.logoCity {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-top: 1px;
+}
+
+.gap {
+  flex: 1;
+}
+
+.count {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--sky-light);
+  flex-shrink: 0;
+
+  /* hide on very narrow screens */
+  @media (max-width: 360px) {
+    display: none;
+  }
+}
+
+.addBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--gold);
+  color: var(--white);
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 7px 13px;
+  border-radius: var(--radius-sm);
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.addBtn:hover {
+  background: var(--gold-hover);
+  box-shadow: 0 2px 12px var(--gold-glow);
+}
+
+.addBtnActive {
+  background: var(--white);
+  color: var(--navy);
+  box-shadow: 0 2px 12px rgba(255, 255, 255, 0.2);
+}
+
+.addBtnActive:hover {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.findBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(108, 150, 187, 0.12);
+  color: var(--sky-light);
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 7px 13px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(108, 150, 187, 0.2);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.findBtn:hover {
+  background: rgba(108, 150, 187, 0.22);
+  color: var(--white);
+}
+
+/* Compact: hide button labels on narrow screens, show only icons */
+@media (max-width: 440px) {
+  .addBtn span,
+  .findBtn span {
+    display: none;
+  }
+
+  .addBtn,
+  .findBtn {
+    padding: 8px;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    justify-content: center;
+  }
+}
