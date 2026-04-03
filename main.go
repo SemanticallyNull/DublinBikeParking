@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
@@ -58,6 +59,13 @@ func main() {
 	r.StaticFile("/sw.js", StaticDirectoryV1+"/sw.js")
 	r.StaticFile("/registerSW.js", StaticDirectoryV1+"/registerSW.js")
 	r.NoRoute(func(c *gin.Context) {
+		// Serve real files (e.g. workbox-*.js, hashed assets) if they exist,
+		// otherwise fall back to index.html for SPA routing.
+		filePath := filepath.Join(StaticDirectoryV1, filepath.Clean(c.Request.URL.Path))
+		if info, err := os.Stat(filePath); err == nil && !info.IsDir() {
+			c.File(filePath)
+			return
+		}
 		c.File(StaticDirectoryV1 + "/index.html")
 	})
 
