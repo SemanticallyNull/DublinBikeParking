@@ -53,6 +53,7 @@ func main() {
 	r.Static("/static", StaticDirectoryV1)
 	r.Static("/assets", StaticDirectoryV1+"/assets")
 	r.Static("/icons", StaticDirectoryV1+"/icons")
+	r.StaticFile("/og-image.png", StaticDirectoryV1+"/og-image.png")
 	r.StaticFile("/manifest.webmanifest", StaticDirectoryV1+"/manifest.webmanifest")
 	r.StaticFile("/sw.js", StaticDirectoryV1+"/sw.js")
 	r.StaticFile("/registerSW.js", StaticDirectoryV1+"/registerSW.js")
