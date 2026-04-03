@@ -111,6 +111,7 @@ func main() {
 
 	var (
 		imported   int
+		replaced   int
 		skippedDup int
 		skippedErr int
 	)
@@ -134,7 +135,30 @@ func main() {
 		}
 
 		// 2. Check against all existing stands using combined signals.
-		skip, warnMsg := checkDuplicate(lat, lng, nStands, existing)
+		replaceTarget, skip, warnMsg := checkDuplicate(lat, lng, nStands, existing)
+
+		if replaceTarget != nil {
+			// Within 1m — overwrite the existing record with the new data.
+			log.Printf("  REPLACE  %s  FID=%s", warnMsg, sourceID)
+			if !*dryRun {
+				err := db.Model(replaceTarget).Updates(map[string]interface{}{
+					"lat":              lat,
+					"lng":              lng,
+					"source":           sourceName,
+					"source_id":        sourceID,
+					"name":             name,
+					"number_of_stands": nStands,
+				}).Error
+				if err != nil {
+					log.Printf("  ERROR replacing stand ID=%s: %v", replaceTarget.StandID, err)
+					skippedErr++
+					continue
+				}
+			}
+			replaced++
+			continue
+		}
+
 		if skip {
 			log.Printf("  SKIP  %s  FID=%s lat=%.6f lng=%.6f", warnMsg, sourceID, lat, lng)
 			skippedDup++
@@ -194,6 +218,7 @@ func main() {
 
 	fmt.Printf("\nDone.\n")
 	fmt.Printf("  Imported:         %d\n", imported)
+	fmt.Printf("  Replaced (<1m):   %d\n", replaced)
 	fmt.Printf("  Warned:           %d\n", len(warnings))
 	fmt.Printf("  Skipped (dup):    %d\n", skippedDup)
 	fmt.Printf("  Skipped (error):  %d\n", skippedErr)
@@ -212,33 +237,41 @@ func nearestDist(lat, lng float64, existing []stand.Stand) float64 {
 	return min
 }
 
-// checkDuplicate returns (skip, description) by combining distance and stand count.
+// checkDuplicate returns (replaceTarget, skip, description).
+//   - replaceTarget non-nil: within 1m, overwrite this existing stand with the incoming data.
+//   - skip true: likely duplicate, do not import.
+//   - msg non-empty with skip false: suspicious proximity, import but warn.
+//
 // Stand count is only used as a signal when both sides have a recorded value > 0.
-func checkDuplicate(lat, lng float64, nStands int, existing []stand.Stand) (skip bool, msg string) {
+func checkDuplicate(lat, lng float64, nStands int, existing []stand.Stand) (replaceTarget *stand.Stand, skip bool, msg string) {
 	for i := range existing {
 		e := &existing[i]
 		dist := haversine(lat, lng, e.Lat, e.Lng)
 		sameCount := nStands > 0 && e.NumberOfStands > 0 && nStands == e.NumberOfStands
 
 		switch {
+		case dist <= 1:
+			// Within 1m — same physical rack, replace with the newer data.
+			return e, false, fmt.Sprintf("%.2fm from %s/%s", dist, e.Source, e.SourceID)
+
 		case dist <= 5:
 			// Within 5m — same physical rack regardless of count.
-			return true, fmt.Sprintf("%.1fm from %s/%s (too close)", dist, e.Source, e.SourceID)
+			return nil, true, fmt.Sprintf("%.1fm from %s/%s (too close)", dist, e.Source, e.SourceID)
 
 		case dist <= 20 && sameCount:
 			// Close + identical stand count — almost certainly the same stand.
-			return true, fmt.Sprintf("%.1fm from %s/%s, same count (%d)", dist, e.Source, e.SourceID, nStands)
+			return nil, true, fmt.Sprintf("%.1fm from %s/%s, same count (%d)", dist, e.Source, e.SourceID, nStands)
 
 		case dist <= 20:
 			// Close but counts differ — could be opposite side of road.
-			return false, fmt.Sprintf("%.1fm from %s/%s (counts differ: incoming %d, existing %d)", dist, e.Source, e.SourceID, nStands, e.NumberOfStands)
+			return nil, false, fmt.Sprintf("%.1fm from %s/%s (counts differ: incoming %d, existing %d)", dist, e.Source, e.SourceID, nStands, e.NumberOfStands)
 
 		case dist <= 50 && sameCount:
 			// Same count, suspiciously nearby.
-			return false, fmt.Sprintf("%.1fm from %s/%s, same count (%d)", dist, e.Source, e.SourceID, nStands)
+			return nil, false, fmt.Sprintf("%.1fm from %s/%s, same count (%d)", dist, e.Source, e.SourceID, nStands)
 		}
 	}
-	return false, ""
+	return nil, false, ""
 }
 
 func fetchGeoJSON(url string) (*featureCollection, error) {
