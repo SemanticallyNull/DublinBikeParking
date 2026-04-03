@@ -11,8 +11,7 @@ export function BottomSheet({ open, onClose, children }: Props) {
   const [expanded, setExpanded] = useState(false)
   const startY = useRef<number | null>(null)
 
-  // Reset expanded state when sheet closes
-  useEffect(() => { if (!open) setExpanded(false) }, [open])
+  useEffect(() => { setExpanded(open) }, [open])
 
   function onTouchStart(e: React.TouchEvent) {
     startY.current = e.touches[0].clientY
