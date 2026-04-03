@@ -28,7 +28,9 @@ import (
 	"math"
 	"net/http"
 	"os"
+	"sort"
 	"strconv"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
@@ -97,9 +99,18 @@ func main() {
 		}
 	}
 
+	type warningEntry struct {
+		dist     float64
+		msg      string
+		sourceID string
+		lat, lng float64
+		nStands  int
+		name     string
+	}
+	var warnings []warningEntry
+
 	var (
 		imported   int
-		warned     int
 		skippedDup int
 		skippedErr int
 	)
@@ -130,8 +141,8 @@ func main() {
 			continue
 		}
 		if warnMsg != "" {
-			log.Printf("  WARN  %s  FID=%s lat=%.6f lng=%.6f — importing, review manually", warnMsg, sourceID, lat, lng)
-			warned++
+			dist := nearestDist(lat, lng, existing)
+			warnings = append(warnings, warningEntry{dist, warnMsg, sourceID, lat, lng, nStands, name})
 		}
 
 		s := stand.Stand{
@@ -160,14 +171,43 @@ func main() {
 		imported++
 	}
 
+	// Write warnings to file sorted by distance (closest first).
+	if len(warnings) > 0 {
+		sort.Slice(warnings, func(i, j int) bool { return warnings[i].dist < warnings[j].dist })
+		wf, err := os.Create("import-warnings.txt")
+		if err != nil {
+			log.Printf("WARNING: could not create import-warnings.txt: %v", err)
+		} else {
+			fmt.Fprintf(wf, "%-8s  %-6s  %-4s  %-10s  %-10s  %-30s  %s\n",
+				"DIST(m)", "FID", "CNT", "LAT", "LNG", "NAME", "REASON")
+			fmt.Fprintf(wf, "%s\n", strings.Repeat("-", 100))
+			for _, w := range warnings {
+				fmt.Fprintf(wf, "%-8.1f  %-6s  %-4d  %-10.6f  %-10.6f  %-30s  %s\n",
+					w.dist, w.sourceID, w.nStands, w.lat, w.lng, w.name, w.msg)
+			}
+			wf.Close()
+			log.Printf("Wrote %d warnings to import-warnings.txt", len(warnings))
+		}
+	}
+
 	fmt.Printf("\nDone.\n")
 	fmt.Printf("  Imported:         %d\n", imported)
-	fmt.Printf("  Warned:           %d\n", warned)
+	fmt.Printf("  Warned:           %d\n", len(warnings))
 	fmt.Printf("  Skipped (dup):    %d\n", skippedDup)
 	fmt.Printf("  Skipped (error):  %d\n", skippedErr)
 	if *dryRun {
 		fmt.Println("  (dry-run — nothing written)")
 	}
+}
+
+func nearestDist(lat, lng float64, existing []stand.Stand) float64 {
+	min := math.MaxFloat64
+	for i := range existing {
+		if d := haversine(lat, lng, existing[i].Lat, existing[i].Lng); d < min {
+			min = d
+		}
+	}
+	return min
 }
 
 // checkDuplicate returns (skip, description) by combining distance and stand count.
