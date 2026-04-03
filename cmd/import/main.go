@@ -5,11 +5,14 @@
 //
 //	go run ./cmd/import [--dry-run] [--type "Sheffield Stand"] [--url <geojson-url>]
 //
-// Deduplication is by source ID only (source=smartdublin + FID). This makes
-// the import safe to re-run. Proximity-based dedup is intentionally omitted —
-// Dublin has narrow 1-way streets and opposite-side-of-road stands can be less
-// than 3m apart, making any distance threshold unreliable. Use --dry-run first
-// and review any spatial duplicates on the map afterwards.
+// Deduplication uses two signals combined:
+//
+//	Distance alone    ≤5m              → skip  (same physical rack regardless of count)
+//	Distance + count  ≤20m, same count → skip  (same stand, counted consistently)
+//	Distance alone    ≤20m             → warn  (close but counts differ — opposite side of road?)
+//	Distance + count  ≤50m, same count → warn  (same count, suspiciously nearby)
+//
+// Stand count is only used as a signal when both sides have a recorded value > 0.
 //
 // Environment variables (same as main server):
 //
@@ -22,6 +25,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"math"
 	"net/http"
 	"os"
 	"strconv"
@@ -37,7 +41,6 @@ import (
 const defaultURL = "https://data.smartdublin.ie/dataset/eb3c5fcb-5df4-4993-bf3a-c07afea32397/resource/95757080-3adc-425c-bdd1-73c9e6c33fc2/download/dublin-public-cycle-parking-facilities.geojson"
 const sourceName = "smartdublin"
 
-// GeoJSON types — just enough to parse the Smart Dublin feed.
 type featureCollection struct {
 	Features []feature `json:"features"`
 }
@@ -80,19 +83,23 @@ func main() {
 	}
 	log.Printf("Fetched %d features", len(fc.Features))
 
-	// Build a set of already-imported source IDs for O(1) lookup.
-	imported_ids := map[string]bool{}
 	var existing []stand.Stand
-	if err := db.Where("source = ? AND deleted_at IS NULL", sourceName).Find(&existing).Error; err != nil {
+	if err := db.Where("deleted_at IS NULL").Find(&existing).Error; err != nil {
 		log.Fatalf("load existing stands: %v", err)
 	}
+	log.Printf("Loaded %d existing stands from database", len(existing))
+
+	// Index existing source IDs for O(1) exact-match lookup.
+	existingSourceIDs := map[string]bool{}
 	for _, s := range existing {
-		imported_ids[s.SourceID] = true
+		if s.Source == sourceName {
+			existingSourceIDs[s.SourceID] = true
+		}
 	}
-	log.Printf("Found %d existing stands from source=%s", len(existing), sourceName)
 
 	var (
 		imported   int
+		warned     int
 		skippedDup int
 		skippedErr int
 	)
@@ -109,10 +116,22 @@ func main() {
 		name := propString(f.Properties, "Location")
 		nStands := propInt(f.Properties, "nostands")
 
-		// Skip if already imported (safe re-runs).
-		if sourceID != "" && imported_ids[sourceID] {
+		// 1. Exact source ID match — already imported, skip.
+		if sourceID != "" && existingSourceIDs[sourceID] {
 			skippedDup++
 			continue
+		}
+
+		// 2. Check against all existing stands using combined signals.
+		skip, warnMsg := checkDuplicate(lat, lng, nStands, existing)
+		if skip {
+			log.Printf("  SKIP  %s  FID=%s lat=%.6f lng=%.6f", warnMsg, sourceID, lat, lng)
+			skippedDup++
+			continue
+		}
+		if warnMsg != "" {
+			log.Printf("  WARN  %s  FID=%s lat=%.6f lng=%.6f — importing, review manually", warnMsg, sourceID, lat, lng)
+			warned++
 		}
 
 		s := stand.Stand{
@@ -135,18 +154,49 @@ func main() {
 				skippedErr++
 				continue
 			}
-			imported_ids[sourceID] = true
+			existing = append(existing, s)
+			existingSourceIDs[sourceID] = true
 		}
 		imported++
 	}
 
 	fmt.Printf("\nDone.\n")
-	fmt.Printf("  Imported:          %d\n", imported)
-	fmt.Printf("  Skipped (dup ID):  %d\n", skippedDup)
-	fmt.Printf("  Skipped (error):   %d\n", skippedErr)
+	fmt.Printf("  Imported:         %d\n", imported)
+	fmt.Printf("  Warned:           %d\n", warned)
+	fmt.Printf("  Skipped (dup):    %d\n", skippedDup)
+	fmt.Printf("  Skipped (error):  %d\n", skippedErr)
 	if *dryRun {
 		fmt.Println("  (dry-run — nothing written)")
 	}
+}
+
+// checkDuplicate returns (skip, description) by combining distance and stand count.
+// Stand count is only used as a signal when both sides have a recorded value > 0.
+func checkDuplicate(lat, lng float64, nStands int, existing []stand.Stand) (skip bool, msg string) {
+	for i := range existing {
+		e := &existing[i]
+		dist := haversine(lat, lng, e.Lat, e.Lng)
+		sameCount := nStands > 0 && e.NumberOfStands > 0 && nStands == e.NumberOfStands
+
+		switch {
+		case dist <= 5:
+			// Within 5m — same physical rack regardless of count.
+			return true, fmt.Sprintf("%.1fm from %s/%s (too close)", dist, e.Source, e.SourceID)
+
+		case dist <= 20 && sameCount:
+			// Close + identical stand count — almost certainly the same stand.
+			return true, fmt.Sprintf("%.1fm from %s/%s, same count (%d)", dist, e.Source, e.SourceID, nStands)
+
+		case dist <= 20:
+			// Close but counts differ — could be opposite side of road.
+			return false, fmt.Sprintf("%.1fm from %s/%s (counts differ: incoming %d, existing %d)", dist, e.Source, e.SourceID, nStands, e.NumberOfStands)
+
+		case dist <= 50 && sameCount:
+			// Same count, suspiciously nearby.
+			return false, fmt.Sprintf("%.1fm from %s/%s, same count (%d)", dist, e.Source, e.SourceID, nStands)
+		}
+	}
+	return false, ""
 }
 
 func fetchGeoJSON(url string) (*featureCollection, error) {
@@ -160,6 +210,17 @@ func fetchGeoJSON(url string) (*featureCollection, error) {
 		return nil, err
 	}
 	return &fc, nil
+}
+
+// haversine returns the distance in metres between two WGS-84 coordinates.
+func haversine(lat1, lng1, lat2, lng2 float64) float64 {
+	const earthR = 6371000.0
+	dLat := (lat2 - lat1) * math.Pi / 180
+	dLng := (lng2 - lng1) * math.Pi / 180
+	a := math.Sin(dLat/2)*math.Sin(dLat/2) +
+		math.Cos(lat1*math.Pi/180)*math.Cos(lat2*math.Pi/180)*
+			math.Sin(dLng/2)*math.Sin(dLng/2)
+	return earthR * 2 * math.Atan2(math.Sqrt(a), math.Sqrt(1-a))
 }
 
 func propString(props map[string]interface{}, key string) string {
