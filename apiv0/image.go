@@ -71,7 +71,7 @@ func handleImagePostFunc(minioClient *minio.Client, bucketName string) func(http
 			return
 		}
 
-		file, fileHeader, err := r.FormFile("filepond")
+		file, fileHeader, err := r.FormFile("photo")
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Println(err)
@@ -122,7 +122,7 @@ func (a api) handlePublicImagePostFunc(minioClient *minio.Client, bucketName str
 			return
 		}
 
-		file, fileHeader, err := r.FormFile("filepond")
+		file, fileHeader, err := r.FormFile("photo")
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Println(err)
