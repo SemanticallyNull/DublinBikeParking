@@ -178,12 +178,14 @@ func main() {
 		if err != nil {
 			log.Printf("WARNING: could not create import-warnings.txt: %v", err)
 		} else {
-			fmt.Fprintf(wf, "%-8s  %-6s  %-4s  %-10s  %-10s  %-30s  %s\n",
-				"DIST(m)", "FID", "CNT", "LAT", "LNG", "NAME", "REASON")
-			fmt.Fprintf(wf, "%s\n", strings.Repeat("-", 100))
+			fmt.Fprintf(wf, "%-8s  %-6s  %-4s  %-10s  %-10s  %-30s  %-55s  %s\n",
+				"DIST(m)", "FID", "CNT", "LAT", "LNG", "NAME", "MAP", "REASON")
+			fmt.Fprintf(wf, "%s\n", strings.Repeat("-", 160))
 			for _, w := range warnings {
-				fmt.Fprintf(wf, "%-8.1f  %-6s  %-4d  %-10.6f  %-10.6f  %-30s  %s\n",
-					w.dist, w.sourceID, w.nStands, w.lat, w.lng, w.name, w.msg)
+				mapURL := fmt.Sprintf("https://www.dublinbikeparking.com/#19/%.5f/%.5f",
+					w.lat, w.lng)
+				fmt.Fprintf(wf, "%-8.1f  %-6s  %-4d  %-10.6f  %-10.6f  %-30s  %-55s  %s\n",
+					w.dist, w.sourceID, w.nStands, w.lat, w.lng, w.name, mapURL, w.msg)
 			}
 			wf.Close()
 			log.Printf("Wrote %d warnings to import-warnings.txt", len(warnings))
