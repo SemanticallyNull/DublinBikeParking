@@ -1,0 +1,46 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap');
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --navy:       #0E2052;
+  --navy-deep:  #091538;
+  --navy-mid:   #162E6B;
+  --sky:        #6C96BB;
+  --sky-light:  #A8C8E0;
+  --gold:       #E8B84B;
+  --gold-hover: #D4A436;
+  --gold-glow:  rgba(232, 184, 75, 0.35);
+  --white:      #FFFFFF;
+  --surface:    #F6F8FC;
+  --border:     rgba(14, 32, 82, 0.09);
+  --text:       #111827;
+  --muted:      #6B7A99;
+  --success:    #16A34A;
+  --danger:     #DC2626;
+  --danger-bg:  rgba(220, 38, 38, 0.06);
+
+  --font-display: 'Barlow Condensed', system-ui, sans-serif;
+  --font-body:    'DM Sans', system-ui, sans-serif;
+
+  --header-h:  56px;
+  --panel-w:   360px;
+  --radius-sm: 8px;
+  --radius:    14px;
+  --radius-lg: 20px;
+  --shadow-sm: 0 1px 4px rgba(14, 32, 82, 0.10), 0 4px 16px rgba(14, 32, 82, 0.07);
+  --shadow:    0 4px 24px rgba(14, 32, 82, 0.18);
+  --shadow-lg: 0 12px 48px rgba(14, 32, 82, 0.25);
+}
+
+html, body, #root {
+  height: 100%;
+  font-family: var(--font-body);
+  overflow: hidden;
+  background: var(--navy-deep);
+  -webkit-font-smoothing: antialiased;
+}

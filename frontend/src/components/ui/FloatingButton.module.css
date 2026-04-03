@@ -1,0 +1,39 @@
+.fab {
+  position: absolute;
+  bottom: 24px;
+  right: 16px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--gold);
+  color: var(--navy);
+  border: none;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 4px 20px var(--gold-glow), 0 2px 8px rgba(14, 32, 82, 0.2);
+  transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+  z-index: 400;
+}
+
+.fab:hover:not(:disabled) {
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 6px 24px var(--gold-glow), 0 3px 12px rgba(14, 32, 82, 0.25);
+}
+
+.fab:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.fab:disabled {
+  opacity: 0.8;
+  cursor: default;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}

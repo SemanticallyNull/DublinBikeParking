@@ -1,0 +1,50 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(14, 32, 82, 0.3);
+  backdrop-filter: blur(2px);
+  z-index: 590;
+}
+
+.sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--navy);
+  border-radius: 20px 20px 0 0;
+  z-index: 600;
+  transform: translateY(calc(100% - 88px));
+  transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+  max-height: 85dvh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 -8px 40px rgba(14, 32, 82, 0.4);
+}
+
+.sheet.expanded {
+  transform: translateY(0);
+}
+
+.handle {
+  width: 100%;
+  padding: 14px 0 10px;
+  display: flex;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.handle::before {
+  content: '';
+  width: 36px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+}
+
+.content {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  flex: 1;
+}
