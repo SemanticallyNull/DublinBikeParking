@@ -14,16 +14,25 @@ clientsClaim()
 precacheAndRoute(self.__WB_MANIFEST)
 cleanupOutdatedCaches()
 
-// Warm the stands API cache during install so offline works immediately
-// on the first visit, without needing a second page load.
 self.addEventListener('install', (event) => {
-  // Pre-warm the stands API cache so offline works on the very first visit.
-  // Errors are swallowed so a network blip doesn't break SW installation.
+  console.log('[SW] install')
   event.waitUntil(
     caches.open('stands-geojson')
-      .then(cache => cache.add(new Request('/api/v0/stand', { credentials: 'same-origin' })))
-      .catch(() => {})
+      .then(cache => {
+        console.log('[SW] warming /api/v0/stand...')
+        return cache.add(new Request('/api/v0/stand', { credentials: 'same-origin' }))
+      })
+      .then(() => console.log('[SW] /api/v0/stand cached ok'))
+      .catch(err => console.warn('[SW] API warm failed (non-fatal):', err))
   )
+})
+
+self.addEventListener('activate', () => {
+  console.log('[SW] activate — in control')
+})
+
+self.addEventListener('fetch', (event: FetchEvent) => {
+  console.log('[SW] fetch', event.request.method, event.request.url)
 })
 
 // SPA navigation fallback
