@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/mux"
 
 	"github.com/semanticallynull/dublinbikeparking/slack"
 	"github.com/semanticallynull/dublinbikeparking/stand"
@@ -97,17 +98,22 @@ func NewAPIv0(r *gin.RouterGroup, db *gorm.DB) {
 	r.GET("/hirebikes", wrap(apiHandler.getHireBikes))
 	r.GET("/stand", wrap(apiHandler.getStands))
 	r.POST("/stand", wrap(apiHandler.createStand))
-	r.GET("/stand/{id}", wrap(apiHandler.getStand))
-	r.GET("/stand/{id}/missing", wrap(apiHandler.standMissing))
+	r.GET("/stand/:id", wrap(apiHandler.getStand))
+	r.GET("/stand/:id/missing", wrap(apiHandler.standMissing))
 	r.OPTIONS("/image", wrap(handleImageOptionsFunc(minioClient)))
 	r.POST("/image", wrap(handleImagePostFunc(minioClient, bucketName)))
-	r.POST("/publicimage/{id}", wrap(apiHandler.handlePublicImagePostFunc(minioClient, "dublinbikeparking-public")))
+	r.POST("/publicimage/:id", wrap(apiHandler.handlePublicImagePostFunc(minioClient, "dublinbikeparking-public")))
 	r.POST("/slack", wrap(apiHandler.handleSlackMessage))
 }
 
 func wrap(handlerFunc http.HandlerFunc) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		handlerFunc(c.Writer, c.Request)
+		vars := make(map[string]string)
+		for _, p := range c.Params {
+			vars[p.Key] = p.Value
+		}
+		req := mux.SetURLVars(c.Request, vars)
+		handlerFunc(c.Writer, req)
 	}
 }
 
