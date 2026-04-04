@@ -20,10 +20,17 @@ import (
 	"github.com/minio/minio-go/v6"
 )
 
+type smtpConfig struct {
+	Host     string
+	Port     string
+	User     string
+	Password string
+}
+
 type api struct {
-	DB             *gorm.DB
-	SendgridAPIKey string
-	Slack          *slack.SlackIntegration
+	DB    *gorm.DB
+	SMTP  *smtpConfig
+	Slack *slack.SlackIntegration
 }
 
 func NewAPIv0(r *gin.RouterGroup, db *gorm.DB) {
@@ -31,10 +38,20 @@ func NewAPIv0(r *gin.RouterGroup, db *gorm.DB) {
 		DB: db,
 	}
 
-	if os.Getenv("SENDGRID_API_KEY") == "" {
-		fmt.Println("WARNING: SENDGRID_API_KEY is not set. No mails will be sent")
+	if os.Getenv("SMTP_HOST") == "" {
+		fmt.Println("WARNING: SMTP_HOST is not set. No mails will be sent")
+	} else {
+		port := os.Getenv("SMTP_PORT")
+		if port == "" {
+			port = "587"
+		}
+		apiHandler.SMTP = &smtpConfig{
+			Host:     os.Getenv("SMTP_HOST"),
+			Port:     port,
+			User:     os.Getenv("SMTP_USER"),
+			Password: os.Getenv("SMTP_PASSWORD"),
+		}
 	}
-	apiHandler.SendgridAPIKey = os.Getenv("SENDGRID_API_KEY")
 
 	if os.Getenv("S3_ENDPOINT") == "" {
 		fmt.Println("WARNING: S3_* variables ares not set. No images will be stored")

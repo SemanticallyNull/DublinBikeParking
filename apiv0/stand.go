@@ -17,8 +17,6 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
 	geojson "github.com/paulmach/go.geojson"
-	"github.com/sendgrid/sendgrid-go"
-	"github.com/sendgrid/sendgrid-go/helpers/mail"
 	"gopkg.in/validator.v2"
 
 	"github.com/semanticallynull/dublinbikeparking/stand"
@@ -140,26 +138,16 @@ func (a *api) standMissing(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if a.SendgridAPIKey != "" {
+	if a.SMTP != nil {
 		go func() {
-			from := mail.NewEmail("DublinBikeParking", "no-reply@dublinbikeparking.com")
 			subject := fmt.Sprintf("Stand Missing at '%s'", s.Name)
-			to := mail.NewEmail("Katie Chapman", "hello@katiechapman.ie")
-			plainTextContent := "Stand missing DublinBikeParking.com\n" +
+			body := "Stand missing DublinBikeParking.com\n" +
 				"Stand ID: " + s.StandID + "\n" +
 				"Name: " + s.Name + "\n" +
 				"Coordinates: " + fmt.Sprintf("%f %f", s.Lat, s.Lng) + "\n" +
-				"https://dublinbikeparking.com/update.html#19/" + fmt.Sprintf("%f/%f", s.Lat, s.Lng)
-			htmlContent := "Stand missing DublinBikeParking.com<br>" +
-				"<b>Stand ID:</b> " + s.StandID + "<br>" +
-				"<b>Name:</b> " + s.Name + "<br>" +
-				"<b>Coordinates:</b> " + fmt.Sprintf("%f %f", s.Lat, s.Lng) + "<br>" +
-				"<a href=\"https://dublinbikeparking.com/update.html#19/" + fmt.Sprintf("%f/%f", s.Lat, s.Lng) + "\">Link to update page</a>"
-			message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
-			client := sendgrid.NewSendClient(a.SendgridAPIKey)
-			_, err := client.Send(message)
-			if err != nil {
-				log.Println(err)
+				"https://www.dublinbikeparking.com/#19/" + fmt.Sprintf("%f/%f", s.Lat, s.Lng)
+			if err := sendMail(a.SMTP, subject, body); err != nil {
+				log.Println("email error:", err)
 			}
 		}()
 	}
@@ -268,26 +256,16 @@ func (a *api) createStand(w http.ResponseWriter, r *http.Request) {
 
 	a.DB.Create(&stand)
 
-	if a.SendgridAPIKey != "" {
+	if a.SMTP != nil {
 		go func() {
-			from := mail.NewEmail("DublinBikeParking", "no-reply@dublinbikeparking.com")
 			subject := fmt.Sprintf("New Stand at '%s'", stand.Name)
-			to := mail.NewEmail("Katie Chapman", "hello@katiechapman.ie")
-			plainTextContent := "New stand on DublinBikeParking.com\n" +
+			body := "New stand on DublinBikeParking.com\n" +
 				"Stand ID: " + stand.StandID + "\n" +
 				"Name: " + stand.Name + "\n" +
 				"Coordinates: " + fmt.Sprintf("%f %f", stand.Lat, stand.Lng) + "\n" +
-				"https://dublinbikeparking.com/update.html#19/" + fmt.Sprintf("%f/%f", stand.Lat, stand.Lng)
-			htmlContent := "New stand on DublinBikeParking.com<br>" +
-				"<b>Stand ID:</b> " + stand.StandID + "<br>" +
-				"<b>Name:</b> " + stand.Name + "<br>" +
-				"<b>Coordinates:</b> " + fmt.Sprintf("%f %f", stand.Lat, stand.Lng) + "<br>" +
-				"<a href=\"https://dublinbikeparking.com/update.html#19/" + fmt.Sprintf("%f/%f", stand.Lat, stand.Lng) + "\">Link to update page</a>"
-			message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
-			client := sendgrid.NewSendClient(a.SendgridAPIKey)
-			_, err := client.Send(message)
-			if err != nil {
-				log.Println(err)
+				"https://www.dublinbikeparking.com/#19/" + fmt.Sprintf("%f/%f", stand.Lat, stand.Lng)
+			if err := sendMail(a.SMTP, subject, body); err != nil {
+				log.Println("email error:", err)
 			}
 		}()
 	}

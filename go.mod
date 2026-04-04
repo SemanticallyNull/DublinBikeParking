@@ -15,7 +15,6 @@ require (
 	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.37.0
 	github.com/paulmach/go.geojson v1.5.0
-	github.com/sendgrid/sendgrid-go v3.16.0+incompatible
 	github.com/slack-go/slack v0.16.0
 	golang.org/x/sync v0.14.0
 	gopkg.in/validator.v2 v2.0.1
