@@ -1,4 +1,5 @@
 /// <reference lib="webworker" />
+import { clientsClaim, skipWaiting } from 'workbox-core'
 import { cleanupOutdatedCaches, createHandlerBoundToURL, precacheAndRoute } from 'workbox-precaching'
 import { NavigationRoute, registerRoute } from 'workbox-routing'
 import { CacheFirst, StaleWhileRevalidate } from 'workbox-strategies'
@@ -7,7 +8,8 @@ import { ExpirationPlugin } from 'workbox-expiration'
 
 declare let self: ServiceWorkerGlobalScope
 
-self.skipWaiting()
+skipWaiting()
+clientsClaim()
 
 precacheAndRoute(self.__WB_MANIFEST)
 cleanupOutdatedCaches()
@@ -15,10 +17,12 @@ cleanupOutdatedCaches()
 // Warm the stands API cache during install so offline works immediately
 // on the first visit, without needing a second page load.
 self.addEventListener('install', (event) => {
+  // Pre-warm the stands API cache so offline works on the very first visit.
+  // Errors are swallowed so a network blip doesn't break SW installation.
   event.waitUntil(
-    caches.open('stands-geojson').then(cache =>
-      cache.add(new Request('/api/v0/stand', { credentials: 'same-origin' }))
-    )
+    caches.open('stands-geojson')
+      .then(cache => cache.add(new Request('/api/v0/stand', { credentials: 'same-origin' })))
+      .catch(() => {})
   )
 })
 
