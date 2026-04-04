@@ -2,7 +2,7 @@
 import { clientsClaim, skipWaiting } from 'workbox-core'
 import { cleanupOutdatedCaches, precacheAndRoute } from 'workbox-precaching'
 import { NavigationRoute, registerRoute, setCatchHandler } from 'workbox-routing'
-import { CacheFirst, StaleWhileRevalidate } from 'workbox-strategies'
+import { StaleWhileRevalidate } from 'workbox-strategies'
 import { CacheableResponsePlugin } from 'workbox-cacheable-response'
 import { ExpirationPlugin } from 'workbox-expiration'
 
@@ -62,20 +62,28 @@ registerRoute(
   'GET'
 )
 
-// Map tiles — cache-first, keep up to 500 tiles for 7 days.
-// Fetch with mode:'cors' so we get a real status-200 response instead of an
-// opaque response — Chrome inflates opaque response sizes to ~7MB each for
-// quota purposes, causing cache.put() to fail immediately.
+// Map tiles — manual cache-first so we can log exactly what's happening.
+// Fetch with mode:'cors' to avoid opaque responses (Chrome inflates their
+// quota cost to ~7MB each, causing cache.put() to fail silently).
 registerRoute(
   /basemaps\.cartocdn\.com/,
-  new CacheFirst({
-    cacheName: 'map-tiles',
-    fetchOptions: { mode: 'cors', credentials: 'omit' },
-    plugins: [
-      new ExpirationPlugin({ maxEntries: 500, maxAgeSeconds: 7 * 24 * 60 * 60 }),
-      new CacheableResponsePlugin({ statuses: [200] }),
-    ],
-  }),
+  async ({ request }) => {
+    const cache = await caches.open('map-tiles')
+    const cached = await cache.match(request)
+    if (cached) {
+      console.log('[SW] tile HIT:', request.url)
+      return cached
+    }
+    console.log('[SW] tile MISS, fetching:', request.url)
+    const response = await fetch(request.url, { mode: 'cors', credentials: 'omit' })
+    console.log('[SW] tile fetch status:', response.status, response.type)
+    if (response.ok) {
+      cache.put(request, response.clone())
+        .then(() => console.log('[SW] tile cached ok'))
+        .catch(err => console.warn('[SW] tile cache.put failed:', err))
+    }
+    return response
+  },
   'GET'
 )
 
