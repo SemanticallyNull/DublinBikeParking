@@ -1,7 +1,7 @@
 /// <reference lib="webworker" />
 import { clientsClaim, skipWaiting } from 'workbox-core'
-import { cleanupOutdatedCaches, createHandlerBoundToURL, precacheAndRoute } from 'workbox-precaching'
-import { NavigationRoute, registerRoute } from 'workbox-routing'
+import { cleanupOutdatedCaches, precacheAndRoute } from 'workbox-precaching'
+import { NavigationRoute, registerRoute, setCatchHandler } from 'workbox-routing'
 import { CacheFirst, StaleWhileRevalidate } from 'workbox-strategies'
 import { CacheableResponsePlugin } from 'workbox-cacheable-response'
 import { ExpirationPlugin } from 'workbox-expiration'
@@ -35,8 +35,19 @@ self.addEventListener('fetch', (event: FetchEvent) => {
   console.log('[SW] fetch', event.request.method, event.request.url)
 })
 
-// SPA navigation fallback
-registerRoute(new NavigationRoute(createHandlerBoundToURL('index.html')))
+// SPA navigation — look up index.html directly from the precache
+registerRoute(
+  new NavigationRoute(async () => {
+    console.log('[SW] navigation route handler')
+    const cached = await caches.match('/index.html')
+    if (cached) {
+      console.log('[SW] serving index.html from cache')
+      return cached
+    }
+    console.log('[SW] index.html not in cache, fetching from network')
+    return fetch('/index.html')
+  })
+)
 
 // Stands API — serve from cache while revalidating in background
 registerRoute(
@@ -63,3 +74,13 @@ registerRoute(
   }),
   'GET'
 )
+
+// Fallback: if any route handler throws, try the cache then give up gracefully
+setCatchHandler(async ({ request }) => {
+  console.warn('[SW] catch handler fired for', request.url)
+  if (request.destination === 'document') {
+    const cached = await caches.match('/index.html')
+    if (cached) return cached
+  }
+  return Response.error()
+})
