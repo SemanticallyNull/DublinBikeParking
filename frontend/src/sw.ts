@@ -62,14 +62,18 @@ registerRoute(
   'GET'
 )
 
-// Map tiles — cache-first, keep up to 500 tiles for 7 days
+// Map tiles — cache-first, keep up to 500 tiles for 7 days.
+// Fetch with mode:'cors' so we get a real status-200 response instead of an
+// opaque response — Chrome inflates opaque response sizes to ~7MB each for
+// quota purposes, causing cache.put() to fail immediately.
 registerRoute(
   /basemaps\.cartocdn\.com/,
   new CacheFirst({
     cacheName: 'map-tiles',
+    fetchOptions: { mode: 'cors', credentials: 'omit' },
     plugins: [
       new ExpirationPlugin({ maxEntries: 500, maxAgeSeconds: 7 * 24 * 60 * 60 }),
-      new CacheableResponsePlugin({ statuses: [0, 200] }),
+      new CacheableResponsePlugin({ statuses: [200] }),
     ],
   }),
   'GET'
