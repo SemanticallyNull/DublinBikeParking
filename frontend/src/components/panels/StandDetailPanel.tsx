@@ -1,3 +1,4 @@
+// frontend/src/components/panels/StandDetailPanel.tsx
 import { useState } from 'react'
 import { reportMissing } from '../../api/actions'
 import type { StandFeature, QueryParams } from '../../types'
@@ -9,9 +10,10 @@ interface Props {
   feature: StandFeature
   queryParams: QueryParams
   onClose: () => void
+  onOpenGuide: () => void
 }
 
-export function StandDetailPanel({ feature, queryParams, onClose }: Props) {
+export function StandDetailPanel({ feature, queryParams, onClose, onOpenGuide }: Props) {
   const p = feature.properties
   const [reportState, setReportState] = useState<'idle' | 'loading' | 'done' | 'error'>('idle')
   const isToaster = TOASTER_TYPES.includes(p.type)
@@ -110,6 +112,13 @@ export function StandDetailPanel({ feature, queryParams, onClose }: Props) {
             {reportState === 'loading' ? 'Reporting…' : reportState === 'error' ? 'Failed — try again' : 'Report Missing'}
           </button>
         )}
+
+        <button className={styles.guideLink} onClick={onOpenGuide}>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+            <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          How to lock your bike securely →
+        </button>
       </div>
     </div>
   )

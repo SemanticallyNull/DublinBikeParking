@@ -271,3 +271,26 @@
   color: var(--success);
   padding: 11px;
 }
+
+.guideLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  background: none;
+  border: none;
+  color: var(--sky);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: var(--radius-sm);
+  transition: color 0.15s, background 0.15s;
+  width: 100%;
+  text-align: center;
+}
+
+.guideLink:hover {
+  color: var(--gold);
+  background: rgba(90, 148, 200, 0.07);
+}
