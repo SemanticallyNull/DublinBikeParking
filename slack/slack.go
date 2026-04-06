@@ -94,6 +94,33 @@ func (s *SlackIntegration) PostMissingNotification(stand stand.Stand) error {
 	return nil
 }
 
+func (s *SlackIntegration) PostVerifyNotification(stand stand.Stand) error {
+	bms := slack.NewSectionBlock(
+		slack.NewTextBlockObject(
+			"mrkdwn",
+			fmt.Sprintf("A bike stand has been verified by a rider:\n*<https://dublinbikeparking.com/update.html#18/%f/%f|%s>*", stand.Lat, stand.Lng, stand.Name),
+			false,
+			false,
+		),
+		[]*slack.TextBlockObject{
+			slack.NewTextBlockObject("mrkdwn", fmt.Sprintf("*ID:*\n%s", stand.StandID), false, false),
+			slack.NewTextBlockObject("mrkdwn", fmt.Sprintf("*Location:*\n%s", stand.Name), false, false),
+			slack.NewTextBlockObject("mrkdwn", fmt.Sprintf("*Coordinates:*\n%f/%f", stand.Lat, stand.Lng), false, false),
+		},
+		nil,
+	)
+
+	if err := slack.PostWebhook(s.webhookURL, &slack.WebhookMessage{
+		Blocks: &slack.Blocks{
+			BlockSet: []slack.Block{bms},
+		},
+	}); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 type SlackInteraction struct {
 	User struct {
 		ID string `json:"id"`

@@ -1,0 +1,179 @@
+.hud {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  background: #111;
+  color: #fff;
+  padding: 1rem;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.topBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+}
+
+.exitButton {
+  padding: 0.75rem 1.25rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  border: 2px solid #666;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+}
+
+.stats {
+  font-size: 0.875rem;
+  color: #aaa;
+}
+
+.directionArea {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.arrow {
+  font-size: min(30vh, 200px);
+  line-height: 1;
+  transition: color 0.3s;
+}
+
+.arrowGreen {
+  color: #51cf66;
+}
+
+.arrowYellow {
+  color: #fcc419;
+}
+
+.arrowDim {
+  color: #666;
+}
+
+.compassText {
+  font-size: 1.5rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.standInfo {
+  text-align: center;
+}
+
+.standName {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.standType {
+  font-size: 0.875rem;
+  color: #aaa;
+}
+
+.distance {
+  font-size: 3rem;
+  font-weight: 700;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.actionButtons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+}
+
+.verifyButton,
+.missingButton {
+  min-height: 80px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  color: #fff;
+}
+
+.verifyButton {
+  background: #2b8a3e;
+}
+
+.verifyButton:active {
+  background: #237032;
+}
+
+.missingButton {
+  background: #c92a2a;
+}
+
+.missingButton:active {
+  background: #a61e1e;
+}
+
+.skipButton {
+  display: block;
+  width: 100%;
+  padding: 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 12px;
+  border: 2px solid #444;
+  background: transparent;
+  color: #aaa;
+  cursor: pointer;
+  margin-bottom: 0.5rem;
+}
+
+.emptyState {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  text-align: center;
+}
+
+.emptyTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.summaryList {
+  font-size: 1rem;
+  color: #aaa;
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.finishButton {
+  padding: 1rem 2rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  border-radius: 12px;
+  border: none;
+  background: #4dabf7;
+  color: #fff;
+  cursor: pointer;
+  min-height: 80px;
+}
+
+.gpsError {
+  text-align: center;
+  color: #ff6b6b;
+  font-size: 1rem;
+  padding: 1rem;
+}

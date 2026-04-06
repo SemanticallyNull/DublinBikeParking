@@ -1,0 +1,70 @@
+.entry {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+  background: #1a1a2e;
+  color: #fff;
+  padding: 2rem;
+  gap: 1.5rem;
+}
+
+.title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: #aaa;
+  text-align: center;
+}
+
+.passwordInput {
+  width: 100%;
+  max-width: 400px;
+  padding: 1rem;
+  font-size: 1.25rem;
+  border-radius: 12px;
+  border: 2px solid #444;
+  background: #2a2a3e;
+  color: #fff;
+  text-align: center;
+}
+
+.passwordInput:focus {
+  outline: none;
+  border-color: #4dabf7;
+}
+
+.startButton {
+  width: 100%;
+  max-width: 400px;
+  padding: 1.25rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  border-radius: 12px;
+  border: none;
+  background: #4dabf7;
+  color: #fff;
+  cursor: pointer;
+  min-height: 80px;
+}
+
+.startButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.error {
+  color: #ff6b6b;
+  font-size: 1rem;
+  text-align: center;
+}
+
+.standCount {
+  font-size: 1rem;
+  color: #aaa;
+}

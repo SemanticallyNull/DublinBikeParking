@@ -122,6 +122,24 @@ func (a *api) standMissing(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("content-type", "application/json")
 	vars := mux.Vars(r)
 
+	// If POST, check password for authenticated missing reports (verify mode)
+	if r.Method == "POST" {
+		var body struct {
+			Password string `json:"password"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(map[string]string{"error": "invalid request body"})
+			return
+		}
+		expected := os.Getenv("DBP_VERIFY_PASSWORD")
+		if expected == "" || body.Password != expected {
+			w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode(map[string]string{"error": "invalid password"})
+			return
+		}
+	}
+
 	s := stand.Stand{}
 	if query := a.DB.Where("`stand_id` = ?", vars["id"]).First(&s); query.Error != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -157,6 +175,61 @@ func (a *api) standMissing(w http.ResponseWriter, r *http.Request) {
 			err := a.Slack.PostMissingNotification(s)
 			if err != nil {
 				log.Println(err)
+			}
+		}()
+	}
+
+	cache = geoJSONCache{}
+
+	err := json.NewEncoder(w).Encode("OK")
+	if err != nil {
+		fmt.Printf("error encoding json: %s", err)
+	}
+}
+
+func (a *api) standVerify(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("content-type", "application/json")
+	vars := mux.Vars(r)
+
+	var body struct {
+		Password string `json:"password"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"error": "invalid request body"})
+		return
+	}
+
+	expected := os.Getenv("DBP_VERIFY_PASSWORD")
+	if expected == "" || body.Password != expected {
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(map[string]string{"error": "invalid password"})
+		return
+	}
+
+	s := stand.Stand{}
+	if query := a.DB.Where("`stand_id` = ?", vars["id"]).First(&s); query.Error != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(query.Error)
+		return
+	}
+
+	if err := a.DB.Model(&s).Where("`stand_id` = ?", vars["id"]).Updates(map[string]interface{}{
+		"checked":  "rider-verify",
+		"verified": true,
+	}).Error; err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+		return
+	}
+
+	cache = geoJSONCache{}
+
+	if a.Slack != nil {
+		go func() {
+			err := a.Slack.PostVerifyNotification(s)
+			if err != nil {
+				log.Println("slack verify notification error:", err)
 			}
 		}()
 	}

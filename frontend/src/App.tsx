@@ -1,12 +1,17 @@
 // frontend/src/App.tsx
 import { useState } from 'react'
 import { AppShell } from './components/layout/AppShell'
+import { VerifyMode } from './components/verify/VerifyMode'
 import { useStands } from './hooks/useStands'
 import { useQueryParams } from './hooks/useQueryParams'
 import { useGeolocation } from './hooks/useGeolocation'
 import type { StandFeature } from './types'
 
 export default function App() {
+  if (window.location.pathname === '/verify') {
+    return <VerifyMode />
+  }
+
   const params = useQueryParams()
   const { features, loading, reload } = useStands({ verified: params.verified, pendingReview: params.pendingReview })
   const [selectedId, setSelectedId] = useState<string | null>(null)
