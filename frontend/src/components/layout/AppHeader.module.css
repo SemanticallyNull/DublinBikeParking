@@ -107,7 +107,7 @@
   background: rgba(255, 255, 255, 0.9);
 }
 
-.findBtn {
+.secondaryBtn {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -127,7 +127,7 @@
   white-space: nowrap;
 }
 
-.findBtn:hover {
+.secondaryBtn:hover {
   background: rgba(108, 150, 187, 0.22);
   color: var(--white);
 }
@@ -135,12 +135,12 @@
 /* Compact: hide button labels on narrow screens, show only icons */
 @media (max-width: 440px) {
   .addBtn span,
-  .findBtn span {
+  .secondaryBtn span {
     display: none;
   }
 
   .addBtn,
-  .findBtn {
+  .secondaryBtn {
     padding: 8px;
     border-radius: 50%;
     width: 36px;
