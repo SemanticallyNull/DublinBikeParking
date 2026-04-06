@@ -1,0 +1,210 @@
+/* frontend/src/components/guide/LockingGuide.module.css */
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(9, 21, 56, 0.85);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.card {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  width: min(480px, 90vw);
+  max-height: 90dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Progress bar */
+.progressBar {
+  height: 3px;
+  background: var(--border);
+  flex-shrink: 0;
+}
+
+.progressFill {
+  height: 100%;
+  background: var(--gold);
+  transition: width 0.3s ease;
+}
+
+/* Top row: step counter + skip */
+.topRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px 0;
+  flex-shrink: 0;
+}
+
+.stepCounter {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+
+.skipBtn {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  transition: color 0.15s, background 0.15s;
+}
+
+.skipBtn:hover {
+  color: var(--text);
+  background: var(--border);
+}
+
+/* Animated step content wrapper */
+.stepContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 28px 20px;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.stepContentForward {
+  animation: slideInRight 0.25s ease-in-out;
+}
+
+.stepContentBack {
+  animation: slideInLeft 0.25s ease-in-out;
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(60px); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+@keyframes slideInLeft {
+  from { transform: translateX(-60px); opacity: 0; }
+  to   { transform: translateX(0);     opacity: 1; }
+}
+
+/* Illustration */
+.illustration {
+  width: 160px;
+  height: 160px;
+  flex-shrink: 0;
+  background: var(--navy);
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.illustration svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Step text */
+.stepTitle {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 26px;
+  letter-spacing: -0.01em;
+  color: var(--navy);
+  text-align: center;
+  margin-bottom: 10px;
+  line-height: 1.1;
+}
+
+.stepBody {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--muted);
+  text-align: center;
+  max-width: 340px;
+}
+
+/* Navigation buttons */
+.nav {
+  display: flex;
+  gap: 10px;
+  padding: 0 20px 20px;
+  flex-shrink: 0;
+}
+
+.navBtnPrev {
+  flex: 1;
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.navBtnPrev:hover {
+  background: var(--border);
+  color: var(--text);
+}
+
+.navBtnNext {
+  flex: 2;
+  background: var(--gold);
+  border: none;
+  color: var(--white);
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.15s, box-shadow 0.15s;
+  box-shadow: 0 2px 12px var(--gold-glow);
+}
+
+.navBtnNext:hover {
+  background: var(--gold-hover);
+  box-shadow: 0 4px 16px var(--gold-glow);
+}
+
+/* Mobile adjustments */
+@media (max-width: 480px) {
+  .illustration {
+    width: 130px;
+    height: 130px;
+  }
+
+  .stepTitle {
+    font-size: 22px;
+  }
+
+  .stepBody {
+    font-size: 13px;
+  }
+}
