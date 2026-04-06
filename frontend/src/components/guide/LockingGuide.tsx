@@ -47,7 +47,7 @@ export function LockingGuide({ open, onClose }: Props) {
 
   // Reset to step 0 whenever the guide opens
   useEffect(() => {
-    if (open) setStep(0)
+    if (open) { setStep(0); setDirection('forward') }
   }, [open])
 
   if (!open) return null
@@ -74,7 +74,7 @@ export function LockingGuide({ open, onClose }: Props) {
     <div className={styles.backdrop} role="dialog" aria-modal="true" aria-label="How to lock your bike">
       <div className={styles.card} ref={cardRef} tabIndex={-1}>
         {/* Progress bar */}
-        <div className={styles.progressBar} role="progressbar" aria-valuenow={step + 1} aria-valuemax={total}>
+        <div className={styles.progressBar} role="progressbar" aria-valuenow={step + 1} aria-valuemin={1} aria-valuemax={total}>
           <div className={styles.progressFill} style={{ width: `${progressPct}%` }} />
         </div>
 

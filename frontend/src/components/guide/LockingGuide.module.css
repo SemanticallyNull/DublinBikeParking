@@ -208,3 +208,9 @@
     font-size: 13px;
   }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .backdrop { animation: none; }
+  .stepContentForward,
+  .stepContentBack { animation: none; }
+}
