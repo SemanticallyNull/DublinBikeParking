@@ -148,3 +148,23 @@
     justify-content: center;
   }
 }
+
+.guideBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: rgba(108, 150, 187, 0.12);
+  color: var(--sky-light);
+  border-radius: 50%;
+  border: 1px solid rgba(108, 150, 187, 0.2);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+
+.guideBtn:hover {
+  background: rgba(108, 150, 187, 0.22);
+  color: var(--white);
+}
