@@ -40,7 +40,7 @@ const IllustrationChooseLock = () => (
     <line x1="78" y1="110" x2="90" y2="118" stroke="#DC2626" strokeWidth="3" strokeLinecap="round"/>
     <line x1="90" y1="110" x2="78" y2="118" stroke="#DC2626" strokeWidth="3" strokeLinecap="round"/>
     <text x="84" y="115" textAnchor="middle" fontSize="10" fill="#DC2626"
-      fontFamily="system-ui, sans-serif" fontWeight="700" dy="10">CABLE</text>
+      fontFamily="system-ui, sans-serif" fontWeight="700">CABLE</text>
   </svg>
 )
 
