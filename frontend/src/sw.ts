@@ -35,13 +35,23 @@ self.addEventListener('fetch', (event: FetchEvent) => {
   console.log('[SW] fetch', event.request.method, event.request.url)
 })
 
-// SPA navigation — look up index.html directly from the precache
+// SPA navigation — look up index.html directly from the precache.
+// We must strip the `redirected` flag from cached responses because
+// Firefox on iOS rejects service-worker responses that carry it.
 registerRoute(
   new NavigationRoute(async () => {
     console.log('[SW] navigation route handler')
     const cached = await caches.match('/index.html')
     if (cached) {
       console.log('[SW] serving index.html from cache')
+      if (cached.redirected) {
+        const body = await cached.blob()
+        return new Response(body, {
+          status: cached.status,
+          statusText: cached.statusText,
+          headers: cached.headers,
+        })
+      }
       return cached
     }
     console.log('[SW] index.html not in cache, fetching from network')
@@ -92,7 +102,17 @@ setCatchHandler(async ({ request }) => {
   console.warn('[SW] catch handler fired for', request.url)
   if (request.destination === 'document') {
     const cached = await caches.match('/index.html')
-    if (cached) return cached
+    if (cached) {
+      if (cached.redirected) {
+        const body = await cached.blob()
+        return new Response(body, {
+          status: cached.status,
+          statusText: cached.statusText,
+          headers: cached.headers,
+        })
+      }
+      return cached
+    }
   }
   return Response.error()
 })
