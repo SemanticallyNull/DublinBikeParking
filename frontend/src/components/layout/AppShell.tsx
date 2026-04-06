@@ -1,3 +1,4 @@
+// frontend/src/components/layout/AppShell.tsx
 import { useEffect } from 'react'
 import { AppHeader } from './AppHeader'
 import { MapView } from '../map/MapView'
@@ -6,6 +7,7 @@ import { AddStandForm } from '../panels/AddStandForm'
 import { BottomSheet } from '../ui/BottomSheet'
 import { FloatingButton } from '../ui/FloatingButton'
 import { NearestStandResult } from '../panels/NearestStandResult'
+import { LockingGuide } from '../guide/LockingGuide'
 import type { StandFeature, QueryParams } from '../../types'
 import type { NearestResult } from '../../hooks/useGeolocation'
 import styles from './AppShell.module.css'
@@ -20,6 +22,7 @@ interface Props {
   geoLoading: boolean
   nearestResult: NearestResult | null
   addPin: { lat: number; lng: number } | null
+  guideOpen: boolean
   onSelect: (feature: StandFeature) => void
   onClose: () => void
   onAddStand: () => void
@@ -28,6 +31,8 @@ interface Props {
   onMapClick: (lat: number, lng: number) => void
   onAddSuccess: () => void
   onAddCancel: () => void
+  onOpenGuide: () => void
+  onCloseGuide: () => void
 }
 
 export function AppShell({
@@ -40,6 +45,7 @@ export function AppShell({
   geoLoading,
   nearestResult,
   addPin,
+  guideOpen,
   onSelect,
   onClose,
   onAddStand,
@@ -48,8 +54,9 @@ export function AppShell({
   onMapClick,
   onAddSuccess,
   onAddCancel,
+  onOpenGuide,
+  onCloseGuide,
 }: Props) {
-  // Prevent body scroll when panel is open on desktop
   useEffect(() => {
     if (selectedStand || addPin) {
       document.body.classList.add('panel-open')
@@ -61,7 +68,6 @@ export function AppShell({
 
   return (
     <div className={styles.shell}>
-      {/* Placement mode banner */}
       {placementMode && (
         <div className={styles.placementBanner}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
@@ -79,6 +85,7 @@ export function AppShell({
         placementMode={placementMode}
         onAddStand={onAddStand}
         onFindNearest={onLocate}
+        onOpenGuide={onOpenGuide}
       />
 
       <div className={styles.body}>
@@ -97,7 +104,6 @@ export function AppShell({
             onMapClick={onMapClick}
           />
 
-          {/* Nearest stand result card — overlays map */}
           {nearestResult && !selectedStand && (
             <NearestStandResult
               result={nearestResult}
@@ -106,32 +112,31 @@ export function AppShell({
             />
           )}
 
-          {/* Geolocation FAB */}
           <FloatingButton loading={geoLoading} onClick={onLocate} />
         </div>
 
-        {/* Desktop side panel */}
         {(selectedStand || addPin) && (
           <aside className={styles.sidePanel}>
             {addPin
               ? <AddStandForm lat={addPin.lat} lng={addPin.lng} onSuccess={onAddSuccess} onCancel={onAddCancel} />
-              : <StandDetailPanel feature={selectedStand!} queryParams={queryParams} onClose={onClose} />
+              : <StandDetailPanel feature={selectedStand!} queryParams={queryParams} onClose={onClose} onOpenGuide={onOpenGuide} />
             }
           </aside>
         )}
       </div>
 
-      {/* Mobile bottom sheet — hidden on desktop via CSS */}
       <div className={styles.mobileOnly}>
         <BottomSheet open={!!(selectedStand || addPin)} onClose={addPin ? onAddCancel : onClose}>
           {addPin
             ? <div className="bottom-sheet-content"><AddStandForm lat={addPin.lat} lng={addPin.lng} onSuccess={onAddSuccess} onCancel={onAddCancel} /></div>
             : selectedStand
-              ? <div className="bottom-sheet-content"><StandDetailPanel feature={selectedStand} queryParams={queryParams} onClose={onClose} /></div>
+              ? <div className="bottom-sheet-content"><StandDetailPanel feature={selectedStand} queryParams={queryParams} onClose={onClose} onOpenGuide={onOpenGuide} /></div>
               : null
           }
         </BottomSheet>
       </div>
+
+      <LockingGuide open={guideOpen} onClose={onCloseGuide} />
     </div>
   )
 }
