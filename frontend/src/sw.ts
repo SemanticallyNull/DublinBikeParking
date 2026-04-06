@@ -35,27 +35,32 @@ self.addEventListener('fetch', (event: FetchEvent) => {
   console.log('[SW] fetch', event.request.method, event.request.url)
 })
 
-// SPA navigation — look up index.html directly from the precache.
-// We must strip the `redirected` flag from cached responses because
-// Firefox on iOS rejects service-worker responses that carry it.
+// SPA navigation — serve index.html for all navigation requests.
+// We ALWAYS create a fresh Response to clear the `redirected` flag
+// AND the `url` property. iOS WebKit rejects navigation responses
+// whose URL doesn't match the request (e.g. serving /index.html
+// for a navigation to /verify).
 registerRoute(
   new NavigationRoute(async () => {
     console.log('[SW] navigation route handler')
     const cached = await caches.match('/index.html')
     if (cached) {
       console.log('[SW] serving index.html from cache')
-      if (cached.redirected) {
-        const body = await cached.blob()
-        return new Response(body, {
-          status: cached.status,
-          statusText: cached.statusText,
-          headers: cached.headers,
-        })
-      }
-      return cached
+      const body = await cached.blob()
+      return new Response(body, {
+        status: cached.status,
+        statusText: cached.statusText,
+        headers: cached.headers,
+      })
     }
     console.log('[SW] index.html not in cache, fetching from network')
-    return fetch('/index.html')
+    const response = await fetch('/index.html')
+    const body = await response.blob()
+    return new Response(body, {
+      status: response.status,
+      statusText: response.statusText,
+      headers: response.headers,
+    })
   })
 )
 
@@ -103,15 +108,12 @@ setCatchHandler(async ({ request }) => {
   if (request.destination === 'document') {
     const cached = await caches.match('/index.html')
     if (cached) {
-      if (cached.redirected) {
-        const body = await cached.blob()
-        return new Response(body, {
-          status: cached.status,
-          statusText: cached.statusText,
-          headers: cached.headers,
-        })
-      }
-      return cached
+      const body = await cached.blob()
+      return new Response(body, {
+        status: cached.status,
+        statusText: cached.statusText,
+        headers: cached.headers,
+      })
     }
   }
   return Response.error()
