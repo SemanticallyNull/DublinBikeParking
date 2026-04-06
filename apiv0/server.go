@@ -102,6 +102,7 @@ func NewAPIv0(r *gin.RouterGroup, db *gorm.DB) {
 	r.GET("/stand/:id/missing", wrap(apiHandler.standMissing))
 	r.POST("/stand/:id/missing", wrap(apiHandler.standMissing))
 	r.POST("/stand/:id/verify", wrap(apiHandler.standVerify))
+	r.POST("/verify-auth", wrap(apiHandler.checkVerifyPassword))
 	r.OPTIONS("/image", wrap(handleImageOptionsFunc(minioClient)))
 	r.POST("/image", wrap(handleImagePostFunc(minioClient, bucketName)))
 	r.POST("/publicimage/:id", wrap(apiHandler.handlePublicImagePostFunc(minioClient, "dublinbikeparking-public")))

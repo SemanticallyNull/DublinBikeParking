@@ -22,6 +22,15 @@ export async function reportMissing(id: string): Promise<void> {
   if (!res.ok) throw new Error(`Failed to report missing: ${res.status}`)
 }
 
+export async function checkVerifyPassword(password: string): Promise<boolean> {
+  const res = await fetch('/api/v0/verify-auth', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password }),
+  })
+  return res.ok
+}
+
 export async function verifyStand(id: string, password: string): Promise<void> {
   const res = await fetch(`/api/v0/stand/${id}/verify`, {
     method: 'POST',

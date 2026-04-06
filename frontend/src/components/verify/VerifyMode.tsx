@@ -3,11 +3,12 @@ import { useStands } from '../../hooks/useStands'
 import { useWatchPosition } from '../../hooks/useWatchPosition'
 import { useVerifyAudio } from '../../hooks/useVerifyAudio'
 import { useVerifySession } from '../../hooks/useVerifySession'
+import { checkVerifyPassword } from '../../api/actions'
 import { VerifyHUD } from './VerifyHUD'
 import styles from './VerifyMode.module.css'
 
 export function VerifyMode() {
-  const [password, setPassword] = useState('')
+  const [password, setPassword] = useState(() => localStorage.getItem('dbp_verify_pw') ?? '')
   const [started, setStarted] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const wakeLockRef = useRef<WakeLockSentinel | null>(null)
@@ -23,10 +24,11 @@ export function VerifyMode() {
   useEffect(() => {
     if (!started || !watch.nearest) return
     const d = watch.nearest.distanceM
-    if (d < 30) {
-      audio.playClose()
-    } else if (d < 100) {
-      audio.playApproaching()
+    const id = watch.nearest.feature.properties.id
+    if (d < 5) {
+      audio.playClose(id)
+    } else if (d < 25) {
+      audio.playApproaching(id)
     }
   }, [started, watch.nearest, audio])
 
@@ -51,12 +53,22 @@ export function VerifyMode() {
     }
   }, [started])
 
-  function handleStart() {
+  const [checking, setChecking] = useState(false)
+
+  async function handleStart() {
     if (!password.trim()) {
       setError('Please enter a password')
       return
     }
     setError(null)
+    setChecking(true)
+    const valid = await checkVerifyPassword(password)
+    setChecking(false)
+    if (!valid) {
+      setError('Incorrect password')
+      return
+    }
+    localStorage.setItem('dbp_verify_pw', password)
     audio.init()
     setStarted(true)
   }
@@ -97,9 +109,9 @@ export function VerifyMode() {
         <button
           className={styles.startButton}
           onClick={handleStart}
-          disabled={loading}
+          disabled={loading || checking}
         >
-          {loading ? 'Loading stands...' : 'Start Verification Ride'}
+          {checking ? 'Checking password...' : loading ? 'Loading stands...' : 'Start Verification Ride'}
         </button>
 
         {!loading && (

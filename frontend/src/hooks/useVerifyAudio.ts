@@ -2,8 +2,8 @@ import { useRef, useCallback } from 'react'
 
 export function useVerifyAudio() {
   const ctxRef = useRef<AudioContext | null>(null)
-  const lastApproachRef = useRef(0)
-  const lastCloseRef = useRef(0)
+  const approachedIds = useRef<Set<string>>(new Set())
+  const closeIds = useRef<Set<string>>(new Set())
 
   const init = useCallback(() => {
     if (!ctxRef.current) {
@@ -30,17 +30,15 @@ export function useVerifyAudio() {
     osc.stop(ctx.currentTime + durationMs / 1000)
   }, [])
 
-  const playApproaching = useCallback(() => {
-    const now = Date.now()
-    if (now - lastApproachRef.current < 5000) return
-    lastApproachRef.current = now
+  const playApproaching = useCallback((standId: string) => {
+    if (approachedIds.current.has(standId)) return
+    approachedIds.current.add(standId)
     playTone(440, 200)
   }, [playTone])
 
-  const playClose = useCallback(() => {
-    const now = Date.now()
-    if (now - lastCloseRef.current < 3000) return
-    lastCloseRef.current = now
+  const playClose = useCallback((standId: string) => {
+    if (closeIds.current.has(standId)) return
+    closeIds.current.add(standId)
     playTone(880, 150)
   }, [playTone])
 

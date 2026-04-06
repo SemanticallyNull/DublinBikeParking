@@ -34,8 +34,8 @@ function getSideLabel(side: string): string {
 }
 
 function getDistanceColor(distanceM: number): string {
-  if (distanceM < 50) return styles.arrowGreen
-  if (distanceM < 100) return styles.arrowYellow
+  if (distanceM < 5) return styles.arrowGreen
+  if (distanceM < 25) return styles.arrowYellow
   return styles.arrowDim
 }
 

@@ -95,7 +95,7 @@
 
 .verifyButton,
 .missingButton {
-  min-height: 80px;
+  min-height: 120px;
   font-size: 1.25rem;
   font-weight: 700;
   border-radius: 12px;
