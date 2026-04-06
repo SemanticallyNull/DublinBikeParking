@@ -7,104 +7,18 @@ export interface GuideStep {
 }
 
 const IllustrationCheckStand = () => (
-  <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    {/* Sheffield stand arch */}
-    <path d="M20 95 L20 42 Q20 18 45 18 L75 18 Q100 18 100 42 L100 95"
-      stroke="white" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
-    {/* Ground rail */}
-    <line x1="8" y1="95" x2="112" y2="95" stroke="#6C96BB" strokeWidth="5" strokeLinecap="round"/>
-    {/* Magnifying glass */}
-    <circle cx="72" cy="62" r="20" stroke="#5A94C8" strokeWidth="4"/>
-    <line x1="86" y1="76" x2="100" y2="90" stroke="#5A94C8" strokeWidth="4" strokeLinecap="round"/>
-    {/* Warning marks on stand */}
-    <circle cx="45" cy="50" r="4" fill="#DC2626"/>
-    <circle cx="45" cy="64" r="4" fill="#DC2626"/>
-  </svg>
-)
+  <svg id="a" xmlns="http://www.w3.org/2000/svg" width="980.78" height="820.3" viewBox="0 0 980.78 820.3"><path d="M111.36,800.8v-361.77c0-46.44,37.65-84.09,84.09-84.09h274.06c46.44,0,84.09,37.65,84.09,84.09v361.77"fill="none" stroke="#fff" strokeLinecap="round" strokeWidth="39"/><line x1="19.5" y1="800.8" x2="776.54" y2="800.8"stroke="#5a94c8" strokeLinecap="round" strokeMiterlimit="10" strokeWidth="39"/><path d="M779.88,158.93c.29,77.89-63.93,141.76-141.44,141.44-78.11,0-141.44-63.32-141.44-141.44,3.18-185.91,279.72-185.91,282.88,0Z"fill="none" stroke="#5a94c8" strokeLinecap="round" strokeMiterlimit="10" strokeWidth="39"/><line x1="740.62" y1="270.62" x2="790.76" y2="319.12"stroke="#5a94c8" strokeLinecap="round" strokeMiterlimit="10" strokeWidth="39"/><line x1="790.76" y1="319.12" x2="938.78" y2="462.31"stroke="#5a94c8" strokeLinecap="round" strokeMiterlimit="10" strokeWidth="86"/></svg>)
 
 const IllustrationChooseLock = () => (
-  <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    {/* U-lock shackle */}
-    <path d="M22 80 L22 48 Q22 26 38 26 Q54 26 54 48 L54 80"
-      stroke="#4ADE80" strokeWidth="6" strokeLinecap="round"/>
-    {/* U-lock body */}
-    <rect x="14" y="76" width="48" height="22" rx="6"
-      fill="rgba(74,222,128,0.12)" stroke="#4ADE80" strokeWidth="4"/>
-    {/* Good label */}
-    <text x="38" y="115" textAnchor="middle" fontSize="10" fill="#4ADE80"
-      fontFamily="system-ui, sans-serif" fontWeight="700">U-LOCK</text>
-    {/* Cable lock squiggle */}
-    <path d="M76 30 Q82 45 78 58 Q74 70 82 80 Q90 90 86 100"
-      stroke="#DC2626" strokeWidth="5" strokeLinecap="round"/>
-    {/* X mark */}
-    <line x1="78" y1="110" x2="90" y2="118" stroke="#DC2626" strokeWidth="3" strokeLinecap="round"/>
-    <line x1="90" y1="110" x2="78" y2="118" stroke="#DC2626" strokeWidth="3" strokeLinecap="round"/>
-    <text x="84" y="115" textAnchor="middle" fontSize="10" fill="#DC2626"
-      fontFamily="system-ui, sans-serif" fontWeight="700">CABLE</text>
-  </svg>
+  <svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1080" viewBox="0 0 1080 1080"><rect x="73.35" y="599.34" width="476.47" height="129.63" rx="43.51" ry="43.51"fill="#fff" stroke="none" strokeMiterlimit="10"/><path d="M470.63,638.44c-12.7,0-23-10.3-23-23v-231.04c0-75.01-61.03-136.04-136.04-136.04s-136.04,61.03-136.04,136.04v231.04c0,12.7-10.3,23-23,23s-23-10.3-23-23v-231.04c0-100.38,81.66-182.04,182.04-182.04s182.04,81.66,182.04,182.04v231.04c0,12.7-10.3,23-23,23Z"fill="#fff" stroke="#0e2052" strokeMiterlimit="10" strokeWidth="6" /><path d="M866.67,217.36c21.46,21.46,46.71,54.22,48.53,95.62,2.36,53.63-36.94,69.15-34.53,124.31,2.26,51.87,38.13,63.2,42.93,122.23,2.89,35.6-7.39,65.5-15.87,84.32"fill="none" stroke="#fff" strokeLinecap="round" strokeLinejoin="round" strokeWidth="18" /><path d="M864.04,217.36c-53.84-14.74-60.84-66.68-43.01-73.13,36.27-13.11,43.01,37.5,43.01,73.13"fill="none" stroke="#fff" strokeLinecap="round" strokeLinejoin="round" strokeWidth="18" /><path d="M907.82,643.84c21.88,51.36-14.49,89.09-30.62,79.11-32.79-20.29,2.69-56.99,30.62-79.11"fill="none" stroke="#fff" strokeLinecap="round" strokeLinejoin="round" strokeWidth="18" /><line x1="672.65" y1="80.02" x2="672.65" y2="831.69"fill="#fff" stroke="#5a94c8" strokeWidth="6" /><circle cx="311.59" cy="915.88" r="88.75" fill="#009245"/><polyline points="359.29 866.85 285.58 964.9 263.89 928.18"fill="none" stroke="#fff" strokeMiterlimit="10" strokeWidth="16" /><circle cx="886.59" cy="915.88" r="88.75" fill="#772018"/><line x1="855.33" y1="880.95" x2="925.18" y2="950.8"fill="none" stroke="#fff" strokeMiterlimit="10" strokeWidth="10" /><line x1="851.67" y1="950.8" x2="921.52" y2="880.95"fill="none" stroke="#fff" strokeMiterlimit="10" strokeWidth="10" /></svg>
 )
 
 const IllustrationLockFrame = () => (
-  <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    {/* Bike frame (simplified triangle) */}
-    <path d="M20 90 L60 30 L90 90 Z" stroke="white" strokeWidth="4" strokeLinejoin="round"/>
-    {/* Rear wheel hint */}
-    <circle cx="20" cy="90" r="16" stroke="#6C96BB" strokeWidth="3"/>
-    {/* Front wheel hint */}
-    <circle cx="90" cy="90" r="16" stroke="#6C96BB" strokeWidth="3"/>
-    {/* Sheffield stand */}
-    <path d="M50 105 L50 70 Q50 58 60 58 Q70 58 70 70 L70 105"
-      stroke="#5A94C8" strokeWidth="5" strokeLinecap="round"/>
-    {/* U-lock through frame + stand */}
-    <path d="M44 96 L44 78 Q44 68 54 68 L66 68 Q76 68 76 78 L76 96"
-      stroke="#4ADE80" strokeWidth="5" strokeLinecap="round"/>
-    <rect x="38" y="92" width="44" height="16" rx="5"
-      fill="rgba(74,222,128,0.15)" stroke="#4ADE80" strokeWidth="3"/>
-  </svg>
+  <svg id="a" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 916.34 903.7"><defs><clipPath id="b"><rect width="916.34" height="903.7" fill="none"/></clipPath><clipPath id="d"><path d="M363.49,432.91v241.77h355.27v-241.77h-355.27ZM432.47,460.12c-5.73,0-10.48.35-14.19,1.05v-26.38c4.65-.58,9.85-.88,15.55-.88,15.59,0,35.61,2.21,59.58,6.58,3.96,9.43,7.61,19.02,10.94,28.76-29.76-5.96-54.57-9.12-71.88-9.12ZM537.12,476.49l-8.01-28.6c.46.11.91.21,1.38.31,15.29,3.53,31.75,7.7,48.98,12.41l8.21,29.32c-17.37-5.03-34.34-9.54-50.55-13.44Z" fill="none"/></clipPath></defs><g clip-path="url(#b)"><rect x="541.93" y="514.06" width="210" height="94.56" rx="9.81" ry="9.81" transform="translate(-58.01 1047.84) rotate(-75.56)" fill="#5a94c8"/><path d="M603.87,630.08c-17.78-3.38-174.8-33.74-212.11-58.61-15.79-10.53-24.82-27.63-26.12-49.45-1.67-28.16,10.88-62.05,28.58-77.15,10.71-9.14,36.46-18.64,136.04,4.31,52.46,12.09,101.56,27.82,102.06,27.98l-7.42,23.1c-115.87-37.22-201.77-48.15-214.92-36.93-10.81,9.22-21.47,34.44-20.11,57.26.84,14.14,6.01,24.47,15.36,30.7,28.12,18.75,156.2,46.03,203.18,54.96l-4.53,23.83Z" fill="#5a94c8"/><path d="M1347.63,1100.31c-18.45,0-33.41-17.36-33.41-38.79V310.82c0-74.83-61.44-135.71-136.96-135.71h-555.22c-75.52,0-136.96,60.88-136.96,135.71v750.7c0,21.42-14.96,38.79-33.41,38.79s-33.41-17.36-33.41-38.79V310.82c0-117.6,91.41-213.28,203.77-213.28h555.22c112.36,0,203.77,95.68,203.77,213.28v750.7c0,21.42-14.96,38.79-33.41,38.79Z" fill="#b3b3b3"/><g id="c"><path d="M1350.84,156.8c-41.59,0-81.91,5.53-120.26,15.9-47-134.66-101.16-272.19-155.28-371.68-59.66-109.68-164.28-107.98-226.78-106.95l.74,45.05c62.32-1.03,139.84-2.29,186.46,83.43,30.56,56.18,61.41,125.72,91.03,200.36H459.64c-.93,0-1.84.06-2.75.17l-24.85-88.72h136.05c12.44,0,22.53-10.09,22.53-22.53s-10.09-22.53-32.92-22.53h-233.8c-2.04,0-12.13,10.09-12.13,22.53s10.09,22.53,22.53,22.53h50.95l35.5,126.7-115.95,161.68c-69.23-41.59-150.21-65.53-236.68-65.53-254.17,0-460.95,206.78-460.95,460.95s206.78,460.95,460.95,460.95c239.51,0,436.92-183.61,458.9-417.47h78.87c.06,0,.11,0,.17,0,.26,0,.53-.02.79-.03.15,0,.31,0,.46-.02.24-.01.48-.03.72-.06.24-.02.47-.04.71-.07.2-.02.39-.05.59-.08.39-.06.77-.12,1.15-.2.06-.01.11-.02.17-.03.47-.1.93-.21,1.39-.34.04-.01.08-.02.12-.03.11-.03.21-.07.32-.1.21-.06.42-.12.62-.19.18-.06.36-.12.53-.18.17-.06.34-.12.52-.19.22-.08.43-.17.65-.26.12-.05.25-.1.37-.16.26-.11.52-.23.77-.36.08-.04.15-.07.23-.11.3-.15.59-.3.88-.47.03-.02.07-.04.1-.05,2.06-1.16,3.9-2.62,5.47-4.32L1151.57,87.32c12.3,32.83,24.3,66.16,35.88,99.36-173.99,66.11-297.97,234.59-297.97,431.48,0,254.4,206.97,461.37,461.36,461.37s461.37-206.97,461.37-461.37-206.97-461.36-461.37-461.36ZM436.2,116.24l140.17,500.34h-47.31c-.51-150.8-73.8-284.78-186.52-368.56l93.67-131.78ZM484,616.59H80.56s235.87-331.85,235.87-331.85c101.25,75.6,167.05,196.17,167.56,331.85ZM68.12,1034.06c-229.32,0-415.89-186.57-415.89-415.89S-161.21,202.27,68.12,202.27c76.69,0,148.59,20.87,210.33,57.21L16.25,625.11c-5.38,6.77-6.41,16.02-2.65,23.81,3.76,7.79,11.64,12.74,20.29,12.74h447.86c-21.81,208.96-198.99,372.41-413.63,372.41ZM616.94,594.43L469.76,69.02l.75-1.06h637.49l-491.06,526.46ZM1350.84,1034.48c-229.55,0-416.31-186.76-416.31-416.31,0-177.18,111.26-328.86,267.59-388.85,72.96,214.78,126.07,412.31,126.96,415.62l43.53-11.64c-3.61-13.5-55.55-206.68-127.32-417.88,33.72-8.84,69.1-13.56,105.55-13.56,229.56,0,416.31,186.76,416.31,416.31s-186.76,416.31-416.31,416.31Z" fill="#fff"/></g><g clip-path="url(#d)"><rect x="541.93" y="514.06" width="210" height="94.56" rx="9.81" ry="9.81" transform="translate(-58.01 1047.84) rotate(-75.56)" fill="#5a94c8"/><path d="M603.87,630.08c-17.78-3.38-174.8-33.74-212.11-58.61-15.79-10.53-24.82-27.63-26.12-49.45-1.67-28.16,10.88-62.05,28.58-77.15,10.71-9.14,36.46-18.64,136.04,4.31,52.46,12.09,101.56,27.82,102.06,27.98l-7.42,23.1c-115.87-37.22-201.77-48.15-214.92-36.93-10.81,9.22-21.47,34.44-20.11,57.26.84,14.14,6.01,24.47,15.36,30.7,28.12,18.75,156.2,46.03,203.18,54.96l-4.53,23.83Z" fill="#5a94c8"/></g></g></svg>
 )
 
 const IllustrationSecondaryLock = () => (
-  <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    {/* Rear wheel */}
-    <circle cx="60" cy="70" r="32" stroke="white" strokeWidth="4"/>
-    <circle cx="60" cy="70" r="6" fill="#6C96BB"/>
-    {/* Spokes */}
-    <line x1="60" y1="38" x2="60" y2="102" stroke="#6C96BB" strokeWidth="2" opacity="0.5"/>
-    <line x1="28" y1="70" x2="92" y2="70" stroke="#6C96BB" strokeWidth="2" opacity="0.5"/>
-    {/* Sheffield stand */}
-    <path d="M36 108 L36 80 Q36 68 48 68 L72 68 Q84 68 84 80 L84 108"
-      stroke="#5A94C8" strokeWidth="5" strokeLinecap="round"/>
-    {/* Cable lock loop around wheel + stand */}
-    <path d="M44 100 Q34 90 38 70 Q42 50 60 46 Q78 42 86 62 Q92 78 80 92"
-      stroke="#5A94C8" strokeWidth="4" strokeLinecap="round" strokeDasharray="6 3"/>
-    {/* Lock clasp */}
-    <rect x="74" y="90" width="14" height="11" rx="3"
-      fill="rgba(90,148,200,0.2)" stroke="#5A94C8" strokeWidth="3"/>
-  </svg>
-)
-
-const IllustrationFillLock = () => (
-  <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    {/* U-lock shackle */}
-    <path d="M30 85 L30 48 Q30 28 50 28 Q70 28 70 48 L70 85"
-      stroke="white" strokeWidth="6" strokeLinecap="round"/>
-    {/* Lock body */}
-    <rect x="22" y="80" width="56" height="26" rx="7"
-      fill="rgba(90,148,200,0.12)" stroke="white" strokeWidth="4"/>
-    {/* Keyhole */}
-    <circle cx="50" cy="90" r="5" fill="#6C96BB"/>
-    <rect x="47" y="90" width="6" height="8" rx="2" fill="#6C96BB"/>
-    {/* Stand bar inside lock — showing tight fit */}
-    <rect x="42" y="45" width="16" height="40" rx="4"
-      fill="rgba(74,222,128,0.2)" stroke="#4ADE80" strokeWidth="3"/>
-    {/* Arrow indicators showing tight fit */}
-    <line x1="34" y1="55" x2="42" y2="55" stroke="#4ADE80" strokeWidth="2.5" strokeLinecap="round"/>
-    <line x1="58" y1="55" x2="66" y2="55" stroke="#4ADE80" strokeWidth="2.5" strokeLinecap="round"/>
-    <line x1="39" y1="52" x2="42" y2="55" stroke="#4ADE80" strokeWidth="2.5" strokeLinecap="round"/>
-    <line x1="39" y1="58" x2="42" y2="55" stroke="#4ADE80" strokeWidth="2.5" strokeLinecap="round"/>
-    <line x1="63" y1="52" x2="60" y2="55" stroke="#4ADE80" strokeWidth="2.5" strokeLinecap="round"/>
-    <line x1="63" y1="58" x2="60" y2="55" stroke="#4ADE80" strokeWidth="2.5" strokeLinecap="round"/>
-  </svg>
+  <svg id="a" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 953 555.23"><defs><clipPath id="c"><path d="M310.38,287.8v94.55h138.4v-94.55h-138.4ZM338.26,300.16c-2.24,0-4.08.14-5.49.42v-11.44c1.8-.22,3.81-.34,6.01-.34,5.96,0,13.6.84,22.7,2.48,1.73,4.08,3.31,8.23,4.74,12.45-11.6-2.34-21.26-3.58-27.97-3.58ZM378.88,306.55l-3.48-12.41.86.19c5.8,1.34,12.05,2.93,18.59,4.71l3.56,12.71c-6.73-1.95-13.27-3.69-19.53-5.2Z" fill="none"/></clipPath><clipPath id="d"><path d="M397.46,161.3v149.79h367.3v-149.79h-367.3ZM643.2,233.13c-1-3.04-2.01-6.1-3.03-9.17,4.78-4.39,8.66-10.06,12.39-18.12,1.34,3.95,2.66,7.88,3.96,11.79-3.82,6.42-8.2,11.51-13.33,15.5ZM665.93,197.19c-.88,2.23-1.87,4.72-2.92,7.25-.53-.52-1.07-1.03-1.63-1.53-2.81.56-5.59,1.2-8.34,1.91,1.63-3.6,3.1-7.32,4.52-10.93,3.17-8.03,6.19-15.61,10.81-21.42,2.5,1.68,4.89,3.5,7.19,5.45-3.91,4.78-6.69,11.83-9.62,19.27Z" fill="none"/></clipPath></defs><rect x="380.55" y="320.38" width="81.13" height="36.53" rx="9.81" ry="9.81" transform="translate(-11.85 662) rotate(-75.56)" fill="#5a94c8"/><path d="M404.48,365.2c-6.87-1.31-67.53-13.04-81.94-22.64-6.1-4.07-9.59-10.67-10.09-19.1-.65-10.88,4.2-23.97,11.04-29.81,4.14-3.53,14.09-7.2,52.56,1.67,20.27,4.67,39.24,10.75,39.43,10.81l-2.87,8.92c-44.76-14.38-77.95-18.6-83.03-14.27-4.18,3.56-8.29,13.3-7.77,22.12.32,5.46,2.32,9.45,5.93,11.86,10.86,7.24,60.35,17.78,78.5,21.23l-1.75,9.21Z" fill="#5a94c8"/><path d="M401.77,306.45c25.35-22.16,36.97-35.48,54.92-45.53,33.26-18.62,59.39-33.25,95.44-36.86,41.86-4.18,54.72,22.01,79.37,10.93,33.96-15.28,27.05-61.66,52.08-67.42,30.53-7.03,81.21,35.22,75.2,70.35-5.9,34.44-65.4,56.85-104.72,38.56-17.97-8.36-15.67-31.85-20.75-41.49" fill="none" stroke="#5a94c8" stroke-miterlimit="10" stroke-width="7"/><path d="M691.82,546.86c-7.13,0-12.91-6.71-12.91-14.98V241.86c0-28.91-23.74-52.43-52.91-52.43h-214.5c-29.18,0-52.91,23.52-52.91,52.43v290.02c0,8.28-5.78,14.98-12.91,14.98s-12.91-6.71-12.91-14.98V241.86c0-45.43,35.31-82.4,78.72-82.4h214.5c43.41,0,78.72,36.96,78.72,82.4v290.02c0,8.28-5.78,14.98-12.91,14.98Z" fill="#b3b3b3"/><g id="b"><path d="M693.06,182.35c-16.07,0-31.64,2.15-46.46,6.15-18.16-52.03-39.08-105.17-59.99-143.61C563.56,2.53,523.14,3.19,498.99,3.58l.29,17.4c24.08-.4,54.02-.88,72.04,32.23,11.81,21.71,23.72,48.57,35.17,77.41h-257.73c-.36,0-.71.03-1.06.07l-9.6-34.28h52.56c4.81,0,8.7-3.9,8.7-8.7s-3.9-8.7-12.72-8.7h-90.32c-.79,0-4.69,3.9-4.69,8.7s3.9,8.7,8.7,8.7h19.68l13.71,48.95-44.8,62.47c-26.74-16.07-58.03-25.32-91.43-25.32-98.19,0-178.08,79.89-178.08,178.08s79.89,178.08,178.08,178.08c92.53,0,168.79-70.94,177.28-161.28h30.48s.04,0,.07,0c.05,0,.1,0,.15-.01.3,0,.6-.03.9-.06.11-.01.22-.03.33-.05.27-.04.53-.1.79-.16.06-.02.12-.02.18-.04.05-.01.09-.03.14-.05.14-.04.28-.09.43-.14.14-.05.29-.1.42-.16.12-.05.24-.11.36-.16.15-.07.31-.14.45-.22.1-.05.2-.11.3-.17.16-.09.31-.19.46-.29.09-.06.18-.13.26-.19.15-.11.29-.22.43-.34.08-.07.17-.14.25-.22.13-.12.26-.25.39-.38.04-.04.09-.08.13-.12l204.38-219.11c4.75,12.69,9.39,25.57,13.87,38.4-67.22,25.54-115.12,90.62-115.12,166.68,0,98.28,79.96,178.24,178.24,178.24s178.24-79.96,178.24-178.24-79.96-178.24-178.24-178.24ZM339.7,166.69l54.15,193.3h-18.28c-.2-58.26-28.51-110.02-72.06-142.39l36.19-50.91ZM358.16,359.99h-155.86s91.13-128.2,91.13-128.2c39.12,29.21,64.54,75.79,64.73,128.2ZM197.5,521.27c-88.6,0-160.67-72.08-160.67-160.67s72.08-160.67,160.67-160.67c29.63,0,57.4,8.07,81.25,22.11l-101.29,141.24c-2.08,2.62-2.48,6.19-1.02,9.2,1.45,3.01,4.5,4.92,7.84,4.92h173.02c-8.42,80.73-76.87,143.87-159.8,143.87ZM409.53,351.42l-56.86-202.98.29-.41h246.29l-189.72,203.39ZM693.06,521.43c-88.68,0-160.84-72.15-160.84-160.84,0-68.45,42.99-127.04,103.38-150.22,28.19,82.97,48.7,159.28,49.05,160.56l16.82-4.5c-1.39-5.21-21.46-79.84-49.19-161.44,13.03-3.42,26.69-5.24,40.78-5.24,88.69,0,160.84,72.15,160.84,160.84s-72.15,160.84-160.84,160.84Z" fill="#fff"/></g><line x1="6.5" y1="548.73" x2="946.5" y2="548.73" fill="none" stroke="#5a94c8" stroke-linecap="round" stroke-linejoin="round" stroke-width="13"/><g clip-path="url(#c)"><rect x="380.55" y="320.38" width="81.13" height="36.53" rx="9.81" ry="9.81" transform="translate(-11.85 662) rotate(-75.56)" fill="#5a94c8"/><path d="M404.48,365.2c-6.87-1.31-67.53-13.04-81.94-22.64-6.1-4.07-9.59-10.67-10.09-19.1-.65-10.88,4.2-23.97,11.04-29.81,4.14-3.53,14.09-7.2,52.56,1.67,20.27,4.67,39.24,10.75,39.43,10.81l-2.87,8.92c-44.76-14.38-77.95-18.6-83.03-14.27-4.18,3.56-8.29,13.3-7.77,22.12.32,5.46,2.32,9.45,5.93,11.86,10.86,7.24,60.35,17.78,78.5,21.23l-1.75,9.21Z" fill="#5a94c8"/></g><g clip-path="url(#d)"><path d="M401.77,306.45c25.35-22.16,36.97-35.48,54.92-45.53,33.26-18.62,59.39-33.25,95.44-36.86,41.86-4.18,54.72,22.01,79.37,10.93,33.96-15.28,27.05-61.66,52.08-67.42,30.53-7.03,81.21,35.22,75.2,70.35-5.9,34.44-65.4,56.85-104.72,38.56-17.97-8.36-15.67-31.85-20.75-41.49" fill="none" stroke="#5a94c8" stroke-miterlimit="10" stroke-width="7"/></g></svg>
 )
 
 const IllustrationPickSpot = () => (
@@ -129,12 +43,12 @@ const IllustrationPickSpot = () => (
 export const GUIDE_STEPS: GuideStep[] = [
   {
     title: 'Check the stand',
-    body: 'Look for signs of tampering — loose bolts, damaged metalwork, anything that looks interfered with. If it looks dodgy, find another stand.',
+    body: 'Look for signs of tampering — Watch out for cuts covered with tape. If it looks dodgy, find another stand.',
     illustration: IllustrationCheckStand,
   },
   {
     title: 'Choose the right lock',
-    body: 'Use a Sold Secure rated U-lock or D-lock as your primary. Avoid cable locks as your only lock — they can be cut in seconds.',
+    body: 'Use a quality D-lock as your primary. Avoid cable locks as your only lock — they can be cut in seconds.',
     illustration: IllustrationChooseLock,
   },
   {
@@ -144,17 +58,17 @@ export const GUIDE_STEPS: GuideStep[] = [
   },
   {
     title: 'Add a secondary lock',
-    body: 'Use a cable or chain to also secure your rear wheel. Two locks double the deterrent and the time cost for a thief.',
+    body: 'Use a cable or chain to also secure your front wheel, even better if it can go around the stand. This makes it difficult for thieves to twist your bike to break your lock.',
     illustration: IllustrationSecondaryLock,
   },
   {
     title: 'Fill the lock',
     body: 'Leave as little space as possible inside your U-lock. A tight fit makes it much harder to lever open.',
-    illustration: IllustrationFillLock,
+    illustration: IllustrationLockFrame,
   },
   {
     title: 'Pick your spot',
-    body: 'Lock in a visible, well-lit location. Thieves prefer cover — busy, open areas are much safer.',
+    body: 'Lock in a visible, well-lit location. Thieves prefer cover — busy, open areas are much safer. If possible a sheffield stand is best, and be mindful to not obstruct pedestrians, wheelchair users or buggies if locking to a sign post.',
     illustration: IllustrationPickSpot,
   },
 ]

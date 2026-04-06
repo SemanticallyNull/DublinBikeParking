@@ -1,12 +1,10 @@
 // frontend/src/App.tsx
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { AppShell } from './components/layout/AppShell'
 import { useStands } from './hooks/useStands'
 import { useQueryParams } from './hooks/useQueryParams'
 import { useGeolocation } from './hooks/useGeolocation'
 import type { StandFeature } from './types'
-
-const GUIDE_SEEN_KEY = 'guide_seen'
 
 export default function App() {
   const params = useQueryParams()
@@ -17,14 +15,6 @@ export default function App() {
   const [guideOpen, setGuideOpen] = useState(false)
 
   const geo = useGeolocation(features)
-
-  // Auto-open on first visit
-  useEffect(() => {
-    if (!localStorage.getItem(GUIDE_SEEN_KEY)) {
-      localStorage.setItem(GUIDE_SEEN_KEY, 'true')
-      setGuideOpen(true)
-    }
-  }, [])
 
   const selectedStand = selectedId
     ? (features.find(f => f.properties.id === selectedId) ?? null)

@@ -44,7 +44,7 @@ export function AppHeader({ standCount, placementMode, onAddStand, onFindNearest
         <span>Add Stand</span>
       </button>
 
-      <button className={styles.findBtn} onClick={onFindNearest} title="Find nearest stand">
+      <button className={styles.secondaryBtn} onClick={onFindNearest} title="Find nearest stand">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
           <circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/>
           <line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/>
@@ -53,12 +53,13 @@ export function AppHeader({ standCount, placementMode, onAddStand, onFindNearest
         <span>Find Nearest</span>
       </button>
 
-      <button className={styles.guideBtn} onClick={onOpenGuide} title="How to lock your bike" aria-label="How to lock your bike">
+      <button className={styles.secondaryBtn} onClick={onOpenGuide} title="How to lock your bike" aria-label="How to lock your bike">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
           <circle cx="12" cy="12" r="10"/>
           <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
           <line x1="12" y1="17" x2="12.01" y2="17"/>
         </svg>
+        <span>Locking Guide</span>
       </button>
     </header>
   )
