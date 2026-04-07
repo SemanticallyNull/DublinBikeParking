@@ -114,6 +114,14 @@ export function VerifyMode() {
           {checking ? 'Checking password...' : loading ? 'Loading stands...' : 'Start Verification Ride'}
         </button>
 
+        <button
+          type="button"
+          className={styles.testAudioButton}
+          onClick={() => audio.playTest()}
+        >
+          Test audio
+        </button>
+
         {!loading && (
           <div className={styles.standCount}>
             {unverifiedCount} unverified stands to check

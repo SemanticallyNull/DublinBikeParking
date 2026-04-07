@@ -58,6 +58,24 @@
   cursor: not-allowed;
 }
 
+.testAudioButton {
+  width: 100%;
+  max-width: 400px;
+  padding: 0.875rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 12px;
+  border: 2px solid #444;
+  background: transparent;
+  color: #ccc;
+  cursor: pointer;
+}
+
+.testAudioButton:hover {
+  border-color: #4dabf7;
+  color: #fff;
+}
+
 .error {
   color: #ff6b6b;
   font-size: 1rem;

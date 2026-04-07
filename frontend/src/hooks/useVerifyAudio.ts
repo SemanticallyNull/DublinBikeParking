@@ -75,5 +75,11 @@ export function useVerifyAudio() {
     playTone(880, 150)
   }, [playTone])
 
-  return { init, playApproaching, playClose }
+  const playTest = useCallback(() => {
+    init()
+    playTone(440, 200)
+    setTimeout(() => playTone(880, 150), 250)
+  }, [init, playTone])
+
+  return { init, playApproaching, playClose, playTest }
 }
