@@ -1,85 +1,157 @@
-import { useRef, useCallback } from 'react'
+import { useRef, useCallback, useMemo } from 'react'
 
-type WebkitWindow = Window & { webkitAudioContext?: typeof AudioContext }
+// Generate a tiny WAV file (PCM 16-bit mono) as a Blob URL containing a sine
+// tone. Using HTMLAudioElement with a pre-generated WAV is the most reliable
+// way to play sound on iOS browsers (Safari, Firefox, Chrome — all WebKit).
+// The Web Audio API is unreliable on Firefox iOS in particular, where
+// oscillator nodes frequently produce no audible output even after the
+// context is resumed inside a user gesture.
+function makeToneWavUrl(freq: number, durationMs: number, volume = 0.3): string {
+  const sampleRate = 22050
+  const numSamples = Math.floor((durationMs / 1000) * sampleRate)
+  const bytesPerSample = 2
+  const blockAlign = bytesPerSample
+  const byteRate = sampleRate * blockAlign
+  const dataSize = numSamples * bytesPerSample
+  const buffer = new ArrayBuffer(44 + dataSize)
+  const view = new DataView(buffer)
+
+  const writeStr = (offset: number, s: string) => {
+    for (let i = 0; i < s.length; i++) view.setUint8(offset + i, s.charCodeAt(i))
+  }
+
+  // RIFF header
+  writeStr(0, 'RIFF')
+  view.setUint32(4, 36 + dataSize, true)
+  writeStr(8, 'WAVE')
+  // fmt chunk
+  writeStr(12, 'fmt ')
+  view.setUint32(16, 16, true) // chunk size
+  view.setUint16(20, 1, true) // PCM format
+  view.setUint16(22, 1, true) // mono
+  view.setUint32(24, sampleRate, true)
+  view.setUint32(28, byteRate, true)
+  view.setUint16(32, blockAlign, true)
+  view.setUint16(34, 16, true) // bits per sample
+  // data chunk
+  writeStr(36, 'data')
+  view.setUint32(40, dataSize, true)
+
+  // PCM samples with a short linear attack/release envelope to avoid clicks.
+  const attack = Math.min(0.01 * sampleRate, numSamples / 2)
+  const release = Math.min(0.02 * sampleRate, numSamples / 2)
+  for (let i = 0; i < numSamples; i++) {
+    let env = 1
+    if (i < attack) env = i / attack
+    else if (i > numSamples - release) env = (numSamples - i) / release
+    const sample = Math.sin((2 * Math.PI * freq * i) / sampleRate) * volume * env
+    view.setInt16(44 + i * 2, Math.max(-1, Math.min(1, sample)) * 0x7fff, true)
+  }
+
+  const blob = new Blob([buffer], { type: 'audio/wav' })
+  return URL.createObjectURL(blob)
+}
 
 export function useVerifyAudio() {
-  const ctxRef = useRef<AudioContext | null>(null)
   const approachedIds = useRef<Set<string>>(new Set())
   const closeIds = useRef<Set<string>>(new Set())
 
+  const { approachUrl, closeUrl } = useMemo(
+    () => ({
+      approachUrl: makeToneWavUrl(440, 200),
+      closeUrl: makeToneWavUrl(880, 150),
+    }),
+    []
+  )
+
+  const approachAudioRef = useRef<HTMLAudioElement | null>(null)
+  const closeAudioRef = useRef<HTMLAudioElement | null>(null)
+
+  const getApproach = useCallback(() => {
+    if (!approachAudioRef.current) {
+      const a = new Audio(approachUrl)
+      a.preload = 'auto'
+      approachAudioRef.current = a
+    }
+    return approachAudioRef.current
+  }, [approachUrl])
+
+  const getClose = useCallback(() => {
+    if (!closeAudioRef.current) {
+      const a = new Audio(closeUrl)
+      a.preload = 'auto'
+      closeAudioRef.current = a
+    }
+    return closeAudioRef.current
+  }, [closeUrl])
+
+  // Must be called from inside a user-gesture handler to "unlock" audio on
+  // iOS. We briefly play each element muted, which primes it so subsequent
+  // play() calls (from non-gesture contexts like GPS updates) succeed.
   const init = useCallback(() => {
-    if (!ctxRef.current) {
-      const Ctor =
-        typeof AudioContext !== 'undefined'
-          ? AudioContext
-          : (window as WebkitWindow).webkitAudioContext
-      if (!Ctor) return
-      ctxRef.current = new Ctor()
+    const unlock = (a: HTMLAudioElement) => {
+      try {
+        a.muted = true
+        const p = a.play()
+        if (p && typeof p.then === 'function') {
+          p.then(() => {
+            a.pause()
+            a.currentTime = 0
+            a.muted = false
+          }).catch(() => {
+            a.muted = false
+          })
+        } else {
+          a.pause()
+          a.currentTime = 0
+          a.muted = false
+        }
+      } catch {
+        a.muted = false
+      }
     }
-    const ctx = ctxRef.current
-    if (ctx.state === 'suspended') {
-      void ctx.resume()
-    }
-    // Unlock audio on iOS (Safari/Firefox/Chrome on iOS all use WebKit) by
-    // playing a silent buffer inside the user-gesture handler. Without this,
-    // subsequent oscillator nodes are silent on iOS browsers.
+    unlock(getApproach())
+    unlock(getClose())
+  }, [getApproach, getClose])
+
+  const play = useCallback((a: HTMLAudioElement) => {
     try {
-      const buffer = ctx.createBuffer(1, 1, 22050)
-      const source = ctx.createBufferSource()
-      source.buffer = buffer
-      source.connect(ctx.destination)
-      source.start(0)
+      a.currentTime = 0
+      const p = a.play()
+      if (p && typeof p.catch === 'function') {
+        p.catch(() => {
+          // Autoplay blocked — ignore
+        })
+      }
     } catch {
       // ignore
     }
   }, [])
 
-  const playTone = useCallback((freq: number, durationMs: number) => {
-    const ctx = ctxRef.current
-    if (!ctx) return
-    if (ctx.state === 'suspended') void ctx.resume()
+  const playApproaching = useCallback(
+    (standId: string) => {
+      if (approachedIds.current.has(standId)) return
+      approachedIds.current.add(standId)
+      play(getApproach())
+    },
+    [play, getApproach]
+  )
 
-    const now = ctx.currentTime
-    const duration = durationMs / 1000
-
-    const osc = ctx.createOscillator()
-    const gain = ctx.createGain()
-    osc.type = 'sine'
-    osc.frequency.setValueAtTime(freq, now)
-
-    // iOS WebKit requires explicit gain scheduling via setValueAtTime /
-    // ramps to produce audible output reliably. Setting gain.value alone
-    // is silent on iOS Firefox/Safari. Use a short attack/release to also
-    // avoid clicks.
-    const peak = 0.3
-    gain.gain.setValueAtTime(0.0001, now)
-    gain.gain.exponentialRampToValueAtTime(peak, now + 0.01)
-    gain.gain.setValueAtTime(peak, now + Math.max(duration - 0.02, 0.01))
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + duration)
-
-    osc.connect(gain)
-    gain.connect(ctx.destination)
-    osc.start(now)
-    osc.stop(now + duration + 0.02)
-  }, [])
-
-  const playApproaching = useCallback((standId: string) => {
-    if (approachedIds.current.has(standId)) return
-    approachedIds.current.add(standId)
-    playTone(440, 200)
-  }, [playTone])
-
-  const playClose = useCallback((standId: string) => {
-    if (closeIds.current.has(standId)) return
-    closeIds.current.add(standId)
-    playTone(880, 150)
-  }, [playTone])
+  const playClose = useCallback(
+    (standId: string) => {
+      if (closeIds.current.has(standId)) return
+      closeIds.current.add(standId)
+      play(getClose())
+    },
+    [play, getClose]
+  )
 
   const playTest = useCallback(() => {
+    // Runs from a click handler, so this is a user gesture — unlock first.
     init()
-    playTone(440, 200)
-    setTimeout(() => playTone(880, 150), 250)
-  }, [init, playTone])
+    play(getApproach())
+    setTimeout(() => play(getClose()), 300)
+  }, [init, play, getApproach, getClose])
 
   return { init, playApproaching, playClose, playTest }
 }
