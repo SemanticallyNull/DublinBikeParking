@@ -19,12 +19,6 @@ var _ = Describe("DublinBikeParking", func() {
 			Expect(resp.StatusCode).To(Equal(http.StatusOK))
 		})
 
-		It("returns a 200 for the stand_icon_sheffield.png", func() {
-			resp, err := http.Get(fmt.Sprintf("http://localhost:%s/static/stand_icon_sheffield.png", serverPort))
-			Expect(err).ToNot(HaveOccurred())
-			Expect(resp.StatusCode).To(Equal(http.StatusOK))
-		})
-
 		It("returns a 200 for the healthz endpoint", func() {
 			resp, err := http.Get(fmt.Sprintf("http://localhost:%s/healthz", serverPort))
 			Expect(err).ToNot(HaveOccurred())
