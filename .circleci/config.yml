@@ -9,6 +9,8 @@ jobs:
       - image: cimg/go:1.21
     steps:
       - checkout
+      - attach_workspace:
+          at: .
       - restore_cache:
           keys:
             - v3-go-pkg-{{ checksum "go.sum" }}
@@ -39,6 +41,10 @@ jobs:
       - run:
           name: Type-check and build
           command: cd frontend && npm run build
+      - persist_to_workspace:
+          root: .
+          paths:
+            - static
 
   deploy:
     executor:
@@ -52,12 +58,13 @@ jobs:
 workflows:
   build-and-deploy:
     jobs:
-      - test-go
       - build-frontend
+      - test-go:
+          requires:
+            - build-frontend
       - deploy:
           requires:
             - test-go
-            - build-frontend
           filters:
             branches:
               only: main
