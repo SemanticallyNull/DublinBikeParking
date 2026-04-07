@@ -39,18 +39,12 @@ jobs:
       - run:
           name: Type-check and build
           command: cd frontend && npm run build
-      - persist_to_workspace:
-          root: .
-          paths:
-            - static
 
   deploy:
     executor:
       name: heroku/default
     steps:
       - checkout
-      - attach_workspace:
-          at: .
       - heroku/install
       - heroku/deploy-via-git:
           app-name: dublinbikeparking
