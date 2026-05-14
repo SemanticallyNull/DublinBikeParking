@@ -13,7 +13,7 @@ require (
 	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.37.0
 	github.com/paulmach/go.geojson v1.5.0
-	github.com/slack-go/slack v0.16.0
+	github.com/slack-go/slack v0.23.1
 	golang.org/x/sync v0.20.0
 	gopkg.in/validator.v2 v2.0.1
 )
