@@ -9,7 +9,7 @@ import type { StandFeature } from '../../types'
 import '../../styles/map.css'
 
 const DUBLIN_CENTER: [number, number] = [53.3441, -6.2675]
-const CARTO_VOYAGER = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png'
+const CARTO_VOYAGER = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=cb1_3hxr_1_b939cca529aff32b78270db3'
 const ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CartoDB</a>'
 
 interface Props {
